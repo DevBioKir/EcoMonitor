@@ -1,0 +1,15 @@
+﻿services:
+    postgres:
+        container_name: postgres
+        image: postgres:17.5
+        environment:
+            POSTGRES_DB: "EcoMonitorDB"
+            POSTGRES_USER: "postgres"
+            POSTGRES_PASSWORD: "posgres"
+        volumes:
+            - posgres-data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+            
+volumes:
+    posgres-data:

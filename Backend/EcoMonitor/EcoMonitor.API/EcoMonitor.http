@@ -1,0 +1,6 @@
+@EcoMonitor_HostAddress = http://localhost:5198
+
+GET {{EcoMonitor_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
