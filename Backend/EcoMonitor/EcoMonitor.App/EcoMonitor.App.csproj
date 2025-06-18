@@ -8,12 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="Mapster" Version="7.4.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.6" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EcoMonitor.Core\EcoMonitor.Core.csproj" />
+    <ProjectReference Include="..\EcoMonitor.DataAccess\EcoMonitor.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

@@ -51,12 +51,11 @@ namespace EcoMonitor.Core.Models
                 throw new ArgumentOutOfRangeException(nameof(FillLevel), "FillLevel must be between 0.0 and 1.0");
         }
 
-        public BinPhoto Create(
+        public static BinPhoto Create(
             string fileName,
             string urlFile,
             double latitude,
             double longitude,
-            DateTime uploadedAt,
             string binType,
             double fillLevel,
             bool isOutsideBin,
