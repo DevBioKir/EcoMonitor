@@ -1,5 +1,6 @@
 using EcoMonitor.App.Mapper;
 using EcoMonitor.DataAccess;
+using EcoMonitor.DataAccess.Repositories;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,8 @@ TypeAdapterConfig.GlobalSettings.Scan(typeof(MappingConfig).Assembly);
 
 builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
+
+builder.Services.AddScoped<IBinPhotoRepository, BinPhotoRepository>();
 
 var app = builder.Build();
 

@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EcoMonitor.DataAccess.Configurations
 {
-    class BinPhotoConfiguration : IEntityTypeConfiguration<BinPhotoEntities>
+    class BinPhotoConfiguration : IEntityTypeConfiguration<BinPhotoEntity>
     {
-        public void Configure(EntityTypeBuilder<BinPhotoEntities> builder)
+        public void Configure(EntityTypeBuilder<BinPhotoEntity> builder)
         {
             builder.HasKey(e => e.Id);
 

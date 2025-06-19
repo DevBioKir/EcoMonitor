@@ -6,7 +6,7 @@ namespace EcoMonitor.DataAccess
 {
     public class EcoMonitorDbContext : DbContext
     {
-        public DbSet<BinPhotoEntities> BinPhotos { get; set; } = null!;
+        public DbSet<BinPhotoEntity> BinPhotos { get; set; } = null!;
         public EcoMonitorDbContext(DbContextOptions<EcoMonitorDbContext> options)
             : base(options)
         { }

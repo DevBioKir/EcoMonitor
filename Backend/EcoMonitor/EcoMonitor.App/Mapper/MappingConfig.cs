@@ -21,7 +21,7 @@ namespace EcoMonitor.App.Mapper
                     src.Comment))
                 .Map(dest => dest.Id, src => src.Id);
 
-            config.NewConfig<BinPhoto, BinPhotoEntities>()
+            config.NewConfig<BinPhoto, BinPhotoEntity>()
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.FileName, src => src.FileName)
                 .Map(dest => dest.UrlFile, src => src.UrlFile)
@@ -32,7 +32,7 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
                 .Map(dest => dest.Comment, src => src.Comment);
 
-            config.NewConfig<BinPhotoEntities, BinPhoto>()
+            config.NewConfig<BinPhotoEntity, BinPhoto>()
                 .ConstructUsing(src => BinPhoto.Create(
                     src.FileName,
                     src.UrlFile,

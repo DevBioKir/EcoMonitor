@@ -1,0 +1,134 @@
+﻿public class ToysServiceTest : TestBase
+    {
+        [Fact] //объявляет метод тестирования, который выполняется тестовым раннером
+        public async Task GetAllToys_ShouldReturnAllToys()
+        {
+            // Arrange //устанавливает начальные условия для выполнения теста
+            var toys = new List<Toy>()
+            {
+                 Toy.Create(
+                     "Тыквенный человечек",
+                     "Из пряжи тыквенный монстрик",
+                     "190x190",
+                     1250,
+                     "/images/ff3c1d15-cfd3-4469-8fbc-adcd3ba99a36_PumpkinMan"),
+                 Toy.Create(
+                     "Монстр",
+                     "Из пряжи монстрик",
+                     "190x190",
+                     1550,
+                     "/images/ff3c1d15-cfd3-4469-8fbc-adcd3ba99a36_PumpkinMan")
+            };
+
+            var mockRepo = new Mock<IToysRepositories>();
+            mockRepo.Setup(r => r.GetAllToysAsync()).ReturnsAsync(toys);
+
+            var mockLogger = new Mock<ILogger<ToyService>>();
+            //var service = new ToyService(mockRepo.Object, mockLogger.Object);
+
+            //// Act //выполняет тест (обычно представляет одну строку кода)
+            //var result = await service.GetAllToysAsync();
+
+            //// Assert
+            //Assert.NotNull(result);
+            //Assert.Equal(2, result.Count);
+            //Assert.Contains(result, t => t.Name == "Тыквенный человечек");
+        }
+        [Fact]
+        public async Task CreateToy_ShouldReturCreatedToy()
+        {
+            // Arrange
+            var toy = Toy.Create(
+                "Тыквенный человечек",
+                "Из пряжи тыквенный монстрик",
+                "190x190",
+                1250,
+                "/images/ff3c1d15-cfd3-4469-8fbc-adcd3ba99a36_PumpkinMan");
+
+            var mockRepo = new Mock<IToysRepositories>();
+            mockRepo.Setup(r => r.CreateToyAsync(toy)).ReturnsAsync(toy.Id);
+
+            //var mockLogger = new Mock<ILogger<ToyService>>();
+            //var service = new ToyService(mockRepo.Object, mockLogger.Object);
+
+            //// Act
+            //var result = await service.CreateToyAsync(toy);
+
+            //// Assert
+            //Assert.Equal(toy.Id, result);
+        }
+
+        [Fact]
+        public async Task UpdateToyAsync_ShouldReturnUpdateToyId()
+        {
+            // Arrange
+            var toyId = Guid.NewGuid();
+            var mockRepo = new Mock<IToysRepositories>();
+            mockRepo.Setup(r => r.UpdateAsync(
+                toyId,
+                "Медвежонок",
+                "Медвежонок Гриша",
+                "200x250",
+                1600,
+                "upl-toy")).ReturnsAsync(toyId);
+
+            var mockLogger = new Mock<ILogger<ToyService>>();
+            //var service = new ToyService(mockRepo.Object, mockLogger.Object);
+
+            //// Act
+            //var result = await service.UpdateToyAsync(toyId,
+            //    "Медвежонок",
+            //    "Медвежонок Гриша",
+            //    "200x250",
+            //    1600,
+            //    "upl-toy");
+
+            //// Assert
+            //Assert.Equal(toyId, result);
+        }
+
+        [Fact]
+        public async Task DeleteToyAsync_ShouldReturnDeletedToyId()
+        {
+            // Arrange
+            var toyId = Guid.NewGuid();
+
+            var mockRepo = new Mock<IToysRepositories>();
+            mockRepo.Setup(r => r.DeleteAsync(toyId)).ReturnsAsync(toyId);
+
+            var mockLogger = new Mock<ILogger<ToyService>>();
+            //var service = new ToyService(mockRepo.Object, mockLogger.Object);
+
+            //// Act
+            //var result = await service.DeleteToyAsync(toyId);
+
+            //// Assert
+            //Assert.Equal(toyId, result);
+        }
+
+        [Fact]
+        public async Task GetToyByIdAsync_ShouldReturnCorrectToy()
+        {
+            // Arrange
+            var toyId = Guid.NewGuid();
+            var toy = Toy.Create(
+                "Медвежонок",
+                "Медвежонок Гриша",
+                "200x250",
+                1600,
+                "upl-toy");
+
+            var mockRepo = new Mock<IToysRepositories>();
+            mockRepo.Setup(r => r.GetToyByIdAsync(toyId)).ReturnsAsync(toy);
+
+            var mockLogger = new Mock<ILogger<ToyService>>();
+            //var service = new ToyService(mockRepo.Object, mockLogger.Object);
+
+            //// Act 
+            //var result = await service.GetToyByIdAsync(toyId);
+
+            //// Assert
+            //Assert.NotNull(result);
+            //Assert.Equal("Медвежонок", result.Name);
+        }
+    }
