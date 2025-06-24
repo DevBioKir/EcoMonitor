@@ -4,6 +4,7 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace EcoMonitor.UnitTest
 {
@@ -30,6 +31,8 @@ namespace EcoMonitor.UnitTest
             config.Scan(typeof(MappingConfig).Assembly);
             services.AddSingleton(config);
             services.AddSingleton<IMapper, ServiceMapper>();
+
+            services.AddLogging();
 
             _serviceProvider = services.BuildServiceProvider();
 

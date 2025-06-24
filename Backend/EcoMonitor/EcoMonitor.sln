@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoMonitor.App", "EcoMonito
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoMonitor.UnitTest", "EcoMonitor.UnitTest\EcoMonitor.UnitTest.csproj", "{9B55C028-C1A9-4B7B-B6B6-1F5F743DB8D4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoMonitor.Infrastracture", "EcoMonitor.Infrastracture\EcoMonitor.Infrastracture.csproj", "{664FF0EF-D680-4378-B792-CCFF77A81461}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoMonitor.Contracts", "EcoMonitor.Contracts\EcoMonitor.Contracts.csproj", "{ACD7E5A1-9016-4E14-A8D4-07577380F178}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +43,14 @@ Global
 		{9B55C028-C1A9-4B7B-B6B6-1F5F743DB8D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B55C028-C1A9-4B7B-B6B6-1F5F743DB8D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B55C028-C1A9-4B7B-B6B6-1F5F743DB8D4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{664FF0EF-D680-4378-B792-CCFF77A81461}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{664FF0EF-D680-4378-B792-CCFF77A81461}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{664FF0EF-D680-4378-B792-CCFF77A81461}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{664FF0EF-D680-4378-B792-CCFF77A81461}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACD7E5A1-9016-4E14-A8D4-07577380F178}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACD7E5A1-9016-4E14-A8D4-07577380F178}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACD7E5A1-9016-4E14-A8D4-07577380F178}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACD7E5A1-9016-4E14-A8D4-07577380F178}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

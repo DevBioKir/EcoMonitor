@@ -18,7 +18,7 @@ namespace EcoMonitor.DataAccess.Repositories
             _mapper = mapper;
         }
 
-        public async Task<ICollection<BinPhoto>> GetAllBinPhotos()
+        public async Task<ICollection<BinPhoto>> GetAllBinPhotosAsync()
         {
             var binPhotosEntity = await _context.BinPhotos.ToListAsync();
             var binPhotos = _mapper.Map<List<BinPhoto>>(binPhotosEntity);
@@ -36,42 +36,6 @@ namespace EcoMonitor.DataAccess.Repositories
 
             return binPhoto;
         }
-
-        
-
-        //public async Task<Guid> AddBinPhotoAsync(
-        //    string fileName,
-        //    string urlFile,
-        //    double latitude,
-        //    double longitude,
-        //    string binType,
-        //    double fillLevel,
-        //    bool isOutsideBin,
-        //    string comment)
-        //{
-        //    try
-        //    {
-        //        var binPhoto = BinPhoto.Create(fileName,
-        //        urlFile,
-        //        latitude,
-        //        longitude,
-        //        binType,
-        //        fillLevel,
-        //        isOutsideBin,
-        //        comment);
-
-        //        var binPhotoEntity = _mapper.Map<BinPhotoEntity>(binPhoto);
-
-        //        await _context.BinPhotos.AddAsync(binPhotoEntity);
-        //        await _context.SaveChangesAsync();
-
-        //        return binPhotoEntity.Id;
-        //    }
-        //    catch(Exception ex) 
-        //    {
-        //        throw new Exception("Error while adding BinPhoto", ex);
-        //    }
-        //}
 
         public async Task<BinPhoto> GetPhotoByIdAsync(Guid photoBinId)
         {

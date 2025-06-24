@@ -1,4 +1,5 @@
-﻿using EcoMonitor.Core.Models;
+﻿using EcoMonitor.Contracts.Contracts;
+using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using Mapster;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -33,6 +34,17 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Comment, src => src.Comment);
 
             config.NewConfig<BinPhotoEntity, BinPhoto>()
+                .ConstructUsing(src => BinPhoto.Create(
+                    src.FileName,
+                    src.UrlFile,
+                    src.Latitude,
+                    src.Longitude,
+                    src.BinType,
+                    src.FillLevel,
+                    src.IsOutsideBin,
+                    src.Comment));
+
+            config.NewConfig<BinPhotoRequest, BinPhoto>()
                 .ConstructUsing(src => BinPhoto.Create(
                     src.FileName,
                     src.UrlFile,

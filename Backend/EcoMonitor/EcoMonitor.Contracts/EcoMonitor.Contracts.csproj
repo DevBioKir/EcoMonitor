@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\EcoMonitor.Contracts\EcoMonitor.Contracts.csproj" />
-  </ItemGroup>
-
 </Project>

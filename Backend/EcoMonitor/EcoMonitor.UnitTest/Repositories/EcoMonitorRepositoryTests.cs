@@ -2,7 +2,7 @@
 using EcoMonitor.DataAccess.Entities;
 using EcoMonitor.DataAccess.Repositories;
 
-namespace EcoMonitor.UnitTest
+namespace EcoMonitor.UnitTest.Repositories
 {
     public class EcoMonitorRepositoryTests : TestBase
     {
@@ -42,7 +42,7 @@ namespace EcoMonitor.UnitTest
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
 
             // Act
-            var result = await binPhotoRepo.GetAllBinPhotos();
+            var result = await binPhotoRepo.GetAllBinPhotosAsync();
 
             // Assert
             Assert.NotNull(result);
@@ -50,8 +50,6 @@ namespace EcoMonitor.UnitTest
             Assert.Contains(result, bp => bp.FileName == "Бак на Калинина.jpg");
             Assert.Contains(result, bp => bp.FileName == "Бак на Кирова.jpg");
         }
-
-
 
         [Fact]
         public async Task GetPhotoByIdAsync_ReturnsMappedBinPhoto_WhenPhotoExists()
