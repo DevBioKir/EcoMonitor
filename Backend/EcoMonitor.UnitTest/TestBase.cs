@@ -1,5 +1,7 @@
 ﻿using EcoMonitor.App.Mapper;
 using EcoMonitor.DataAccess;
+using EcoMonitor.Infrastracture.Abstractions;
+using EcoMonitor.Infrastracture.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +33,10 @@ namespace EcoMonitor.UnitTest
             config.Scan(typeof(MappingConfig).Assembly);
             services.AddSingleton(config);
             services.AddSingleton<IMapper, ServiceMapper>();
+
+            var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwrootTest");
+            services.AddSingleton<IImageStorageService>(new ImageStorageService(webRootPath));
+            services.AddSingleton<IGeolocationService, GeolocationService>();
 
             services.AddLogging();
 

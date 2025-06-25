@@ -3,8 +3,13 @@ using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using EcoMonitor.DataAccess.Repositories;
+using EcoMonitor.Infrastracture.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace EcoMonitor.UnitTest.Services
 {
@@ -43,10 +48,16 @@ namespace EcoMonitor.UnitTest.Services
             await _context.BinPhotos.AddRangeAsync(binPhotosEntity);
             await _context.SaveChangesAsync();
 
+            var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            Directory.CreateDirectory(webRootPath);
+
+            var imageStorageService = new ImageStorageService(webRootPath);
+            var geoLocationService = new GeolocationService();
+
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
             var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService);
 
             //var binPhotosRequest = _mapper.Map<BinPhotoRequest>(binPhotos);
 
@@ -80,10 +91,16 @@ namespace EcoMonitor.UnitTest.Services
             await _context.BinPhotos.AddAsync(binPhotoEntity);
             await _context.SaveChangesAsync();
 
+            var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            Directory.CreateDirectory(webRootPath);
+
+            var imageStorageService = new ImageStorageService(webRootPath);
+            var geoLocationService = new GeolocationService();
+
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
             var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService);
 
             var binPhotoRequest = _mapper.Map<BinPhotoRequest>(binPhotoEntity);
 
@@ -120,9 +137,15 @@ namespace EcoMonitor.UnitTest.Services
                 "Test photo"
                 );
 
+            var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            Directory.CreateDirectory(webRootPath);
+
+            var imageStorageService = new ImageStorageService(webRootPath);
+            var geoLocationService = new GeolocationService();
+
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
             var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService);
 
             var binPhotoRequest = _mapper.Map<BinPhotoRequest>(binPhoto);
 
@@ -142,6 +165,51 @@ namespace EcoMonitor.UnitTest.Services
             Assert.Equal(0.8, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
             Assert.Equal("Test photo", result.Comment);
+        }
+
+        [Fact]
+        public async Task UploadImage_ShouldReturnCorrectResponse()
+        {
+            // Arrage
+            var fileName = "Home.png";
+            var imagePath = Path.Combine("TestPhotos", "Home.png");
+            var imagesBytes = await File.ReadAllBytesAsync(imagePath);
+            var stream = new MemoryStream(imagesBytes);
+
+            var formFile = new FormFile(stream, 0, stream.Length, "image", fileName)
+            {
+                Headers = new HeaderDictionary(),
+                ContentType = "image/png"
+            };
+
+            var request = new BinPhotoUploadRequest(
+                Photo: formFile,
+                BinType: "Plastic",
+                FillLevel: 0.6,
+                IsOutsideBin: true,
+                Comment: "Бак на кирова");
+
+            var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            Directory.CreateDirectory(webRootPath);
+
+            var imageStorageService = new ImageStorageService(webRootPath);
+            var geoLocationService = new GeolocationService();
+
+            var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
+            var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService);
+
+            // Act
+            var result = await binPhotoService.UploadImage(request);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal("Plastic", result.BinType);
+            Assert.Equal("Бак на кирова", result.Comment);
+
+            var saved = await _context.BinPhotos.FirstOrDefaultAsync(x => x.Id == result.Id);
+            Assert.NotNull(saved);
+            Assert.Equal(0.6, saved.FillLevel);
         }
     }
 }

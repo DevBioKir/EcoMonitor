@@ -27,4 +27,14 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="TestPhotos\" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Content Include="TestPhotos\Home.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
 </Project>

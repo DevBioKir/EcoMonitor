@@ -1,9 +1,11 @@
 ﻿using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Repositories;
+using EcoMonitor.Infrastracture.Abstractions;
 using MapsterMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System.Reflection.Metadata.Ecma335;
+using SixLabors.ImageSharp;
 
 namespace EcoMonitor.App.Services
 {
@@ -12,14 +14,20 @@ namespace EcoMonitor.App.Services
         private readonly IMapper _mapper;
         private readonly IBinPhotoRepository _binPhotoRepository;
         private readonly ILogger<BinPhotoService> _logger;
+
+        private readonly IImageStorageService _storage;
+        private readonly IGeolocationService _geo;
+
         public BinPhotoService(
             IMapper mapper,
             IBinPhotoRepository binPhotoRepository,
-            ILogger<BinPhotoService> logger)
+            ILogger<BinPhotoService> logger,
+            IImageStorageService storage)
         {
             _mapper = mapper;
             _binPhotoRepository = binPhotoRepository;
             _logger = logger;
+            _storage = storage;
         }
         public async Task<BinPhotoResponse> AddBinPhotoAsync(
             BinPhotoRequest requestBinPhoto)
@@ -45,6 +53,31 @@ namespace EcoMonitor.App.Services
         {
             var domainBinPhoto = await _binPhotoRepository.GetPhotoByIdAsync(photoBinId);
             return _mapper.Map<BinPhotoResponse>(domainBinPhoto);
+        }
+
+        public async Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request)
+        {
+            var relativePath = await _storage.SaveImageAsync(request.Photo);
+            var absolutePath = Path.Combine("wwwroot", relativePath);
+
+            using var uploadedPhoto = await Image.LoadAsync(absolutePath);
+
+            var exif = uploadedPhoto.Metadata.ExifProfile;
+            var (lat, lon) = _geo.GeoLocationService(exif);
+
+            var binPhoto = BinPhoto.Create(
+                fileName: Path.GetFileName(request.Photo.FileName),
+                urlFile: "/" + relativePath.Replace("\\", "/"),
+                latitude: lat ?? 0,
+                longitude: lon ?? 0,
+                binType: request.BinType,
+                fillLevel: request.FillLevel,
+                isOutsideBin: request.IsOutsideBin,
+                comment: request.Comment);
+
+            await _binPhotoRepository.AddBinPhotoAsync(binPhoto);
+
+            return _mapper.Map<BinPhotoResponse>(binPhoto);
         }
     }
 }

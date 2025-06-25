@@ -8,11 +8,17 @@
 
   <ItemGroup>
     <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\EcoMonitor.Contracts\EcoMonitor.Contracts.csproj" />
     <ProjectReference Include="..\EcoMonitor.DataAccess\EcoMonitor.DataAccess.csproj" />
+    <ProjectReference Include="..\EcoMonitor.Infrastracture\EcoMonitor.Infrastracture.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Abstractions\" />
   </ItemGroup>
 
 </Project>
