@@ -171,15 +171,15 @@ namespace EcoMonitor.UnitTest.Services
         public async Task UploadImage_ShouldReturnCorrectResponse()
         {
             // Arrage
-            var fileName = "Home.png";
-            var imagePath = Path.Combine("TestPhotos", "Home.png");
+            var fileName = "Бак возле работы.jpeg";
+            var imagePath = Path.Combine("TestPhotos", "Бак_возле_работы.jpeg");
             var imagesBytes = await File.ReadAllBytesAsync(imagePath);
             var stream = new MemoryStream(imagesBytes);
 
             var formFile = new FormFile(stream, 0, stream.Length, "image", fileName)
             {
                 Headers = new HeaderDictionary(),
-                ContentType = "image/png"
+                ContentType = "image/jpeg"
             };
 
             var request = new BinPhotoUploadRequest(
