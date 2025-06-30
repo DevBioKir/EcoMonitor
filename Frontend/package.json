@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "react-native-yamap": "^4.8.3"
+  }
+}

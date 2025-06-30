@@ -57,7 +57,7 @@ namespace EcoMonitor.UnitTest.Services
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
             var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService, geoLocationService);
 
             //var binPhotosRequest = _mapper.Map<BinPhotoRequest>(binPhotos);
 
@@ -100,7 +100,7 @@ namespace EcoMonitor.UnitTest.Services
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
             var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService, geoLocationService);
 
             var binPhotoRequest = _mapper.Map<BinPhotoRequest>(binPhotoEntity);
 
@@ -145,7 +145,7 @@ namespace EcoMonitor.UnitTest.Services
 
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
             var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService, geoLocationService);
 
             var binPhotoRequest = _mapper.Map<BinPhotoRequest>(binPhoto);
 
@@ -171,15 +171,15 @@ namespace EcoMonitor.UnitTest.Services
         public async Task UploadImage_ShouldReturnCorrectResponse()
         {
             // Arrage
-            var fileName = "Бак возле работы.jpeg";
-            var imagePath = Path.Combine("TestPhotos", "Бак_возле_работы.jpeg");
+            var fileName = "20250630_201412.jpg";
+            var imagePath = Path.Combine("TestPhotos", "20250630_201412.jpg");
             var imagesBytes = await File.ReadAllBytesAsync(imagePath);
             var stream = new MemoryStream(imagesBytes);
 
             var formFile = new FormFile(stream, 0, stream.Length, "image", fileName)
             {
                 Headers = new HeaderDictionary(),
-                ContentType = "image/jpeg"
+                ContentType = "image/jpg"
             };
 
             var request = new BinPhotoUploadRequest(
@@ -197,7 +197,7 @@ namespace EcoMonitor.UnitTest.Services
 
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
             var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService, geoLocationService);
 
             // Act
             var result = await binPhotoService.UploadImage(request);

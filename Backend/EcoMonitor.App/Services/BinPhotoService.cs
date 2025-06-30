@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 
+
 namespace EcoMonitor.App.Services
 {
     public class BinPhotoService : IBinPhotoService
@@ -22,12 +23,14 @@ namespace EcoMonitor.App.Services
             IMapper mapper,
             IBinPhotoRepository binPhotoRepository,
             ILogger<BinPhotoService> logger,
-            IImageStorageService storage)
+            IImageStorageService storage,
+            IGeolocationService geo)
         {
             _mapper = mapper;
             _binPhotoRepository = binPhotoRepository;
             _logger = logger;
             _storage = storage;
+            _geo = geo;
         }
         public async Task<BinPhotoResponse> AddBinPhotoAsync(
             BinPhotoRequest requestBinPhoto)
@@ -63,7 +66,26 @@ namespace EcoMonitor.App.Services
             using var uploadedPhoto = await Image.LoadAsync(absolutePath);
 
             var exif = uploadedPhoto.Metadata.ExifProfile;
+
+            _logger.LogInformation("Metadata: {Meta}", uploadedPhoto.Metadata);
+            _logger.LogInformation("ExifProfile: {Exif}", uploadedPhoto.Metadata.ExifProfile);
+
+            if (exif == null)
+            {
+                _logger.LogWarning("EXIF не найден");
+                Console.WriteLine("EXIF не найден");
+            }
+            else
+            {
+                foreach (var val in exif.Values)
+                {
+                    _logger.LogInformation("EXIF: {Tag} = {Value}", val.Tag, val.GetValue());
+                    Console.WriteLine($"EXIF: {val.Tag} = {val.GetValue()}");
+                }
+            }
+
             var (lat, lon) = _geo.GeoLocationService(exif);
+            
 
             var binPhoto = BinPhoto.Create(
                 fileName: Path.GetFileName(request.Photo.FileName),
