@@ -5,25 +5,26 @@
  * @format
  */
 
-import {YaMap} from 'react-native-yamap';
+import { NewAppScreen } from '@react-native/new-app-screen';
+import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import YandexMapView from './components/YandexMapView';
 
-YaMap.init('b435f7c5-a250-4eb7-a2f8-3fff029ceb53');
-
-const Map = () => {
+export default function App() {
   return (
-    // @ts-ignore
-    <YaMap
-      userLocationIcon={{ uri: 'https://www.clipartmax.com/png/middle/180-1801760_pin-png.png' }}
-      initialRegion={{
-        lat: 50,
-        lon: 50,
-        zoom: 10,
-        azimuth: 80,
-        tilt: 100
-      }}
-      style={{ flex: 1 }}
-    />
+    <View style={{ flex: 1 }}>
+    {/* <View style={styles.container}> */}
+      <YandexMapView 
+      style={{ width: '100%', height: '100%' }}
+      // style={styles.map}
+      latitude={56.8389}
+      longitude={60.6057} />
+    </View>
   );
-};
+}
 
-export default Map;
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  map: { flex: 1 },
+});
+
+// export default App;
