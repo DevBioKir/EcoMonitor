@@ -17,36 +17,44 @@ import com.facebook.react.uimanager.ViewManager
 import android.util.Log
 
 class MainApplication : Application(), ReactApplication {
-
   override val reactNativeHost: ReactNativeHost =
-      object : DefaultReactNativeHost(this) {
-        override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
+    object : DefaultReactNativeHost(this) {
+      override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 
-        override fun getPackages(): List<ReactPackage>{
-        // Получаем автолинкнутые пакеты
+      override fun getPackages(): List<ReactPackage> {
         val packages = PackageList(this).packages.toMutableList()
-
-        // Добавляем наш менеджер карты вручную
         packages.add(YandexMapViewPackage())
-
+        Log.d("MainApplication", "Total packages: ${packages.size}")
         return packages
       }
 
-        override fun getJSMainModuleName(): String = "index"
-
-        override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
-        override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
-      }
+      override fun getJSMainModuleName(): String = "index"
+      override val isNewArchEnabled: Boolean = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED
+      override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
+    }
 
   override val reactHost: ReactHost
     get() = getDefaultReactHost(applicationContext, reactNativeHost)
 
   override fun onCreate() {
     super.onCreate()
-    Log.d("MapKit", "API Key: ${BuildConfig.MAPKIT_API_KEY}")
-    MapKitFactory.setApiKey(BuildConfig.MAPKIT_API_KEY);
-    MapKitFactory.initialize(this);
-    Log.d("MapKit", "MapKitFactory initialized")
+
+    Log.d("MainApplication", "Application onCreate() called")
+
+    // Инициализируем MapKit
+    try {
+      val apiKey = BuildConfig.MAPKIT_API_KEY
+      Log.d("MainApplication", "Initializing MapKit with API key (length: ${apiKey.length})")
+
+      MapKitFactory.setApiKey(apiKey)
+      MapKitFactory.initialize(this)
+
+      Log.d("MainApplication", "MapKit initialized successfully")
+    } catch (e: Exception) {
+      Log.e("MainApplication", "Error initializing MapKit: ${e.message}")
+      e.printStackTrace()
+    }
+
     loadReactNative(this)
   }
 }

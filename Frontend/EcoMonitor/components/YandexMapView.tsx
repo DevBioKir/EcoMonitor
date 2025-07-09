@@ -1,15 +1,20 @@
 import React from 'react';
-import { requireNativeComponent, ViewStyle, StyleProp } from 'react-native';
+import { requireNativeComponent, ViewStyle, StyleProp, ViewProps } from 'react-native';
 
-export interface YandexMapViewProps {
-  /** Обычное prop style у View‑подобных компонентов */
-  latitude?: number;
-  longitude?: number;
-  style?: StyleProp<ViewStyle>;
+type YandexMapViewProps = ViewProps & {
+  latitude: number;
+  longitude: number;
+};
+
+const NativeYandexMapView = requireNativeComponent<YandexMapViewProps>("YandexMapView");
+
+export default function YandexMapView({ latitude, longitude, style }: YandexMapViewProps) {
+  console.log('YandexMapView props:', latitude, longitude);
+  return (
+    <NativeYandexMapView
+      style={style}
+      latitude={latitude}
+      longitude={longitude}
+    />
+  );
 }
-
-const YandexMapView =
-// через дженерики TypeScript понимает, что компонент принимает эти пропсы, включая style
-  requireNativeComponent<YandexMapViewProps>('YandexMapView');
-
-export default YandexMapView;
