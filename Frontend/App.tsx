@@ -6,7 +6,14 @@
  */
 
 import { NewAppScreen } from '@react-native/new-app-screen';
-import { PermissionsAndroid, Platform, StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import {
+  PermissionsAndroid,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from 'react-native';
 import YandexMapView from './components/YandexMapView';
 import { useEffect } from 'react';
 
@@ -16,19 +23,24 @@ export default function App() {
       PermissionsAndroid.requestMultiple([
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
-      ]).then((statuses) => {
+      ]).then(statuses => {
         console.log('Permissions:', statuses);
       });
     }
   }, []);
   return (
     <View style={{ flex: 1 }}>
-    {/* <View style={styles.container}> */}
-      <YandexMapView 
-      style={{ flex: 1, backgroundColor: 'red' }} // красный фон — проверка отображения
-      // style={styles.map}
-      latitude={55.1644}
-      longitude={61.4368} />
+      {/* <View style={styles.container}> */}
+      <YandexMapView
+        style={{ flex: 1, backgroundColor: 'red' }} // красный фон — проверка отображения
+        // style={styles.map}
+        latitude={55.1644}
+        longitude={61.4368}
+        markers={[
+          { latitude: 55.75, longitude: 37.61 },
+          { latitude: 55.76, longitude: 37.62 },
+        ]}
+      />
     </View>
   );
 }
