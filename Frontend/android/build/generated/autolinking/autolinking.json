@@ -1,8 +1,34 @@
 {
-  "root": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\EcoMonitor",
-  "reactNativePath": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\EcoMonitor\\node_modules\\react-native",
+  "root": "C:\\EcoMonitor\\EcoMonitor\\Frontend",
+  "reactNativePath": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\node_modules\\react-native",
   "reactNativeVersion": "0.80",
-  "dependencies": {},
+  "dependencies": {
+    "react-native-image-picker": {
+      "root": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\node_modules\\react-native-image-picker",
+      "name": "react-native-image-picker",
+      "platforms": {
+        "ios": {
+          "podspecPath": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\node_modules\\react-native-image-picker\\react-native-image-picker.podspec",
+          "version": "8.2.1",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\node_modules\\react-native-image-picker\\android",
+          "packageImportPath": "import com.imagepicker.ImagePickerPackage;",
+          "packageInstance": "new ImagePickerPackage()",
+          "buildTypes": [],
+          "libraryName": "RNImagePickerSpec",
+          "componentDescriptors": [],
+          "cmakeListsPath": "C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    }
+  },
   "commands": [
     {
       "name": "bundle",
@@ -165,7 +191,7 @@
         {
           "name": "--path <path>",
           "description": "Path to the React Native project root.",
-          "default": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\EcoMonitor"
+          "default": "C:\\EcoMonitor\\EcoMonitor\\Frontend"
         },
         {
           "name": "--platform <string>",
@@ -465,7 +491,7 @@
   "assets": [],
   "project": {
     "ios": {
-      "sourceDir": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\EcoMonitor\\ios",
+      "sourceDir": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\ios",
       "xcodeProject": {
         "name": "EcoMonitor.xcodeproj",
         "path": ".",
@@ -474,7 +500,7 @@
       "assets": []
     },
     "android": {
-      "sourceDir": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\EcoMonitor\\android",
+      "sourceDir": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\android",
       "appName": "app",
       "packageName": "com.ecomonitor",
       "applicationId": "com.ecomonitor",

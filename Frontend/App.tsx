@@ -34,12 +34,12 @@ export default function App() {
       <YandexMapView
         style={{ flex: 1, backgroundColor: 'red' }} // красный фон — проверка отображения
         // style={styles.map}
-        latitude={55.1644}
-        longitude={61.4368}
+        latitude={55.154}
+        longitude={61.4291}
         markers={[
-          { latitude: 55.75, longitude: 37.61 },
-          { latitude: 55.76, longitude: 37.62 },
-        ]}
+          { latitude: 56.8376375, longitude: 60.6022782 },
+          { latitude: 56.837097, longitude: 60.605209 },
+        ]} 
       />
     </View>
   );

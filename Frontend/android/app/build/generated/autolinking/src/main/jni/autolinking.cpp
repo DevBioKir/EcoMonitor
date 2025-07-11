@@ -7,13 +7,16 @@
  */
 
 #include "autolinking.h"
-
+#include <RNImagePickerSpec.h>
 
 namespace facebook {
 namespace react {
 
 std::shared_ptr<TurboModule> autolinking_ModuleProvider(const std::string moduleName, const JavaTurboModule::InitParams &params) {
-
+auto module_RNImagePickerSpec = RNImagePickerSpec_ModuleProvider(moduleName, params);
+if (module_RNImagePickerSpec != nullptr) {
+return module_RNImagePickerSpec;
+}
   return nullptr;
 }
 

@@ -65,13 +65,13 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
 
     @ReactProp(name = "markers")
     fun setMarkers(view: MapView, markers: ReadableArray?) {
-    Log.d("YandexMapViewManager", "Setting markers...")
+        Log.d("YandexMapViewManager", "Setting markers...")
 
-    // Удаляем старые
-    placemarks.forEach { view.map.mapObjects.remove(it) }
-    placemarks.clear()
+        // Удаляем старые
+        placemarks.forEach { view.map.mapObjects.remove(it) }
+        placemarks.clear()
 
-    if (markers == null) return
+        if (markers == null) return
 
         for (i in 0 until markers.size()) {
             val markerMap = markers.getMap(i) ?: continue
@@ -81,6 +81,7 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
 
             val point = Point(lat, lon)
             val placemark = view.map.mapObjects.addPlacemark(point)
+            
             placemark.setIcon(ImageProvider.fromResource(view.context, R.drawable.ic_marker))
             placemarks.add(placemark)
 
