@@ -20,6 +20,7 @@ namespace EcoMonitor.Infrastracture.Services
                 throw new ArgumentException("Not an image");
 
             var photoFolder = Path.Combine(_webRootPath, "Photos");
+
             if(!Directory.Exists(photoFolder))
                 Directory.CreateDirectory(photoFolder);
 
