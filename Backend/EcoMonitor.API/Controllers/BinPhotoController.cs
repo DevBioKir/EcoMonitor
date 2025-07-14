@@ -17,11 +17,13 @@ namespace EcoMonitor.API.Controllers
         public BinPhotoController(
             IBinPhotoService binPhotoService,
             IMapper mapper,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            ILogger<BinPhotoController> logger)
         {
             _binPhotoService = binPhotoService;
             _mapper = mapper;
             _env = env;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -42,23 +44,47 @@ namespace EcoMonitor.API.Controllers
         }
 
         [HttpPost("UploadWithMetadata")]
-        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata(/*[FromBody] BinPhotoUploadRequest request*/
-            [FromForm] IFormFile photo,
+        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata(/*[FromBody]*/[FromForm] BinPhotoUploadRequest request
+            /*[FromForm] IFormFile photo,
             [FromForm] string binType,
             [FromForm] int fillLevel,
             [FromForm] bool isOutsideBin,
-            [FromForm] string? comment)
+            [FromForm] string? comment*/)
         {
-            var request = new BinPhotoUploadRequest(
-                Photo: photo,
-                BinType: binType,
-                FillLevel: fillLevel,
-                IsOutsideBin: isOutsideBin,
-                Comment: comment);
+            //var request = new BinPhotoUploadRequest(
+            //    Photo: photo,
+            //    BinType: binType,
+            //    FillLevel: fillLevel,
+            //    IsOutsideBin: isOutsideBin,
+            //    Comment: comment);
+
+            _logger.LogInformation("📥 UploadWithMetadata вызван");
+
+            if (request == null)
+            {
+                _logger.LogWarning("⚠️ Request model пустая (null)");
+                return BadRequest("Данные не переданы");
+            }
+
+            if (request.Photo == null)
+            {
+                _logger.LogWarning("⚠️ Фото не передано");
+                return BadRequest("Фото не загружено");
+            }
+
+            _logger.LogInformation("Получены данные: BinType={BinType}, FillLevel={FillLevel}, IsOutsideBin={IsOutsideBin}, Comment={Comment}",
+                request.BinType, request.FillLevel, request.IsOutsideBin, request.Comment);
+
+            _logger.LogInformation("Фото: FileName={FileName}, ContentType={ContentType}, Length={Length}",
+                request.Photo.FileName, request.Photo.ContentType, request.Photo.Length);
+
             try
             {
                 var binPhoto = await _binPhotoService.UploadImage(request);
-                return CreatedAtAction(nameof(AddBinPhotoAsync), new { id = binPhoto.Id }, binPhoto);
+                _logger.LogInformation("Фото успешно загружено, Id={Id}", binPhoto.Id);
+
+                return Ok(binPhoto);
+                //return CreatedAtAction(nameof(AddBinPhotoAsync), new { id = binPhoto.Id }, binPhoto);
             }
             catch (Exception ex)
             {
