@@ -45,7 +45,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5198")
+            policy.WithOrigins("http://192.168.1.154:8081")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
                   //.AllowCredentials(); для куки
@@ -74,7 +74,7 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseCors("AllowFrontend");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

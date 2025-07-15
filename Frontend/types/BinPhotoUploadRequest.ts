@@ -1,7 +1,11 @@
 export interface BinPhotoUploadRequest {
-    photo: File;
-    binType: string;
-    fillLevel: number;
-    isOutsideBin: boolean;
-    comment: string;
+  photo: {
+    uri: string;
+    name: string;
+    type: string;
+  };
+  binType: string;
+  fillLevel: number;
+  isOutsideBin: boolean;
+  comment: string;
 }

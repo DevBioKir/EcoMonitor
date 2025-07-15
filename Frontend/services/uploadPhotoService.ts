@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { BinPhotoResponse } from '../types/BinPhotoResponse';
 import { BinPhotoUploadRequest } from '../types/BinPhotoUploadRequest';
 
@@ -7,7 +8,11 @@ export const UploadWithMetadata = async (
   if (!request) throw new Error('Файл не выбран');
 
   const formData = new FormData();
-  formData.append('Photo', request.photo); // имя должно совпадать с сервером
+  formData.append("Photo", {
+    uri: request.photo.uri,
+    name: request.photo.name,
+    type: request.photo.type,
+  } as any);
   formData.append('BinType', request.binType);
   formData.append('FillLevel', String(request.fillLevel));
   formData.append('IsOutsideBin', String(request.isOutsideBin));
@@ -15,11 +20,11 @@ export const UploadWithMetadata = async (
 
   try {
     const response = await fetch(
-      'http://192.168.1.154:5198/api/BinPhoto/UploadWithMetadata',
+      "http://192.168.1.154:5198/api/BinPhoto/UploadWithMetadata",
       {
-        method: 'POST',
+        method: "POST",
         body: formData,
-      },
+      }
     );
     if (!response.ok) {
       // Если сервер вернул ошибку, читаем тело ответа и выводим

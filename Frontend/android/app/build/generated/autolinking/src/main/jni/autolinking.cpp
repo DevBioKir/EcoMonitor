@@ -7,12 +7,18 @@
  */
 
 #include "autolinking.h"
+#include <RNCSlider.h>
+#include <react/renderer/components/RNCSlider/ComponentDescriptors.h>
 #include <RNImagePickerSpec.h>
 
 namespace facebook {
 namespace react {
 
 std::shared_ptr<TurboModule> autolinking_ModuleProvider(const std::string moduleName, const JavaTurboModule::InitParams &params) {
+auto module_RNCSlider = RNCSlider_ModuleProvider(moduleName, params);
+if (module_RNCSlider != nullptr) {
+return module_RNCSlider;
+}
 auto module_RNImagePickerSpec = RNImagePickerSpec_ModuleProvider(moduleName, params);
 if (module_RNImagePickerSpec != nullptr) {
 return module_RNImagePickerSpec;
@@ -26,7 +32,7 @@ std::shared_ptr<TurboModule> autolinking_cxxModuleProvider(const std::string mod
 }
 
 void autolinking_registerProviders(std::shared_ptr<ComponentDescriptorProviderRegistry const> providerRegistry) {
-
+providerRegistry->add(concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>());
   return;
 }
 
