@@ -14,13 +14,14 @@ export const UploadWithMetadata = async (
     type: request.photo.type,
   } as any);
   formData.append('BinType', request.binType);
-  formData.append('FillLevel', String(request.fillLevel));
+  formData.append('FillLevel', String(request.fillLevel).replace('.', ','));
   formData.append('IsOutsideBin', String(request.isOutsideBin));
   formData.append('Comment', request.comment);
 
   try {
     const response = await fetch(
-      "http://192.168.1.154:5198/api/BinPhoto/UploadWithMetadata",
+      "http://127.0.0.1:5198/api/BinPhoto/UploadWithMetadata",
+      //"http://192.168.1.154:5198/api/BinPhoto/UploadWithMetadata",
       {
         method: "POST",
         body: formData,
