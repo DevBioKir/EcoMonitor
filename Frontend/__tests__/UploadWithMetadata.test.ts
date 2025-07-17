@@ -1,7 +1,7 @@
 
-import { BinPhotoUploadRequest } from "../types/BinPhotoUploadRequest";
-import { BinPhotoResponse } from "../types/BinPhotoResponse";
-import { UploadWithMetadata } from "../services/uploadPhotoService";
+import { BinPhotoUploadRequest } from "../src/types/BinPhotoUploadRequest";
+import { BinPhotoResponse } from "../src/types/BinPhotoResponse";
+import { UploadWithMetadata } from "../src/services/uploadPhotoService";
 
 global.fetch = jest.fn();
 

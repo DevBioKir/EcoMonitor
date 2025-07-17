@@ -44,31 +44,19 @@ namespace EcoMonitor.API.Controllers
         }
 
         [HttpPost("UploadWithMetadata")]
-        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata(/*[FromBody]*/[FromForm] BinPhotoUploadRequest request
-            /*[FromForm] IFormFile photo,
-            [FromForm] string binType,
-            [FromForm] int fillLevel,
-            [FromForm] bool isOutsideBin,
-            [FromForm] string? comment*/)
+        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata(/*[FromBody]*/[FromForm] BinPhotoUploadRequest request)
         {
-            //var request = new BinPhotoUploadRequest(
-            //    Photo: photo,
-            //    BinType: binType,
-            //    FillLevel: fillLevel,
-            //    IsOutsideBin: isOutsideBin,
-            //    Comment: comment);
-
-            _logger.LogInformation("📥 UploadWithMetadata вызван");
+            _logger.LogInformation("UploadWithMetadata вызван");
 
             if (request == null)
             {
-                _logger.LogWarning("⚠️ Request model пустая (null)");
+                _logger.LogWarning("Request model пустая (null)");
                 return BadRequest("Данные не переданы");
             }
 
             if (request.Photo == null)
             {
-                _logger.LogWarning("⚠️ Фото не передано");
+                _logger.LogWarning("Фото не передано");
                 return BadRequest("Фото не загружено");
             }
 
@@ -90,6 +78,21 @@ namespace EcoMonitor.API.Controllers
             {
                 _logger.LogError(ex, "Ошибка при загрузке фото с метаданными");
                 return StatusCode(500, "Ошибка при обработке изображения.");
+            }
+        }
+
+        [HttpDelete("Delete")]
+        public async Task<ActionResult<Guid>> DeleteBinPhotoAsync(Guid binPhotoId)
+        {
+            try
+            {
+                var photoId = await _binPhotoService.DeleteBinPhotoAsync(binPhotoId);
+                return photoId;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при удалении фото из базы");
+                return StatusCode(500, "Ошибка при удалении фотографии.");
             }
         }
     }
