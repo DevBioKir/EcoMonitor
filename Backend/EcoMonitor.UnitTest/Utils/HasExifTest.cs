@@ -9,7 +9,7 @@ namespace EcoMonitor.UnitTest.Utils
         public async Task HasExifMetadataAsync()
         {
             // Arrage
-            var imagePath = Path.Combine("TestPhotos", "Бак_возле_работы.jpeg");
+            var imagePath = Path.Combine("TestPhotos", "20250630_201412.jpg");
 
             Assert.True(File.Exists(imagePath), $"Файл не найден: {imagePath}");
 

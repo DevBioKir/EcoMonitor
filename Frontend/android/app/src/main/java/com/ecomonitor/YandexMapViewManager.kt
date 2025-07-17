@@ -10,6 +10,10 @@ import android.util.Log
 import com.facebook.react.bridge.LifecycleEventListener
 import android.view.ViewGroup
 import com.yandex.mapkit.MapKitFactory
+import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
+import com.yandex.runtime.image.ImageProvider
+import com.yandex.mapkit.map.PlacemarkMapObject
 
 
 class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListener  {
@@ -18,6 +22,7 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
     private var longitude: Double? = null
     private var mapView: MapView? = null
     private var reactContext: ThemedReactContext? = null
+    private val placemarks = mutableListOf<PlacemarkMapObject>()
 
     override fun getName(): String = "YandexMapView"
 
@@ -56,6 +61,32 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
         Log.d("YandexMapViewManager", "Setting longitude: $longitude")
         this.longitude = longitude
         updateCamera()
+    }
+
+    @ReactProp(name = "markers")
+    fun setMarkers(view: MapView, markers: ReadableArray?) {
+        Log.d("YandexMapViewManager", "Setting markers...")
+
+        // Удаляем старые
+        placemarks.forEach { view.map.mapObjects.remove(it) }
+        placemarks.clear()
+
+        if (markers == null) return
+
+        for (i in 0 until markers.size()) {
+            val markerMap = markers.getMap(i) ?: continue
+
+            val lat = if (markerMap.hasKey("latitude")) markerMap.getDouble("latitude") else continue
+            val lon = if (markerMap.hasKey("longitude")) markerMap.getDouble("longitude") else continue
+
+            val point = Point(lat, lon)
+            val placemark = view.map.mapObjects.addPlacemark(point)
+            
+            placemark.setIcon(ImageProvider.fromResource(view.context, R.drawable.ic_marker))
+            placemarks.add(placemark)
+
+                Log.d("YandexMapViewManager", "Added marker: $lat, $lon")
+            }
     }
 
     private fun updateCamera() {

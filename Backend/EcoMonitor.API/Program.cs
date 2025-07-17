@@ -40,12 +40,25 @@ builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
 //    return new ImageStorageService(env.WebRootPath);
 //});
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://192.168.1.154:8081")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+                  //.AllowCredentials(); для куки
+        });
+});
 
 builder.Services.AddScoped<IBinPhotoRepository, BinPhotoRepository>();
 
 builder.Services.AddScoped<IBinPhotoService, BinPhotoService>();
 
 builder.Services.AddScoped<IGeolocationService, GeolocationService>();
+
+builder.WebHost.UseUrls("http://0.0.0.0:5198");
 
 var app = builder.Build();
 
@@ -59,7 +72,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
+
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 

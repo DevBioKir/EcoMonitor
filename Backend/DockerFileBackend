@@ -1,0 +1,17 @@
+# 1. Build project
+FROM mcr.microsoft.com/dotnet/sdk:9.0 as build
+
+# working directory inside the container, commands are run in it
+WORKDIR /src
+
+COPY EcoMonitor.API/*.cproj ./EcoMonitor.API/
+
+# Restore NuGet packages specified in .cproj. To prepare the project for building
+RUN dotnet restore ./EcoMonitor.API/EcoMonitor.API.cproj
+
+# Copy all project files inside the container
+COPY . .
+
+# Navigate to the working directory where the main ASP.NET Core project is located
+WORKDIR /src/EcoMonitor.API
+

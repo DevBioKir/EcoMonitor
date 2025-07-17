@@ -6,8 +6,16 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 # or link against a old prefab target (this is needed for React Native 0.76 on).
 set(REACTNATIVE_MERGED_SO true)
 
-
+add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/@react-native-community/slider/android/src/main/jni/" RNCSlider_autolinked_build)
+add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/" rngesturehandler_codegen_autolinked_build)
+add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/" RNImagePickerSpec_autolinked_build)
+add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-safe-area-context/android/src/main/jni/" safeareacontext_autolinked_build)
+add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-screens/android/src/main/jni/" rnscreens_autolinked_build)
 
 set(AUTOLINKED_LIBRARIES
-  
+  react_codegen_RNCSlider
+  react_codegen_rngesturehandler_codegen
+  react_codegen_RNImagePickerSpec
+  react_codegen_safeareacontext
+  react_codegen_rnscreens
 )
