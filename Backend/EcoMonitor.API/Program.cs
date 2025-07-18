@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using EcoMonitor.App.Services;
 using EcoMonitor.Infrastracture.Abstractions;
 using EcoMonitor.Infrastracture.Services;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -69,6 +70,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(env.ContentRootPath, "wwwroot", "Photos")),
+    RequestPath = "/Photos"
+});
+
+app.UseStaticFiles();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 

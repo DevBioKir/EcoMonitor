@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 import { BinPhotoResponse } from '../types/BinPhotoResponse';
 import { BinPhotoUploadRequest } from '../types/BinPhotoUploadRequest';
+import { DEV_API_BASE_URL } from '@env';
 
 export const UploadWithMetadata = async (
   request: BinPhotoUploadRequest,
@@ -20,8 +21,8 @@ export const UploadWithMetadata = async (
 
   try {
     const response = await fetch(
-      "http://127.0.0.1:5198/api/BinPhoto/UploadWithMetadata",
-      //"http://192.168.1.154:5198/api/BinPhoto/UploadWithMetadata",
+      `${DEV_API_BASE_URL}/api/BinPhoto/UploadWithMetadata`,
+      //"http://127.0.0.1:5198/api/BinPhoto/UploadWithMetadata",
       {
         method: "POST",
         body: formData,

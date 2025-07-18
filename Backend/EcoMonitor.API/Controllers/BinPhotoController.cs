@@ -26,7 +26,7 @@ namespace EcoMonitor.API.Controllers
             _logger = logger;
         }
 
-        [HttpGet]
+        [HttpGet("GetAllPhotos")]
         public async Task<ActionResult<ICollection<BinPhotoResponse>>> GetAllBinPhotosAsync()
         {
             var binPhotos = await _binPhotoService.GetAllBinPhotosAsync();

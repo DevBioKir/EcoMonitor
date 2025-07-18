@@ -21,8 +21,8 @@ const MapScreen = ({ navigation }) => {
     <View style={styles.container}>
       <YandexMapView
         style={styles.map}
-        lattitude={55.154}
-        longtitude={61.4291}
+        latitude={55.7522}
+        longitude={37.6156}
       />
 
       <View style={styles.buttonContainer}>
