@@ -9,7 +9,7 @@ export const PhotoInfoScreen = ({ route }) => {
     <View style={{ flex: 1, padding: 20 }}>
       {/* Отображение фото */}
       <Image
-        source={{ uri: `${DEV_API_BASE_URL}/Photos/${photo.fileName}` }}
+        source={{ uri: `${DEV_API_BASE_URL}${photo.urlFile}` }}
         style={{ width: '100%', height: 300 }}
       />
 

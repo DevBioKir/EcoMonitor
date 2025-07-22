@@ -14,6 +14,12 @@ import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.yandex.runtime.image.ImageProvider
 import com.yandex.mapkit.map.PlacemarkMapObject
+import android.view.View
+import com.facebook.react.bridge.ReactContext
+import com.facebook.react.bridge.Arguments
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.uimanager.events.RCTEventEmitter
+
 
 
 class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListener  {
@@ -103,6 +109,13 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
                 Log.e("YandexMapViewManager", "Error moving camera: ${e.message}")
             }
         }
+    }
+
+    private fun sendMarkerPressEvent(reactContext: ReactContext, view: View, id: String) {
+        val event: WritableMap = Arguments.createMap()
+        event.putString("id", id)
+        reactContext.getJSModule(RCTEventEmitter::class.java)
+            .receiveEvent(view.id, "onMarkerPress", event)
     }
 
     override fun onHostResume() {

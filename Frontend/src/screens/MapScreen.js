@@ -1,10 +1,16 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import YandexMapView from '../components/YandexMapView';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { View, StyleSheet, Button } from 'react-native';
+import { getAllPhotos } from '../services/GetAllBinPhotos';
+import { getBinPhotoById } from '../services/GetBinPhotoById';
+import { mapPhotosToMarkers } from '../utils/mapPhotosToMarkers';
 
 const MapScreen = ({ navigation }) => {
+  const [markers, setMarkers] = useState([]);
+  //const navigation = useNavigation(); // если юзать этот screen где то ещё
+
   useEffect(() => {
     if (Platform.OS === 'android') {
       PermissionsAndroid.requestMultiple([
@@ -15,14 +21,34 @@ const MapScreen = ({ navigation }) => {
         console.log('Permissions', statuses);
       });
     }
+
+    const loadMarkers = async () => {
+      try {
+        const photos = await getAllPhotos();
+        const markerData = mapPhotosToMarkers(photos);
+        setMarkers(markerData);
+      } catch (error) {
+        console.error('Ошибка загрузки маркеров:', error);
+      }
+    };
+
+    loadMarkers();
   }, []);
 
   return (
     <View style={styles.container}>
       <YandexMapView
         style={styles.map}
-        latitude={55.7522}
-        longitude={37.6156}
+        latitude={55.154}
+        longitude={61.4291}
+        markers={markers}
+        onMarkerPress={({ nativeEvent }) => {
+          const id = nativeEvent.id;
+          console.log('Clicked marker id:', id);
+          getBinPhotoById(id).then(photo => {
+            navigation.navigate('PhotoInfo', { photo });
+          });
+        }}
       />
 
       <View style={styles.buttonContainer}>
@@ -34,6 +60,7 @@ const MapScreen = ({ navigation }) => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

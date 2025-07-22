@@ -120,6 +120,7 @@ interface YandexMapViewProps extends ViewProps {
   markers?: Point[];
   onCameraPositionChanged?: (event: { nativeEvent: CameraPosition }) => void;
   onMapLoaded?: (event: { nativeEvent: MapLoaded }) => void;
+  onMarkerPress?: (event: { nativeEvent: { id: string } }) => void;
 }
 
 const NativeYandexMapView =
@@ -131,6 +132,7 @@ export default function YandexMapView({
   style,
   initialRegion,
   markers,
+  onMarkerPress,
 }: YandexMapViewProps) {
   console.log('YandexMapView props:', latitude, longitude);
   return (
@@ -140,6 +142,7 @@ export default function YandexMapView({
       longitude={longitude}
       initialRegion={initialRegion}
       markers={markers}
+      onMarkerPress={onMarkerPress}
     />
   );
 }

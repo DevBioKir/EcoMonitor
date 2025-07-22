@@ -14,7 +14,7 @@ export const getAllPhotos = async (): Promise<BinPhotoResponse[]> => {
   );
 
   if (!response.ok) {
-    throw new Error('Failed to fetch carts');
+    throw new Error('Failed to fetch photos');
   }
 
   const data: BinPhotoResponse[] = await response.json(); // Преобразуем ответ в массив объектов BinPhotoResponse

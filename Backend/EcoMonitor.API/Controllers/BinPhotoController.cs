@@ -26,6 +26,21 @@ namespace EcoMonitor.API.Controllers
             _logger = logger;
         }
 
+        [HttpGet("GetBinPhotoById")]
+        public async Task<ActionResult<BinPhotoResponse>> GetBinPhotoByIdAsync(Guid id)
+        {
+            try
+            {
+                var binPhoto = await _binPhotoService.GetPhotoByIdAsync(id);
+                return Ok(binPhoto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при поиске фото в базе");
+                return StatusCode(500, "Ошибка при поиске фото в базе.");
+            }
+        }
+
         [HttpGet("GetAllPhotos")]
         public async Task<ActionResult<ICollection<BinPhotoResponse>>> GetAllBinPhotosAsync()
         {
