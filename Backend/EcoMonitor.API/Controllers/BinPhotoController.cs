@@ -26,7 +26,7 @@ namespace EcoMonitor.API.Controllers
             _logger = logger;
         }
 
-        [HttpGet("GetBinPhotoById")]
+        [HttpGet("GetBinPhotoById/{id}")]
         public async Task<ActionResult<BinPhotoResponse>> GetBinPhotoByIdAsync(Guid id)
         {
             try

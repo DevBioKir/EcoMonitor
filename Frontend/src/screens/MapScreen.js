@@ -42,6 +42,9 @@ const MapScreen = ({ navigation }) => {
         latitude={55.154}
         longitude={61.4291}
         markers={markers}
+        // onMarkerPress={({ nativeEvent }) => {
+        //   console.log('Marker pressed event with id:', nativeEvent.id);
+        // }}
         onMarkerPress={({ nativeEvent }) => {
           const id = nativeEvent.id;
           console.log('Clicked marker id:', id);
@@ -51,7 +54,7 @@ const MapScreen = ({ navigation }) => {
         }}
       />
 
-      <View style={styles.buttonContainer}>
+      <View style={styles.buttonContainer} pointerEvents="box-none">
         <Button
           title="Показать все фото"
           onPress={() => navigation.navigate('AllPhotos')}

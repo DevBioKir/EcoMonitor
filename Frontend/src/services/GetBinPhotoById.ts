@@ -3,7 +3,7 @@ import { BinPhotoResponse } from '../types/BinPhotoResponse';
 
 export const getBinPhotoById = async (id: string): Promise<BinPhotoResponse> => {
   const response = await fetch(
-    `${DEV_API_BASE_URL}/api/BinPhoto/GetBinPhotoById`,
+    `${DEV_API_BASE_URL}/api/BinPhoto/GetBinPhotoById/${id}`,
     {
       method: 'GET',
       headers: {

@@ -35,19 +35,19 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
     override fun createViewInstance(reactContext: ThemedReactContext): MapView {
         this.reactContext = reactContext
 
-        Log.d("YandexMapViewManager", "Creating MapView instance")
-
         val view = MapView(reactContext)
         mapView = view
 
-        // Добавляем слушатель жизненного цикла
+        if (view.id == View.NO_ID) {
+            view.id = View.generateViewId()
+            Log.d("YandexMapViewManager", "Generated view ID: ${view.id}")
+        }
+
         reactContext.addLifecycleEventListener(this)
 
-        // Запускаем MapView
         try {
             view.onStart()
             MapKitFactory.getInstance().onStart()
-            Log.d("YandexMapViewManager", "MapView started successfully")
         } catch (e: Exception) {
             Log.e("YandexMapViewManager", "Error starting MapView: ${e.message}")
         }
@@ -57,23 +57,22 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
 
     @ReactProp(name = "latitude")
     fun setLatitude(view: MapView, latitude: Double) {
-        Log.d("YandexMapViewManager", "Setting latitude: $latitude")
+        Log.d("EcoMonitor", "Setting latitude: $latitude")
         this.latitude = latitude
         updateCamera()
     }
 
     @ReactProp(name = "longitude")
     fun setLongitude(view: MapView, longitude: Double) {
-        Log.d("YandexMapViewManager", "Setting longitude: $longitude")
+        Log.d("EcoMonitor", "Setting longitude: $longitude")
         this.longitude = longitude
         updateCamera()
     }
 
     @ReactProp(name = "markers")
     fun setMarkers(view: MapView, markers: ReadableArray?) {
-        Log.d("YandexMapViewManager", "Setting markers...")
+        Log.d("EcoMonitor", "Received markers array of size: ${markers?.size() ?: 0}")
 
-        // Удаляем старые
         placemarks.forEach { view.map.mapObjects.remove(it) }
         placemarks.clear()
 
@@ -82,17 +81,83 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
         for (i in 0 until markers.size()) {
             val markerMap = markers.getMap(i) ?: continue
 
-            val lat = if (markerMap.hasKey("latitude")) markerMap.getDouble("latitude") else continue
-            val lon = if (markerMap.hasKey("longitude")) markerMap.getDouble("longitude") else continue
+            val lat = markerMap.getDouble("latitude")
+            val lon = markerMap.getDouble("longitude")
+            val id = markerMap.getString("id") ?: continue
 
             val point = Point(lat, lon)
             val placemark = view.map.mapObjects.addPlacemark(point)
-            
-            placemark.setIcon(ImageProvider.fromResource(view.context, R.drawable.ic_marker))
-            placemarks.add(placemark)
 
-                Log.d("YandexMapViewManager", "Added marker: $lat, $lon")
+            placemark.userData = id
+            placemark.opacity = 1.0f
+            placemark.isVisible = true
+            placemark.isDraggable = false
+
+            placemark.addTapListener { _, _ ->
+                reactContext?.let {
+                    sendMarkerPressEvent(it, view, id)
+                }
+                true
             }
+
+            placemarks.add(placemark)
+        }
+
+
+    //     placemarks.forEach { view.map.mapObjects.remove(it) }
+    //     placemarks.clear()
+
+    //     if (markers == null || markers.size() == 0) return
+
+    //     val firstMarkerMap = markers.getMap(0) ?: return
+    // val firstId = firstMarkerMap.getString("id") ?: "no_id"
+
+    // val point = Point(
+    //     firstMarkerMap.getDouble("latitude"),
+    //     firstMarkerMap.getDouble("longitude")
+    // )
+    // val placemark = view.map.mapObjects.addPlacemark(point)
+    // placemark.userData = firstId
+
+    // placemark.addTapListener { _, _ ->
+    //     Log.d("EcoMonitor", "Marker tapped (test): $firstId")
+    //     reactContext?.let {
+    //         sendMarkerPressEvent(it, view, firstId)
+    //     }
+    //     true
+    // }
+
+    // placemarks.add(placemark)
+
+        // for (i in 0 until markers.size()) {
+        //     val markerMap = markers.getMap(i) ?: continue
+
+        //     val lat = if (markerMap.hasKey("latitude")) markerMap.getDouble("latitude") else continue
+        //     val lon = if (markerMap.hasKey("longitude")) markerMap.getDouble("longitude") else continue
+        //     val id = if (markerMap.hasKey("id")) markerMap.getString("id") else continue
+
+        //     val point = Point(lat, lon)
+        //     val placemark = view.map.mapObjects.addPlacemark(point)
+            
+        //     //placemark.setIcon(ImageProvider.fromResource(view.context, R.drawable.ic_marker))
+        //     placemark.userData = id
+        //     placemark.opacity = 1.0f
+        //     placemark.isVisible = true
+        //     placemark.isDraggable = false
+
+        //     Log.d("EcoMonitor", "Adding tap listener to marker: $id")
+        //     // Слушатель нажатия
+        //     placemark.addTapListener { _, _ ->
+        //         Log.d("EcoMonitor", "Marker tapped: $id")
+        //         reactContext?.let {
+        //             sendMarkerPressEvent(it, view, id!!)
+        //         }
+        //         true
+        //     }
+
+        //     placemarks.add(placemark)
+        //     Log.d("EcoMonitor", "Added marker: $lat, $lon")
+        // }
     }
 
     private fun updateCamera() {
@@ -104,9 +169,9 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
             try {
                 val position = CameraPosition(Point(lat, lon), 14.0f, 0f, 0f)
                 view.map.move(position)
-                Log.d("YandexMapViewManager", "Camera moved to: $lat, $lon")
+                Log.d("EcoMonitor", "Camera moved to: $lat, $lon")
             } catch (e: Exception) {
-                Log.e("YandexMapViewManager", "Error moving camera: ${e.message}")
+                Log.e("EcoMonitor", "Error moving camera: ${e.message}")
             }
         }
     }
@@ -114,51 +179,58 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
     private fun sendMarkerPressEvent(reactContext: ReactContext, view: View, id: String) {
         val event: WritableMap = Arguments.createMap()
         event.putString("id", id)
+        Log.d("EcoMonitor", "Sending marker press event to JS: $id")
         reactContext.getJSModule(RCTEventEmitter::class.java)
             .receiveEvent(view.id, "onMarkerPress", event)
     }
 
     override fun onHostResume() {
-        Log.d("YandexMapViewManager", "onHostResume called")
+        Log.d("EcoMonitor", "onHostResume called")
         try {
             mapView?.onStart()
             MapKitFactory.getInstance().onStart()
         } catch (e: Exception) {
-            Log.e("YandexMapViewManager", "Error in onHostResume: ${e.message}")
+            Log.e("EcoMonitor", "Error in onHostResume: ${e.message}")
         }
     }
 
     override fun onHostPause() {
-        Log.d("YandexMapViewManager", "onHostPause called")
+        Log.d("EcoMonitor", "onHostPause called")
         try {
             mapView?.onStop()
             MapKitFactory.getInstance().onStop()
         } catch (e: Exception) {
-            Log.e("YandexMapViewManager", "Error in onHostPause: ${e.message}")
+            Log.e("EcoMonitor", "Error in onHostPause: ${e.message}")
         }
     }
 
     override fun onHostDestroy() {
-        Log.d("YandexMapViewManager", "onHostDestroy called")
+        Log.d("EcoMonitor", "onHostDestroy called")
         try {
             mapView?.onStop()
             MapKitFactory.getInstance().onStop()
         } catch (e: Exception) {
-            Log.e("YandexMapViewManager", "Error in onHostDestroy: ${e.message}")
+            Log.e("EcoMonitor", "Error in onHostDestroy: ${e.message}")
         }
     }
 
     override fun onDropViewInstance(view: MapView) {
         super.onDropViewInstance(view)
-        Log.d("YandexMapViewManager", "onDropViewInstance called")
+        Log.d("EcoMonitor", "onDropViewInstance called")
         try {
             reactContext?.removeLifecycleEventListener(this)
             view.onStop()
             mapView = null
             reactContext = null
         } catch (e: Exception) {
-            Log.e("YandexMapViewManager", "Error in onDropViewInstance: ${e.message}")
+            Log.e("EcoMonitor", "Error in onDropViewInstance: ${e.message}")
         }
     }
+    
+    override fun getExportedCustomDirectEventTypeConstants(): MutableMap<String, Any> {
+    return mutableMapOf(
+        "onMarkerPress" to mapOf("registrationName" to "onMarkerPress")
+    )
+}
 }
 
