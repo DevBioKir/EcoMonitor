@@ -16,10 +16,14 @@ import com.reactnativecommunity.slider.ReactSliderPackage;
 import com.swmansion.gesturehandler.RNGestureHandlerPackage;
 // react-native-image-picker
 import com.imagepicker.ImagePickerPackage;
+// react-native-reanimated
+import com.swmansion.reanimated.ReanimatedPackage;
 // react-native-safe-area-context
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 // react-native-screens
 import com.swmansion.rnscreens.RNScreensPackage;
+// react-native-worklets
+import com.swmansion.worklets.WorkletsPackage;
 
 public class PackageList {
   private Application application;
@@ -68,8 +72,10 @@ public class PackageList {
       new ReactSliderPackage(),
       new RNGestureHandlerPackage(),
       new ImagePickerPackage(),
+      new ReanimatedPackage(),
       new SafeAreaContextPackage(),
-      new RNScreensPackage()
+      new RNScreensPackage(),
+      new WorkletsPackage()
     ));
   }
 }

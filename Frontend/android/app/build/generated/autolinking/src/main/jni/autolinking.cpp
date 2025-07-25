@@ -12,10 +12,12 @@
 #include <rngesturehandler_codegen.h>
 #include <react/renderer/components/rngesturehandler_codegen/ComponentDescriptors.h>
 #include <RNImagePickerSpec.h>
+#include <rnreanimated.h>
 #include <safeareacontext.h>
 #include <react/renderer/components/safeareacontext/ComponentDescriptors.h>
 #include <rnscreens.h>
 #include <react/renderer/components/rnscreens/ComponentDescriptors.h>
+#include <rnworklets.h>
 
 namespace facebook {
 namespace react {
@@ -33,6 +35,10 @@ auto module_RNImagePickerSpec = RNImagePickerSpec_ModuleProvider(moduleName, par
 if (module_RNImagePickerSpec != nullptr) {
 return module_RNImagePickerSpec;
 }
+auto module_rnreanimated = rnreanimated_ModuleProvider(moduleName, params);
+if (module_rnreanimated != nullptr) {
+return module_rnreanimated;
+}
 auto module_safeareacontext = safeareacontext_ModuleProvider(moduleName, params);
 if (module_safeareacontext != nullptr) {
 return module_safeareacontext;
@@ -40,6 +46,10 @@ return module_safeareacontext;
 auto module_rnscreens = rnscreens_ModuleProvider(moduleName, params);
 if (module_rnscreens != nullptr) {
 return module_rnscreens;
+}
+auto module_rnworklets = rnworklets_ModuleProvider(moduleName, params);
+if (module_rnworklets != nullptr) {
+return module_rnworklets;
 }
   return nullptr;
 }
@@ -66,6 +76,7 @@ providerRegistry->add(concreteComponentDescriptorProvider<RNSScreenComponentDesc
 providerRegistry->add(concreteComponentDescriptorProvider<RNSScreenFooterComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNSScreenContentWrapperComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNSModalScreenComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNSBottomTabsComponentDescriptor>());
   return;
 }
 

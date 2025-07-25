@@ -35,6 +35,14 @@ const MapScreen = ({ navigation }) => {
     loadMarkers();
   }, []);
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <Button title="☰" onPress={() => navigation.dispatch(DrawerActions.openDrawer())} />
+      ),
+    });
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
       <YandexMapView
