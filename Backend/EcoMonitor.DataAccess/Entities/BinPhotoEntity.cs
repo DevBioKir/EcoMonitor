@@ -1,4 +1,6 @@
-﻿namespace EcoMonitor.DataAccess.Entities
+﻿using EcoMonitor.Core.Models;
+
+namespace EcoMonitor.DataAccess.Entities
 {
     public class BinPhotoEntity
     {
@@ -12,5 +14,7 @@
         public double FillLevel { get; set; }
         public bool IsOutsideBin { get; set; } = false;
         public string Comment { get; set; } = string.Empty;
+
+        public ICollection<BinPhotoBinTypeEntity> BinPhotoBinTypes { get; private set; } = new List<BinPhotoBinTypeEntity>();
     }
 }

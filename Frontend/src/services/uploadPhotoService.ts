@@ -1,4 +1,3 @@
-import { Platform } from 'react-native';
 import { BinPhotoResponse } from '../types/BinPhotoResponse';
 import { BinPhotoUploadRequest } from '../types/BinPhotoUploadRequest';
 import { DEV_API_BASE_URL } from '@env';

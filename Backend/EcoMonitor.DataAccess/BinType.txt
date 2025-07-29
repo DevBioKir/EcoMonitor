@@ -39,3 +39,30 @@
 
 Коричневый. Баки для сбора опасных и медицинских отходов, к ним относятся 
 использованные батарейки и нерабочие аккумуляторы, лампы с содержанием ртути, различные градусники и термометры, люминесцентные осветительные приборы, просроченные лекарства и другие вещества медикаментозного назначения.
+
+
+
+
+для получения всех баков с пластиком
+
+var plastic = dbContext.BinTypes
+    .Include(t => t.BinPhotoBinTypes)
+        .ThenInclude(bt => bt.BinPhoto)
+    .First(t => t.Name == "Пластик");
+
+foreach (var photo in plastic.BinPhotos)
+{
+    Console.WriteLine(photo.Url);
+}
+
+для получения всех типов баков
+
+var photo = dbContext.BinPhotos
+    .Include(p => p.BinPhotoBinTypes)
+        .ThenInclude(pbt => pbt.BinType)
+    .First(p => p.Id == photoId);
+
+foreach (var binType in photo.BinTypes)
+{
+    Console.WriteLine(binType.Name);
+}

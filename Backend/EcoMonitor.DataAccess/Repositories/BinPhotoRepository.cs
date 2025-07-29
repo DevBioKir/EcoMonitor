@@ -20,7 +20,9 @@ namespace EcoMonitor.DataAccess.Repositories
 
         public async Task<ICollection<BinPhoto>> GetAllBinPhotosAsync()
         {
-            var binPhotosEntity = await _context.BinPhotos.ToListAsync();
+            var binPhotosEntity = await _context.BinPhotos
+                .Include(bp => bp.BinPhotoBinTypes)
+                .ThenInclude(bbt => bbt.BinType).ToListAsync();
             var binPhotos = _mapper.Map<List<BinPhoto>>(binPhotosEntity);
 
             return binPhotos;

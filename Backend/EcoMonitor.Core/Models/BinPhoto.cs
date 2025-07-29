@@ -15,6 +15,8 @@ namespace EcoMonitor.Core.Models
         public bool IsOutsideBin { get; private set; }
         public string Comment { get; private set; } = string.Empty;
 
+        public ICollection<BinPhotoBinType> BinPhotoBinTypes { get; private set; } = new List<BinPhotoBinType>();
+
         private BinPhoto() { }
 
         private BinPhoto(
@@ -70,6 +72,14 @@ namespace EcoMonitor.Core.Models
                 fillLevel,
                 isOutsideBin,
                 comment);
+        }
+
+        public void AddBinType(Guid binTypeId)
+        {
+            if (!BinPhotoBinTypes.Any(x => x.BinTypeId == binTypeId))
+            {
+                BinPhotoBinTypes.Add(new BinPhotoBinType(Id, binTypeId));
+            }
         }
     }
 }
