@@ -35,14 +35,6 @@ const MapScreen = ({ navigation }) => {
     loadMarkers();
   }, []);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <Button title="☰" onPress={() => navigation.dispatch(DrawerActions.openDrawer())} />
-      ),
-    });
-  }, [navigation]);
-
   return (
     <View style={styles.container}>
       <YandexMapView
@@ -61,13 +53,6 @@ const MapScreen = ({ navigation }) => {
           });
         }}
       />
-
-      <View style={styles.buttonContainer} pointerEvents="box-none">
-        <Button
-          title="Показать все фото"
-          onPress={() => navigation.navigate('AllPhotos')}
-        />
-      </View>
     </View>
   );
 };

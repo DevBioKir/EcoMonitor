@@ -173,31 +173,6 @@
           "isPureCxxDependency": false
         }
       }
-    },
-    "react-native-worklets": {
-      "root": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\node_modules\\react-native-worklets",
-      "name": "react-native-worklets",
-      "platforms": {
-        "ios": {
-          "podspecPath": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\node_modules\\react-native-worklets\\RNWorklets.podspec",
-          "version": "0.4.0",
-          "configurations": [],
-          "scriptPhases": []
-        },
-        "android": {
-          "sourceDir": "C:\\EcoMonitor\\EcoMonitor\\Frontend\\node_modules\\react-native-worklets\\android",
-          "packageImportPath": "import com.swmansion.worklets.WorkletsPackage;",
-          "packageInstance": "new WorkletsPackage()",
-          "buildTypes": [],
-          "libraryName": "rnworklets",
-          "componentDescriptors": [],
-          "cmakeListsPath": "C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/CMakeLists.txt",
-          "cxxModuleCMakeListsModuleName": null,
-          "cxxModuleCMakeListsPath": null,
-          "cxxModuleHeaderName": null,
-          "isPureCxxDependency": false
-        }
-      }
     }
   },
   "commands": [

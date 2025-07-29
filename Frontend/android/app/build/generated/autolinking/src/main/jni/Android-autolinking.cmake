@@ -12,7 +12,6 @@ add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-im
 add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/" rnreanimated_autolinked_build)
 add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-safe-area-context/android/src/main/jni/" safeareacontext_autolinked_build)
 add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-screens/android/src/main/jni/" rnscreens_autolinked_build)
-add_subdirectory("C:/EcoMonitor/EcoMonitor/Frontend/node_modules/react-native-worklets/android/build/generated/source/codegen/jni/" rnworklets_autolinked_build)
 
 set(AUTOLINKED_LIBRARIES
   react_codegen_RNCSlider
@@ -21,5 +20,4 @@ set(AUTOLINKED_LIBRARIES
   react_codegen_rnreanimated
   react_codegen_safeareacontext
   react_codegen_rnscreens
-  react_codegen_rnworklets
 )

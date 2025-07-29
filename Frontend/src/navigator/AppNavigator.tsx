@@ -1,15 +1,18 @@
-import { createDrawerNavigator } from "@react-navigation/drawer";
 import { NavigationContainer } from "@react-navigation/native";
-import { RootNavigator } from "./RootNavigator";
+import React from "react";
+import DrawerNavigator from './DrawerNavigator';
+import { createStackNavigator } from "@react-navigation/stack";
+import { PhotoInfoScreen } from "../screens/PhotoInfoScreen";
 
-const Drawer = createDrawerNavigator();
+const Stack = createStackNavigator();
 
 const AppNavigator = () => {
     return(
         <NavigationContainer>
-            <Drawer.Navigator initialRouteName="Main">
-                <Drawer.Screen name="Main" component={RootNavigator} />
-            </Drawer.Navigator>
+            <Stack.Navigator screenOptions={{ headerShown: true }} >
+                <Stack.Screen name="Drawer" component={DrawerNavigator} options={{ headerShown: false }} />
+                <Stack.Screen name="PhotoInfo" component={PhotoInfoScreen} />
+            </Stack.Navigator>
         </NavigationContainer>
     );
 };

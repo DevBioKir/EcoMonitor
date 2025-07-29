@@ -17,7 +17,6 @@
 #include <react/renderer/components/safeareacontext/ComponentDescriptors.h>
 #include <rnscreens.h>
 #include <react/renderer/components/rnscreens/ComponentDescriptors.h>
-#include <rnworklets.h>
 
 namespace facebook {
 namespace react {
@@ -46,10 +45,6 @@ return module_safeareacontext;
 auto module_rnscreens = rnscreens_ModuleProvider(moduleName, params);
 if (module_rnscreens != nullptr) {
 return module_rnscreens;
-}
-auto module_rnworklets = rnworklets_ModuleProvider(moduleName, params);
-if (module_rnworklets != nullptr) {
-return module_rnworklets;
 }
   return nullptr;
 }
