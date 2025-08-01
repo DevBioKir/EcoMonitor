@@ -75,8 +75,8 @@ namespace EcoMonitor.API.Controllers
                 return BadRequest("Фото не загружено");
             }
 
-            _logger.LogInformation("Получены данные: BinType={BinType}, FillLevel={FillLevel}, IsOutsideBin={IsOutsideBin}, Comment={Comment}",
-                request.BinType, request.FillLevel, request.IsOutsideBin, request.Comment);
+            _logger.LogInformation("Получены данные: BinType={BinTypeId}, FillLevel={FillLevel}, IsOutsideBin={IsOutsideBin}, Comment={Comment}",
+                request.BinTypeId, request.FillLevel, request.IsOutsideBin, request.Comment);
 
             _logger.LogInformation("Фото: FileName={FileName}, ContentType={ContentType}, Length={Length}",
                 request.Photo.FileName, request.Photo.ContentType, request.Photo.Length);

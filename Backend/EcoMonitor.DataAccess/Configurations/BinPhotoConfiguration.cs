@@ -27,9 +27,6 @@ namespace EcoMonitor.DataAccess.Configurations
             builder.Property(p => p.UploadedAt)
                 .IsRequired();
 
-            builder.Property(p => p.BinType)
-                .IsRequired();
-
             builder.Property(p => p.FillLevel)
                 .IsRequired();
 

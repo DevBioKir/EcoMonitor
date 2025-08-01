@@ -7,15 +7,7 @@
         public string Name { get; private set; } = string.Empty;
         public ICollection<BinPhotoBinType> BinPhotoBinTypes { get; private set; } = new List<BinPhotoBinType>();
 
-        private BinType(
-            string code, 
-            string name)
-        {
-            Id = Guid.NewGuid();
-            Code = code;
-            Name = name;
-            Validate();
-        }
+        private BinType() {}
 
         private void Validate()
         {
@@ -27,11 +19,26 @@
             string code,
             string name)
         {
-            return new BinType(
-                code, 
-                name);
+            var binType = new BinType
+            {
+                Id = Guid.NewGuid(),
+                Code = code,
+                Name = name
+            };
+            binType.Validate();
+            return binType;
         }
 
-        
+        public void Rename(
+            string name,
+            string code)
+        {
+            if (!string.IsNullOrWhiteSpace(name) 
+                && !string.IsNullOrWhiteSpace(code))
+            {
+                Name = name;
+                Code = code;
+            } 
+        }
     }
 }

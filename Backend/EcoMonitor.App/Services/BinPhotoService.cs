@@ -85,14 +85,13 @@ namespace EcoMonitor.App.Services
             }
 
             var (lat, lon) = _geo.GeoLocationService(exif);
-            
 
             var binPhoto = BinPhoto.Create(
                 fileName: Path.GetFileName(request.Photo.FileName),
                 urlFile: "/" + relativePath.Replace("\\", "/"),
                 latitude: lat ?? 0,
                 longitude: lon ?? 0,
-                binType: request.BinType,
+                BinTypeId: request.BinTypeId,
                 fillLevel: request.FillLevel,
                 isOutsideBin: request.IsOutsideBin,
                 comment: request.Comment);

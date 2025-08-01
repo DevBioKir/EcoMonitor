@@ -42,6 +42,8 @@ namespace EcoMonitor.DataAccess.Repositories
         public async Task<BinPhoto> GetPhotoByIdAsync(Guid photoBinId)
         {
             var entityBinPhoto = await _context.BinPhotos
+                .Include(bp => bp.BinPhotoBinTypes)
+                .ThenInclude(bbt => bbt.BinType)
                 .FirstOrDefaultAsync(b => b.Id == photoBinId);
 
             return _mapper.Map<BinPhoto>(entityBinPhoto);

@@ -1,14 +1,14 @@
 ﻿namespace EcoMonitor.Contracts.Contracts
 {
-    public record BinPhotoResponse(
+    public record BinPhotoWithTypesResponse(
        Guid Id,
        string FileName,
        string UrlFile,
        double Latitude,
        double Longitude,
        DateTime UploadedAt,
-       List<Guid> BinTypeId,
        double FillLevel,
        bool IsOutsideBin,
-       string Comment);
+       string Comment,
+       List<BinTypeResponse> BinTypes);
 }

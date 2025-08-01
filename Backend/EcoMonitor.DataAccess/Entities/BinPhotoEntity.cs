@@ -1,6 +1,4 @@
-﻿using EcoMonitor.Core.Models;
-
-namespace EcoMonitor.DataAccess.Entities
+﻿namespace EcoMonitor.DataAccess.Entities
 {
     public class BinPhotoEntity
     {
@@ -10,7 +8,6 @@ namespace EcoMonitor.DataAccess.Entities
         public double Latitude { get; set; }
         public double Longitude { get; set; }
         public DateTime UploadedAt { get; set; }
-        public string BinType { get; set; } = string.Empty;
         public double FillLevel { get; set; }
         public bool IsOutsideBin { get; set; } = false;
         public string Comment { get; set; } = string.Empty;

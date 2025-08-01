@@ -7,7 +7,7 @@
         double Latitude,
         double Longitude,
         DateTime UploadedAt,
-        string BinType,
+        List<Guid> BinTypeId, 
         double FillLevel,
         bool IsOutsideBin,
         string Comment);
