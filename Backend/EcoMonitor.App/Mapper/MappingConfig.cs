@@ -99,6 +99,19 @@ namespace EcoMonitor.App.Mapper
                     src.IsOutsideBin,
                     src.Comment));
 
+            config.NewConfig<BinPhoto, BinPhotoRequest>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.FileName, src => src.FileName)
+                .Map(dest => dest.UrlFile, src => src.UrlFile)
+                .Map(dest => dest.Latitude, src => src.Latitude)
+                .Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.UploadedAt, src => src.UploadedAt)
+                .Map(dest => dest.BinTypeId, src => src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId).ToList())
+                .Map(dest => dest.FillLevel, src => src.FillLevel)
+                .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
+                .Map(dest => dest.Comment, src => src.Comment);
+
+
             config.NewConfig<BinPhoto, BinPhotoResponse>()
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.FileName, src => src.FileName)

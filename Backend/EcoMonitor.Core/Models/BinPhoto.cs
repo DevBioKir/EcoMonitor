@@ -53,6 +53,10 @@
                 Comment = comment
             };
 
+            if (BinTypeId == null || BinTypeId == null || !BinTypeId.Any())
+            {
+               throw new Exception("BinTypeId required");
+            }
             foreach (var id in BinTypeId)
             {
                 photo.AddBinType(id);
