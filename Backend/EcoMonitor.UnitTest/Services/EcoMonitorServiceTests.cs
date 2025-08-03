@@ -18,7 +18,7 @@ namespace EcoMonitor.UnitTest.Services
         [Fact]
         public async Task GetAllBinPhotos_ReturnsAllBinPhotoResponse()
         {
-            // Arrage
+            // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
@@ -77,7 +77,7 @@ namespace EcoMonitor.UnitTest.Services
         [Fact]
         public async Task GetPhotoByIdAsync_ReturnsMappedBinPhoto_WhenPhotoExists()
         {
-            // Arrage
+            // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
@@ -131,7 +131,7 @@ namespace EcoMonitor.UnitTest.Services
         [Fact]
         public async Task AddBinPhotoAsync_ReturnsTheAddedBinPhotoResponse()
         {
-            // Arrage
+            // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
@@ -179,7 +179,7 @@ namespace EcoMonitor.UnitTest.Services
         [Fact]
         public async Task UploadImage_ShouldReturnCorrectResponse()
         {
-            // Arrage
+            // Arrange
             var fileName = "20250630_201412.jpg";
             var imagePath = Path.Combine("TestPhotos", "20250630_201412.jpg");
             var imagesBytes = await File.ReadAllBytesAsync(imagePath);

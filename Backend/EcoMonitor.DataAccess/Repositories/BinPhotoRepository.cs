@@ -18,12 +18,12 @@ namespace EcoMonitor.DataAccess.Repositories
             _mapper = mapper;
         }
 
-        public async Task<ICollection<BinPhoto>> GetAllBinPhotosAsync()
+        public async Task<IEnumerable<BinPhoto>> GetAllBinPhotosAsync()
         {
             var binPhotosEntity = await _context.BinPhotos
                 .Include(bp => bp.BinPhotoBinTypes)
                 .ThenInclude(bbt => bbt.BinType).ToListAsync();
-            var binPhotos = _mapper.Map<List<BinPhoto>>(binPhotosEntity);
+            var binPhotos = _mapper.Map<IEnumerable<BinPhoto>>(binPhotosEntity);
 
             return binPhotos;
         }
@@ -45,6 +45,9 @@ namespace EcoMonitor.DataAccess.Repositories
                 .Include(bp => bp.BinPhotoBinTypes)
                 .ThenInclude(bbt => bbt.BinType)
                 .FirstOrDefaultAsync(b => b.Id == photoBinId);
+
+            if (entityBinPhoto == null)
+                throw new NullReferenceException($"Container photo with ID {photoBinId} not found");
 
             return _mapper.Map<BinPhoto>(entityBinPhoto);
         }

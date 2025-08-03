@@ -4,12 +4,12 @@ using EcoMonitor.DataAccess.Repositories;
 
 namespace EcoMonitor.UnitTest.Repositories
 {
-    public class EcoMonitorRepositoryTests : TestBase
+    public class BinPhotoRepositoryTests : TestBase
     {
         [Fact]
         public async Task GetAllBinPhotos_ReturnsAllBinPhotos()
         {
-            // Arrage
+            // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
@@ -49,7 +49,7 @@ namespace EcoMonitor.UnitTest.Repositories
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
+            Assert.Equal(2, result.Count());
             Assert.Contains(result, bp => bp.FileName == "Бак на Калинина.jpg");
             Assert.Contains(result, bp => bp.FileName == "Бак на Кирова.jpg");
         }
@@ -57,7 +57,7 @@ namespace EcoMonitor.UnitTest.Repositories
         [Fact]
         public async Task GetPhotoByIdAsync_ReturnsMappedBinPhoto_WhenPhotoExists()
         {
-            // Arrage
+            // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
@@ -80,7 +80,7 @@ namespace EcoMonitor.UnitTest.Repositories
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
 
             // Act
-            var result = await binPhotoRepo.GetPhotoByIdAsync(binPhoto.Id);
+            var result = await binPhotoRepo.GetPhotoByIdAsync(binPhotoEntity.Id);
 
             // Assert
             Assert.NotNull(result);
@@ -100,7 +100,7 @@ namespace EcoMonitor.UnitTest.Repositories
         [Fact]
         public async Task AddBinPhotoAsync_ReturnsTheAddedBinPhoto()
         {
-            // Arrage
+            // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
@@ -138,7 +138,7 @@ namespace EcoMonitor.UnitTest.Repositories
         [Fact]
         public async Task DeleteBinPhotoAsync_ReturnsIdDeletedPhoto()
         {
-            // Arrage
+            // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
@@ -165,8 +165,9 @@ namespace EcoMonitor.UnitTest.Repositories
 
             // Assert
             var deletedBinPhoto = await _context.BinPhotos.FindAsync(binPhotoEntity.Id);
-            Assert.Null(deletedBinPhoto);
 
+
+            Assert.Null(deletedBinPhoto);
             Assert.Equal(binPhotoEntity.Id, result);
         }
 

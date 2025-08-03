@@ -1,3 +1,4 @@
+'use client';
 import { useEffect, useState } from 'react';
 import YandexMapView from '../components/YandexMapView';
 import { PermissionsAndroid, Platform } from 'react-native';

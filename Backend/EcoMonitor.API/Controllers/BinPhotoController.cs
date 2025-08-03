@@ -59,7 +59,7 @@ namespace EcoMonitor.API.Controllers
         }
 
         [HttpPost("UploadWithMetadata")]
-        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata(/*[FromBody]*/[FromForm] BinPhotoUploadRequest request)
+        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata([FromForm] BinPhotoUploadRequest request)
         {
             _logger.LogInformation("UploadWithMetadata вызван");
 

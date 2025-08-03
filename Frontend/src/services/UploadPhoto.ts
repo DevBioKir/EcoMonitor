@@ -2,18 +2,23 @@ import { BinPhotoResponse } from '../types/BinPhotoResponse';
 import { BinPhotoUploadRequest } from '../types/BinPhotoUploadRequest';
 import { DEV_API_BASE_URL } from '@env';
 
-export const UploadWithMetadata = async (
+export const uploadWithMetadata = async (
   request: BinPhotoUploadRequest,
 ): Promise<BinPhotoResponse> => {
   if (!request) throw new Error('Файл не выбран');
 
   const formData = new FormData();
+
   formData.append("Photo", {
     uri: request.photo.uri,
     name: request.photo.name,
     type: request.photo.type,
-  } as any);
-  formData.append('BinType', request.binType);
+  });
+
+  request.binTypeId.forEach(id => {
+    formData.append('BinTypeId', id)
+  });
+
   formData.append('FillLevel', String(request.fillLevel).replace('.', ','));
   formData.append('IsOutsideBin', String(request.isOutsideBin));
   formData.append('Comment', request.comment);
