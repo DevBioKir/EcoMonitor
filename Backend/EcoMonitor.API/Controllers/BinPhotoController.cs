@@ -42,7 +42,7 @@ namespace EcoMonitor.API.Controllers
         }
 
         [HttpGet("GetAllPhotos")]
-        public async Task<ActionResult<ICollection<BinPhotoResponse>>> GetAllBinPhotosAsync()
+        public async Task<ActionResult<IReadOnlyList<BinPhotoResponse>>> GetAllBinPhotosAsync()
         {
             var binPhotos = await _binPhotoService.GetAllBinPhotosAsync();
             var responseBinPhotos = _mapper.Map<List<BinPhotoResponse>>(binPhotos);

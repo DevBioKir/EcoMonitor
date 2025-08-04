@@ -42,11 +42,11 @@ namespace EcoMonitor.DataAccess.Repositories
             return binTypeId;
         }
 
-        public async Task<IEnumerable<BinType>> GetAllBinTypesAsync()
+        public async Task<IReadOnlyList<BinType>> GetAllBinTypesAsync()
         {
             var binTypeEntities = await _context.BinTypes.ToListAsync();
 
-            return _mapper.Map<IEnumerable<BinType>>(binTypeEntities);
+            return _mapper.Map<IReadOnlyList<BinType>>(binTypeEntities);
         }
 
         public async Task<BinType> GetBinTypeByIdAsync(Guid binTypeId)

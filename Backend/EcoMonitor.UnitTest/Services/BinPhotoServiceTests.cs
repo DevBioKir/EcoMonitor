@@ -9,11 +9,10 @@ using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
 
 namespace EcoMonitor.UnitTest.Services
 {
-    public class EcoMonitorServiceTests : TestBase
+    public class BinPhotoServiceTests : TestBase
     {
         [Fact]
         public async Task GetAllBinPhotos_ReturnsAllBinPhotoResponse()

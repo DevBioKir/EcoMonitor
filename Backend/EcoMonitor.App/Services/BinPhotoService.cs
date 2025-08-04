@@ -3,7 +3,6 @@ using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Repositories;
 using EcoMonitor.Infrastracture.Abstractions;
 using MapsterMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 
@@ -46,7 +45,7 @@ namespace EcoMonitor.App.Services
             return await _binPhotoRepository.DeleteBinPhotoAsync(binPhotoId);
         }
 
-        public async Task<ICollection<BinPhotoResponse>> GetAllBinPhotosAsync()
+        public async Task<IReadOnlyList<BinPhotoResponse>> GetAllBinPhotosAsync()
         {
             var listBinPhotos = await _binPhotoRepository.GetAllBinPhotosAsync();
             return _mapper.Map<List<BinPhotoResponse>>(listBinPhotos);

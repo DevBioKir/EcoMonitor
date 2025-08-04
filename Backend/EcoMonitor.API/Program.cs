@@ -54,8 +54,10 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddScoped<IBinPhotoRepository, BinPhotoRepository>();
+builder.Services.AddScoped<IBinTypeRepository, BinTypeRepository>();
 
 builder.Services.AddScoped<IBinPhotoService, BinPhotoService>();
+builder.Services.AddScoped<IBinTypeService, BinTypeService>();
 
 builder.Services.AddScoped<IGeolocationService, GeolocationService>();
 
