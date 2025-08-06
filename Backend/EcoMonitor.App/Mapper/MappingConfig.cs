@@ -132,6 +132,7 @@ namespace EcoMonitor.App.Mapper
                     src.Name));
 
             config.NewConfig<BinType, BinTypeResponse>()
+                .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Code, src => src.Code)
                 .Map(dest => dest.Name, src => src.Name);
 

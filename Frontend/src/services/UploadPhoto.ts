@@ -11,15 +11,15 @@ export const uploadWithMetadata = async (
 
   formData.append("Photo", {
     uri: request.photo.uri,
-    name: request.photo.name,
-    type: request.photo.type,
+    name: request.photo.name || 'photo.jpg',
+    type: request.photo.type || 'image/jpeg',
   });
 
   request.binTypeId.forEach(id => {
     formData.append('BinTypeId', id)
   });
 
-  formData.append('FillLevel', String(request.fillLevel).replace('.', ','));
+  formData.append('FillLevel', String(request.fillLevel));
   formData.append('IsOutsideBin', String(request.isOutsideBin));
   formData.append('Comment', request.comment);
 

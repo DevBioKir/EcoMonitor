@@ -55,14 +55,20 @@ namespace EcoMonitor.API.Controllers
             try
             {
                 var binType = await _binTypeService.AddBinTypeAsync(request);
-                return CreatedAtAction(nameof(GetBinTypeByIdAsync), new { id = binType.Id }, binType);
-            }
+            return CreatedAtAction(
+                actionName: nameof(GetBinTypeByIdAsync),
+                controllerName: "BinType", // без "Controller"
+                routeValues: new { id = binType.Id },
+                value: binType);
+        }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при создании BinType");
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { message = ex.Message});
             }
         }
+
+
 
     }
 }
