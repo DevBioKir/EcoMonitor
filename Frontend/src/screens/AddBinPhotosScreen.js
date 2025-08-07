@@ -6,7 +6,7 @@ import {
   Image,
   TextInput,
   Text,
-  ScrollView
+  ScrollView,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -39,26 +39,37 @@ export const AddPhotoScreen = () => {
   };
 
   const selectPhoto = () => {
-    launchImageLibrary({ mediaType: 'photo' }, response => {
-      if (response.didCancel || response.errorCode) return;
-      if (response.assets?.length) {
-        setPhoto(response.assets[0]);
-      }
-    });
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        includeExtra: true,
+        quality: 1,
+        includeBase64: false,
+      },
+      response => {
+        if (response.didCancel || response.errorCode) return;
+        if (response.assets?.length) {
+          const selected = response.assets[0];
+          console.log('PHOTO', selected);
+          setPhoto(selected);
+        }
+      },
+    );
   };
-
-  const fill = parseFloat(fillLevel);
-  if (!isFinite(fill)) {
-    Alert.alert('Введите корректный уровень заполнения');
-    return;
-  }
-
 
   const handleUpload = async () => {
     if (!photo) {
       Alert('Select photo');
       return;
     }
+
+    const fill = parseFloat(fillLevel);
+
+    if (!isFinite(fill)) {
+      Alert.alert('Введите корректный уровень заполнения');
+      return;
+    }
+
     try {
       const response = await uploadWithMetadata({
         photo,
