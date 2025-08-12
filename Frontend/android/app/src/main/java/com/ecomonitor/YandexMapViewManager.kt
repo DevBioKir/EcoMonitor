@@ -29,6 +29,7 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
     private var mapView: MapView? = null
     private var reactContext: ThemedReactContext? = null
     private val placemarks = mutableListOf<PlacemarkMapObject>()
+    private var currentMarkersData: ReadableArray? = null
 
     override fun getName(): String = "YandexMapView"
 
@@ -72,7 +73,13 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
     @ReactProp(name = "markers")
     fun setMarkers(view: MapView, markers: ReadableArray?) {
         Log.d("EcoMonitor", "Received markers array of size: ${markers?.size() ?: 0}")
-
+        
+        currentMarkersData = markers
+        addMarkersToMap(view, markers)
+    }
+    
+    private fun addMarkersToMap(view: MapView, markers: ReadableArray?) {
+        // Очистить старые маркеры
         placemarks.forEach { view.map.mapObjects.remove(it) }
         placemarks.clear()
 
@@ -94,6 +101,7 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
             placemark.isDraggable = false
 
             placemark.addTapListener { _, _ ->
+                Log.d("EcoMonitor", "Marker tapped: $id")
                 reactContext?.let {
                     sendMarkerPressEvent(it, view, id)
                 }
@@ -101,63 +109,8 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
             }
 
             placemarks.add(placemark)
+            Log.d("EcoMonitor", "Added marker with listener: $lat, $lon, id: $id")
         }
-
-
-    //     placemarks.forEach { view.map.mapObjects.remove(it) }
-    //     placemarks.clear()
-
-    //     if (markers == null || markers.size() == 0) return
-
-    //     val firstMarkerMap = markers.getMap(0) ?: return
-    // val firstId = firstMarkerMap.getString("id") ?: "no_id"
-
-    // val point = Point(
-    //     firstMarkerMap.getDouble("latitude"),
-    //     firstMarkerMap.getDouble("longitude")
-    // )
-    // val placemark = view.map.mapObjects.addPlacemark(point)
-    // placemark.userData = firstId
-
-    // placemark.addTapListener { _, _ ->
-    //     Log.d("EcoMonitor", "Marker tapped (test): $firstId")
-    //     reactContext?.let {
-    //         sendMarkerPressEvent(it, view, firstId)
-    //     }
-    //     true
-    // }
-
-    // placemarks.add(placemark)
-
-        // for (i in 0 until markers.size()) {
-        //     val markerMap = markers.getMap(i) ?: continue
-
-        //     val lat = if (markerMap.hasKey("latitude")) markerMap.getDouble("latitude") else continue
-        //     val lon = if (markerMap.hasKey("longitude")) markerMap.getDouble("longitude") else continue
-        //     val id = if (markerMap.hasKey("id")) markerMap.getString("id") else continue
-
-        //     val point = Point(lat, lon)
-        //     val placemark = view.map.mapObjects.addPlacemark(point)
-            
-        //     //placemark.setIcon(ImageProvider.fromResource(view.context, R.drawable.ic_marker))
-        //     placemark.userData = id
-        //     placemark.opacity = 1.0f
-        //     placemark.isVisible = true
-        //     placemark.isDraggable = false
-
-        //     Log.d("EcoMonitor", "Adding tap listener to marker: $id")
-        //     // Слушатель нажатия
-        //     placemark.addTapListener { _, _ ->
-        //         Log.d("EcoMonitor", "Marker tapped: $id")
-        //         reactContext?.let {
-        //             sendMarkerPressEvent(it, view, id!!)
-        //         }
-        //         true
-        //     }
-
-        //     placemarks.add(placemark)
-        //     Log.d("EcoMonitor", "Added marker: $lat, $lon")
-        // }
     }
 
     private fun updateCamera() {
@@ -185,10 +138,16 @@ class YandexMapViewManager : SimpleViewManager<MapView>(), LifecycleEventListene
     }
 
     override fun onHostResume() {
-        Log.d("EcoMonitor", "onHostResume called")
+        Log.d("EcoMonitor", "onHostResume called - recreating markers")
         try {
             mapView?.onStart()
             MapKitFactory.getInstance().onStart()
+            
+            // ИСПРАВЛЕНИЕ: Полностью пересоздать маркеры при resume
+            mapView?.let { view ->
+                Log.d("EcoMonitor", "Recreating markers from saved data")
+                addMarkersToMap(view, currentMarkersData)
+            }
         } catch (e: Exception) {
             Log.e("EcoMonitor", "Error in onHostResume: ${e.message}")
         }

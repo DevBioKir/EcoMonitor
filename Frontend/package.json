@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-native-community/checkbox": "^0.5.20",
+    "@react-native-community/geolocation": "^3.4.0",
     "@react-native-community/slider": "^4.5.7",
     "@react-native/new-app-screen": "0.80.1",
     "@react-navigation/drawer": "^7.5.3",
@@ -22,6 +23,7 @@
     "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "^2.27.2",
     "react-native-image-picker": "^8.2.1",
+    "react-native-maps": "^1.25.3",
     "react-native-reanimated": "^3.19.0",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.13.1"

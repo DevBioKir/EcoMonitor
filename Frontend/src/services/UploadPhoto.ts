@@ -19,9 +19,22 @@ export const uploadWithMetadata = async (
     formData.append('BinTypeId', id)
   });
 
-  formData.append('FillLevel', String(request.fillLevel));
+  // Проверяем FillLevel на валидность
+  if (!isFinite(request.fillLevel) || isNaN(request.fillLevel)) {
+    throw new Error(`Некорректное значение fillLevel: ${request.fillLevel}`);
+  }
+
+  formData.append('FillLevel', String(request.fillLevel).replace('.', ','));
   formData.append('IsOutsideBin', String(request.isOutsideBin));
   formData.append('Comment', request.comment);
+
+  console.log('FormData FillLevel (проверенный):', request.fillLevel, '-> отправляется с запятой:', String(request.fillLevel).replace('.', ','));
+  console.log('FormData все поля:', {
+    FillLevel: String(request.fillLevel).replace('.', ','),
+    IsOutsideBin: String(request.isOutsideBin),
+    Comment: request.comment,
+    BinTypeId: request.binTypeId
+  });
 
   try {
     const response = await fetch(

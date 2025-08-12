@@ -1,5 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useReducer } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import YandexMapView from '../components/YandexMapView';
 import { PermissionsAndroid, Platform } from 'react-native';
 import { View, StyleSheet, Button } from 'react-native';
@@ -9,7 +10,35 @@ import { mapPhotosToMarkers } from '../utils/mapPhotosToMarkers';
 
 const MapScreen = ({ navigation }) => {
   const [markers, setMarkers] = useState([]);
+  const [mapKey, setMapKey] = useState(0);
+  const [refreshMap, setRefreshMap] = useState(0);
   //const navigation = useNavigation(); // если юзать этот screen где то ещё
+
+  // Простой обработчик нажатий на маркеры
+  const handleMarkerPress = ({ nativeEvent }) => {
+    const id = nativeEvent.id;
+    console.log('Clicked marker id:', id);
+    getBinPhotoById(id)
+      .then(photo => {
+        console.log('Photo loaded:', photo);
+        navigation.navigate('PhotoInfo', { photo });
+      })
+      .catch(error => {
+        console.error('Ошибка загрузки фото:', error);
+      });
+  };
+
+  const loadMarkers = useCallback(async () => {
+    try {
+      const photos = await getAllPhotos();
+      console.log('Loaded photos:', photos.length);
+      const markerData = mapPhotosToMarkers(photos);
+      console.log('Mapped markers:', markerData.length);
+      setMarkers(markerData);
+    } catch (error) {
+      console.error('Ошибка загрузки маркеров:', error);
+    }
+  }, []);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -21,19 +50,15 @@ const MapScreen = ({ navigation }) => {
         console.log('Permissions', statuses);
       });
     }
-
-    const loadMarkers = async () => {
-      try {
-        const photos = await getAllPhotos();
-        const markerData = mapPhotosToMarkers(photos);
-        setMarkers(markerData);
-      } catch (error) {
-        console.error('Ошибка загрузки маркеров:', error);
-      }
-    };
-
     loadMarkers();
-  }, []);
+  }, [loadMarkers]);
+
+  // Убираем useFocusEffect - может конфликтовать с нативным компонентом
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     console.log('Map screen focused');
+  //   }, [])
+  // );
 
   return (
     <View style={styles.container}>
@@ -42,15 +67,11 @@ const MapScreen = ({ navigation }) => {
         latitude={55.154}
         longitude={61.4291}
         markers={markers}
-        // onMarkerPress={({ nativeEvent }) => {
-        //   console.log('Marker pressed event with id:', nativeEvent.id);
-        // }}
         onMarkerPress={({ nativeEvent }) => {
-          const id = nativeEvent.id;
-          console.log('Clicked marker id:', id);
-          getBinPhotoById(id).then(photo => {
-            navigation.navigate('PhotoInfo', { photo });
-          });
+          console.log('Yandex marker pressed:', nativeEvent.id);
+          getBinPhotoById(nativeEvent.id)
+            .then(photo => navigation.navigate('PhotoInfo', { photo }))
+            .catch(console.error);
         }}
       />
     </View>

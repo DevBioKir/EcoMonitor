@@ -7,11 +7,14 @@
  */
 
 #include "autolinking.h"
+#include <RNCGeolocationSpec.h>
 #include <RNCSlider.h>
 #include <react/renderer/components/RNCSlider/ComponentDescriptors.h>
 #include <rngesturehandler_codegen.h>
 #include <react/renderer/components/rngesturehandler_codegen/ComponentDescriptors.h>
 #include <RNImagePickerSpec.h>
+#include <RNMapsSpecs.h>
+#include <react/renderer/components/RNMapsSpecs/ComponentDescriptors.h>
 #include <rnreanimated.h>
 #include <safeareacontext.h>
 #include <react/renderer/components/safeareacontext/ComponentDescriptors.h>
@@ -22,6 +25,10 @@ namespace facebook {
 namespace react {
 
 std::shared_ptr<TurboModule> autolinking_ModuleProvider(const std::string moduleName, const JavaTurboModule::InitParams &params) {
+auto module_RNCGeolocationSpec = RNCGeolocationSpec_ModuleProvider(moduleName, params);
+if (module_RNCGeolocationSpec != nullptr) {
+return module_RNCGeolocationSpec;
+}
 auto module_RNCSlider = RNCSlider_ModuleProvider(moduleName, params);
 if (module_RNCSlider != nullptr) {
 return module_RNCSlider;
@@ -33,6 +40,10 @@ return module_rngesturehandler_codegen;
 auto module_RNImagePickerSpec = RNImagePickerSpec_ModuleProvider(moduleName, params);
 if (module_RNImagePickerSpec != nullptr) {
 return module_RNImagePickerSpec;
+}
+auto module_RNMapsSpecs = RNMapsSpecs_ModuleProvider(moduleName, params);
+if (module_RNMapsSpecs != nullptr) {
+return module_RNMapsSpecs;
 }
 auto module_rnreanimated = rnreanimated_ModuleProvider(moduleName, params);
 if (module_rnreanimated != nullptr) {
@@ -58,6 +69,16 @@ void autolinking_registerProviders(std::shared_ptr<ComponentDescriptorProviderRe
 providerRegistry->add(concreteComponentDescriptorProvider<RNCSliderComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNGestureHandlerButtonComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNGestureHandlerRootViewComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsCalloutComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsCircleComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsGoogleMapViewComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsGooglePolygonComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsMapViewComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsMarkerComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsOverlayComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsPolylineComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsUrlTileComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNMapsWMSTileComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNCSafeAreaProviderComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNCSafeAreaViewComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNSFullWindowOverlayComponentDescriptor>());

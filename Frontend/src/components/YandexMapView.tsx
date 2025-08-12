@@ -134,7 +134,13 @@ export default function YandexMapView({
   markers,
   onMarkerPress,
 }: YandexMapViewProps) {
-  console.log('YandexMapView props:', latitude, longitude);
+  // console.log('YandexMapView render:', { 
+  //   latitude, 
+  //   longitude, 
+  //   markersCount: markers?.length,
+  //   hasOnMarkerPress: typeof onMarkerPress === 'function'
+  // });
+  
   return (
     <NativeYandexMapView
       style={style}

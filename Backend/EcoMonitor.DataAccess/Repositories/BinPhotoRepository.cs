@@ -22,7 +22,9 @@ namespace EcoMonitor.DataAccess.Repositories
         {
             var binPhotosEntity = await _context.BinPhotos
                 .Include(bp => bp.BinPhotoBinTypes)
-                .ThenInclude(bbt => bbt.BinType).ToListAsync();
+                .ThenInclude(bbt => bbt.BinType)
+                .ToListAsync();
+
             var binPhotos = _mapper.Map<IEnumerable<BinPhoto>>(binPhotosEntity);
 
             return binPhotos;
