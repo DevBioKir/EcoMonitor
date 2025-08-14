@@ -57,6 +57,17 @@ namespace EcoMonitor.App.Services
             return _mapper.Map<BinPhotoResponse>(domainBinPhoto);
         }
 
+        public async Task<IEnumerable<BinPhotoResponse>> GetPhotosInBoundsAsync(
+            double north, 
+            double south, 
+            double east, 
+            double west)
+        {
+            var photos = await _binPhotoRepository.GetPhotosInBoundsAsync(north, south, east, west);
+
+            return _mapper.Map<IEnumerable<BinPhotoResponse>>(photos);
+        }
+
         public async Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request)
         {
             var relativePath = await _storage.SaveImageAsync(request.Photo);

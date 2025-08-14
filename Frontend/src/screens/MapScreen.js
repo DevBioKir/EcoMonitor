@@ -7,38 +7,40 @@ import { View, StyleSheet, Button } from 'react-native';
 import { getAllPhotos } from '../services/GetAllBinPhotos';
 import { getBinPhotoById } from '../services/GetBinPhotoById';
 import { mapPhotosToMarkers } from '../utils/mapPhotosToMarkers';
+import { getPhotosInBounds } from '../services/GetPhotosInBounds';
+import { DEV_API_BASE_URL } from '@env';
 
 const MapScreen = ({ navigation }) => {
   const [markers, setMarkers] = useState([]);
-  const [mapKey, setMapKey] = useState(0);
-  const [refreshMap, setRefreshMap] = useState(0);
+  const [isNavigating, setIsNavigating] = useState(false);
   //const navigation = useNavigation(); // если юзать этот screen где то ещё
 
   // Простой обработчик нажатий на маркеры
   const handleMarkerPress = ({ nativeEvent }) => {
     const id = nativeEvent.id;
-    console.log('Clicked marker id:', id);
+    if (isNavigating) return;
+
+    setIsNavigating(true);
     getBinPhotoById(id)
       .then(photo => {
-        console.log('Photo loaded:', photo);
         navigation.navigate('PhotoInfo', { photo });
+        setTimeout(() => setIsNavigating(false), 1000);
       })
       .catch(error => {
-        console.error('Ошибка загрузки фото:', error);
+        console.error(error);
+        setIsNavigating(false);
       });
   };
 
-  const loadMarkers = useCallback(async () => {
+  const loadMarkersInBounds = async bounds => {
     try {
-      const photos = await getAllPhotos();
-      console.log('Loaded photos:', photos.length);
+      const photos = await getPhotosInBounds(bounds);
       const markerData = mapPhotosToMarkers(photos);
-      console.log('Mapped markers:', markerData.length);
       setMarkers(markerData);
     } catch (error) {
       console.error('Ошибка загрузки маркеров:', error);
     }
-  }, []);
+  };
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -50,32 +52,57 @@ const MapScreen = ({ navigation }) => {
         console.log('Permissions', statuses);
       });
     }
-    loadMarkers();
-  }, [loadMarkers]);
-
-  // Убираем useFocusEffect - может конфликтовать с нативным компонентом
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     console.log('Map screen focused');
-  //   }, [])
-  // );
+    // loadMarkers();
+  }, []);
 
   return (
-    <View style={styles.container}>
-      <YandexMapView
-        style={styles.map}
-        latitude={55.154}
-        longitude={61.4291}
-        markers={markers}
-        onMarkerPress={({ nativeEvent }) => {
-          console.log('Yandex marker pressed:', nativeEvent.id);
-          getBinPhotoById(nativeEvent.id)
-            .then(photo => navigation.navigate('PhotoInfo', { photo }))
-            .catch(console.error);
-        }}
-      />
-    </View>
+    <YandexMapView
+      style={{ flex: 1 }}
+      latitude={55.154}
+      longitude={61.4291}
+      baseUrl={DEV_API_BASE_URL} // вот сюда
+      onBoundsChange={({ nativeEvent }) => {
+        // если нужно — можно руками дёргать загрузку на фронте
+        console.log('bounds', nativeEvent);
+      }}
+      onMarkerPress={({ nativeEvent }) => {
+        navigation.navigate('PhotoInfo', { photoId: nativeEvent.id });
+      }}
+    />
   );
+
+  // return (
+  //   <View style={styles.container}>
+  //     <YandexMapView
+  //       style={styles.map}
+  //       latitude={55.154}
+  //       longitude={61.4291}
+  //       markers={markers}
+  //       onMarkerPress={({ nativeEvent }) => {
+  //         if (isNavigating) {
+  //           console.log('Navigation in progress, ignoring click');
+  //           return;
+  //         }
+
+  //         console.log('Yandex marker pressed:', nativeEvent.id);
+  //         setIsNavigating(true);
+
+  //         getBinPhotoById(nativeEvent.id)
+  //           .then(photo => {
+  //             navigation.navigate('PhotoInfo', { photoId: nativeEvent.id });
+  //             // Сбрасываем флаг через время
+  //             setTimeout(() => setIsNavigating(false), 1000);
+  //           })
+  //           .catch(error => {
+  //             console.error(error);
+  //             onBoundsChange={({ nativeEvent }) => {
+  //         loadMarkersInBounds(nativeEvent.bounds);
+  //       }}
+  //           });
+  //       }}
+  //     />
+  //   </View>
+  // );
 };
 
 const styles = StyleSheet.create({

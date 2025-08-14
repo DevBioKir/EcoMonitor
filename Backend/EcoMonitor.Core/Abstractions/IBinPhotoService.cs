@@ -1,5 +1,4 @@
 ﻿using EcoMonitor.Contracts.Contracts;
-using EcoMonitor.Core.Models;
 
 namespace EcoMonitor.App.Services
 {
@@ -10,5 +9,10 @@ namespace EcoMonitor.App.Services
         Task<BinPhotoResponse> AddBinPhotoAsync(BinPhotoRequest requestBinPhoto);
         Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId);
         Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request);
+        Task<IEnumerable<BinPhotoResponse>> GetPhotosInBoundsAsync(
+            double north,
+            double south,
+            double east,
+            double west);
     }
 }

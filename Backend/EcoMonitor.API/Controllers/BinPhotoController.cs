@@ -41,6 +41,25 @@ namespace EcoMonitor.API.Controllers
             }
         }
 
+        [HttpGet("GetPhotosInBounds")]
+        public async Task<ActionResult<IEnumerable<BinPhotoResponse>>> GetPhotosInBoundsAsync(
+            double north,
+            double south,
+            double east,
+            double west)
+        {
+            try
+            {
+                var photos = await _binPhotoService.GetPhotosInBoundsAsync(north, south, east, west);
+                return Ok(photos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при поиске фотографий в базе");
+                return StatusCode(500, "Ошибка при поиске фотографий в базе.");
+            }
+        }
+
         [HttpGet("GetAllPhotos")]
         public async Task<ActionResult<IReadOnlyList<BinPhotoResponse>>> GetAllBinPhotosAsync()
         {

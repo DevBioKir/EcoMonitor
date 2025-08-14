@@ -17,5 +17,5 @@ export const getBinPhotoById = async (id: string): Promise<BinPhotoResponse> => 
     throw new Error('Failed to fetch photos');
   }
 
-   return response.json(); // Преобразуем ответ в массив объектов BinPhotoResponse
+   return response.json();
 };

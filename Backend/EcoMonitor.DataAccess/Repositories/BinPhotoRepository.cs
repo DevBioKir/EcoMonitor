@@ -30,6 +30,26 @@ namespace EcoMonitor.DataAccess.Repositories
             return binPhotos;
         }
 
+        public async Task<IEnumerable<BinPhoto>> GetPhotosInBoundsAsync(
+            double north,
+            double south,
+            double east,
+            double west)
+        {
+            var photos = await _context.BinPhotos
+                .Where(b => b.Latitude <= north && b.Latitude >= south
+                && b.Longitude >= west && b.Longitude <= east)
+                .Select(b => new
+                {
+                    b.FileName,
+                    b.Latitude,
+                    b.Longitude,
+                    b.FillLevel
+                }).ToListAsync();
+
+            return _mapper.Map<IEnumerable<BinPhoto>>(photos);
+        }
+
         public async Task<BinPhoto> AddBinPhotoAsync(
             BinPhoto binPhoto)
         {
