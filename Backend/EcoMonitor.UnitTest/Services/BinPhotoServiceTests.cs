@@ -175,19 +175,23 @@ namespace EcoMonitor.UnitTest.Services
             Assert.Equal("Test photo", result.Comment);
         }
 
-        [Fact]
+        //[Fact]
+        [Theory]
+        [InlineData("20250630_201412.jpg", "image/jpg")]
+        [InlineData("Home.png", "image/png")]
+        [InlineData("IMG_6453.HEIC", "image/heic")]
         public async Task UploadImage_ShouldReturnCorrectResponse()
         {
             // Arrange
-            var fileName = "20250630_201412.jpg";
-            var imagePath = Path.Combine("TestPhotos", "20250630_201412.jpg");
+            var fileName = "IMG_6453.HEIC";
+            var imagePath = Path.Combine("TestPhotos", "IMG_6453.HEIC");
             var imagesBytes = await File.ReadAllBytesAsync(imagePath);
             var stream = new MemoryStream(imagesBytes);
 
             var formFile = new FormFile(stream, 0, stream.Length, "image", fileName)
             {
                 Headers = new HeaderDictionary(),
-                ContentType = "image/jpg"
+                ContentType = "image/heic"
             };
 
             var plasticId = Guid.NewGuid();

@@ -2,9 +2,13 @@
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Repositories;
 using EcoMonitor.Infrastracture.Abstractions;
+using HeyRed.ImageSharp.Heif.Formats.Avif;
+using HeyRed.ImageSharp.Heif.Formats.Heif;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 
 namespace EcoMonitor.App.Services
@@ -73,7 +77,14 @@ namespace EcoMonitor.App.Services
             var relativePath = await _storage.SaveImageAsync(request.Photo);
             var absolutePath = Path.Combine("wwwroot", relativePath);
 
-            using var uploadedPhoto = await Image.LoadAsync(absolutePath);
+            var decoderOptions = new DecoderOptions()
+            {
+                Configuration = new Configuration(
+                    new AvifConfigurationModule(),
+                    new HeifConfigurationModule(),
+                    new JpegConfigurationModule())
+            };
+            using var uploadedPhoto = await Image.LoadAsync(decoderOptions, absolutePath);
 
             var exif = uploadedPhoto.Metadata.ExifProfile;
 

@@ -60,10 +60,10 @@ const MapScreen = ({ navigation }) => {
       style={{ flex: 1 }}
       latitude={55.154}
       longitude={61.4291}
-      baseUrl={DEV_API_BASE_URL} // вот сюда
+      baseUrl={DEV_API_BASE_URL}
       onBoundsChange={({ nativeEvent }) => {
-        // если нужно — можно руками дёргать загрузку на фронте
         console.log('bounds', nativeEvent);
+        loadMarkersInBounds(nativeEvent);
       }}
       onMarkerPress={({ nativeEvent }) => {
         navigation.navigate('PhotoInfo', { photoId: nativeEvent.id });

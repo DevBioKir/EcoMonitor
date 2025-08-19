@@ -8,8 +8,7 @@ export const getPhotosInBounds = async (
   const { north, south, east, west } = bounds;
 
   const response = await fetch(
-    `${DEV_API_BASE_URL}/api/BinPhoto/GetPhotosInBounds
-        ?north=${north}&south=${south}&east=${east}&west=${west}`,
+    `${DEV_API_BASE_URL}/api/BinPhoto/GetPhotosInBounds?north=${north}&south=${south}&east=${east}&west=${west}`,
     {
       method: 'GET',
       headers: {
