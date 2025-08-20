@@ -9,6 +9,7 @@ using EcoMonitor.App.Services;
 using EcoMonitor.Infrastracture.Abstractions;
 using EcoMonitor.Infrastracture.Services;
 using Microsoft.Extensions.FileProviders;
+using EcoMonitor.Infrastracture.Pipeline;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -59,6 +60,8 @@ builder.Services.AddScoped<IBinPhotoService, BinPhotoService>();
 builder.Services.AddScoped<IBinTypeService, BinTypeService>();
 
 builder.Services.AddScoped<IGeolocationService, GeolocationService>();
+
+builder.Services.AddScoped<IImagePipeline, ImagePipeline>();
 
 builder.WebHost.UseUrls("http://0.0.0.0:5198");
 

@@ -1,29 +1,27 @@
 ﻿using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Infrastracture.Abstractions;
 using EcoMonitor.Infrastracture.Services;
-using HeyRed.ImageSharp.Heif;
 using HeyRed.ImageSharp.Heif.Formats.Avif;
 using HeyRed.ImageSharp.Heif.Formats.Heif;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
-using SixLabors.ImageSharp.Formats.Gif;
 using SixLabors.ImageSharp.Formats.Jpeg;
-using SixLabors.ImageSharp.Metadata.Profiles.Exif;
+using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace EcoMonitor.Infrastracture.Pipeline
 {
     public class ImagePipeline : IImagePipeline
     {
-        private readonly ImageStorageService _storageService;
-        private readonly GeolocationService _geolocationService;
+        private readonly IImageStorageService _storageService;
+        private readonly IGeolocationService _geolocationService;
         private readonly ILogger<ImagePipeline> _logger;
 
         public ImagePipeline(
-            ImageStorageService storageService, 
-            GeolocationService geolocationService,
+            IImageStorageService storageService, 
+            IGeolocationService geolocationService,
             ILogger<ImagePipeline> logger)
         {
             _storageService = storageService;
@@ -44,7 +42,9 @@ namespace EcoMonitor.Infrastracture.Pipeline
             {
                 Configuration = new Configuration(
                 new AvifConfigurationModule(),
-                new HeifConfigurationModule())
+                new HeifConfigurationModule(),
+                new JpegConfigurationModule(),
+                new PngConfigurationModule())
             };
             if (decoderOptions == null) throw new InvalidOperationException("ImageSharp configuration is null");
 
@@ -75,8 +75,6 @@ namespace EcoMonitor.Infrastracture.Pipeline
                 _logger.LogError(ex, "Failed to load image");
                 throw;
             }
-
-            
         }
     }
 }

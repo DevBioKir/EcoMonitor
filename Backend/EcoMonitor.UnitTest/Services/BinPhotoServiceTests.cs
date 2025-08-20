@@ -3,6 +3,7 @@ using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using EcoMonitor.DataAccess.Repositories;
+using EcoMonitor.Infrastracture.Pipeline;
 using EcoMonitor.Infrastracture.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
@@ -57,9 +58,12 @@ namespace EcoMonitor.UnitTest.Services
             var geoLocationService = new GeolocationService();
 
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
-            var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
+            var loggerService = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
+            var loggerPipeline = _serviceProvider.GetRequiredService<ILogger<ImagePipeline>>();
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService, geoLocationService);
+            var pipeline = new ImagePipeline(imageStorageService, geoLocationService, loggerPipeline);
+
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
 
             //var binPhotosRequest = _mapper.Map<BinPhotoRequest>(binPhotos);
 
@@ -103,9 +107,12 @@ namespace EcoMonitor.UnitTest.Services
             var geoLocationService = new GeolocationService();
 
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
-            var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
+            var loggerService = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
+            var loggerPipeline = _serviceProvider.GetRequiredService<ILogger<ImagePipeline>>();
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService, geoLocationService);
+            var pipeline = new ImagePipeline(imageStorageService, geoLocationService, loggerPipeline);
+
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
 
             var binPhotoRequest = _mapper.Map<BinPhotoRequest>(binPhotoEntity);
 
@@ -152,8 +159,12 @@ namespace EcoMonitor.UnitTest.Services
             var geoLocationService = new GeolocationService();
 
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
-            var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService, geoLocationService);
+            var loggerService = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
+            var loggerPipeline = _serviceProvider.GetRequiredService<ILogger<ImagePipeline>>();
+
+            var pipeline = new ImagePipeline(imageStorageService, geoLocationService, loggerPipeline);
+
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
 
             var binPhotoRequest = _mapper.Map<BinPhotoRequest>(binPhoto);
 
@@ -180,18 +191,16 @@ namespace EcoMonitor.UnitTest.Services
         [InlineData("20250630_201412.jpg", "image/jpg")]
         [InlineData("Home.png", "image/png")]
         [InlineData("IMG_6453.HEIC", "image/heic")]
-        public async Task UploadImage_ShouldReturnCorrectResponse()
+        public async Task UploadImage_ShouldReturnCorrectResponse(string fileName, string contentType)
         {
-            // Arrange
-            var fileName = "IMG_6453.HEIC";
-            var imagePath = Path.Combine("TestPhotos", "IMG_6453.HEIC");
+            var imagePath = Path.Combine("TestPhotos", fileName);
             var imagesBytes = await File.ReadAllBytesAsync(imagePath);
             var stream = new MemoryStream(imagesBytes);
 
             var formFile = new FormFile(stream, 0, stream.Length, "image", fileName)
             {
                 Headers = new HeaderDictionary(),
-                ContentType = "image/heic"
+                ContentType = contentType
             };
 
             var plasticId = Guid.NewGuid();
@@ -211,11 +220,16 @@ namespace EcoMonitor.UnitTest.Services
             var geoLocationService = new GeolocationService();
 
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
-            var logger = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, logger, imageStorageService, geoLocationService);
+            var loggerService = _serviceProvider.GetRequiredService<ILogger<BinPhotoService>>();
+            var loggerPipeline = _serviceProvider.GetRequiredService<ILogger<ImagePipeline>>();
+
+            var pipeline = new ImagePipeline(imageStorageService, geoLocationService, loggerPipeline);
+
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
+            var ct = new CancellationToken();
 
             // Act
-            var result = await binPhotoService.UploadImage(request);
+            var result = await binPhotoService.UploadImage(request, ct);
 
             // Assert
             Assert.NotNull(result);

@@ -1,6 +1,7 @@
 ﻿using EcoMonitor.App.Mapper;
 using EcoMonitor.DataAccess;
 using EcoMonitor.Infrastracture.Abstractions;
+using EcoMonitor.Infrastracture.Pipeline;
 using EcoMonitor.Infrastracture.Services;
 using Mapster;
 using MapsterMapper;

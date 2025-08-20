@@ -78,7 +78,7 @@ namespace EcoMonitor.API.Controllers
         }
 
         [HttpPost("UploadWithMetadata")]
-        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata([FromForm] BinPhotoUploadRequest request)
+        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata([FromForm] BinPhotoUploadRequest request, CancellationToken ct)
         {
             _logger.LogInformation("UploadWithMetadata вызван");
 
@@ -102,7 +102,7 @@ namespace EcoMonitor.API.Controllers
 
             try
             {
-                var binPhoto = await _binPhotoService.UploadImage(request);
+                var binPhoto = await _binPhotoService.UploadImage(request, ct);
                 _logger.LogInformation("Фото успешно загружено, Id={Id}", binPhoto.Id);
 
                 return Ok(binPhoto);
