@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.Identity;
+﻿using EcoMonitor.Core.ValueObjects;
+using Microsoft.AspNet.Identity;
 
 namespace EcoMonitor.Core.Models
 {
@@ -8,10 +9,10 @@ namespace EcoMonitor.Core.Models
         public Guid Id { get; private set; }
         public string Firstname { get; private set; } = string.Empty;
         public string Surname { get; private set; } = string.Empty;
-        public string Email { get; private set; } = string.Empty;
+        public Email Email { get; private set; }
 
         // Security
-        public string PasswordHash { get; private set; } = string.Empty;
+        public PasswordHash PasswordHash { get; private set; }
         public string Salt { get; private set; } = string.Empty;
         public bool isLoginConfirmed { get; private set; }
 
@@ -26,15 +27,41 @@ namespace EcoMonitor.Core.Models
 
         private User() {}
 
-        public static User Create(
-            string firstname, 
-            string surname, 
-            string email, 
-            string password, 
-            IPasswordHasher hasher)
+        private User(
+            string firstname,
+            string surnave,
+            string email,
+            string passwordHash
+            )
         {
-            var (hash, salt) = hasher.HashPassword(password);
+            Id = Guid.NewGuid();
+            Firstname = firstname;
+            Surname = surnave;
+            Email = new Email(email) ?? throw new ArgumentException(nameof(email));
+            PasswordHash = PasswordHash.HashPassword(passwordHash);
+            CreatedAt = DateTime.UtcNow;
+            Validate();
+        }
 
+        private void Validate()
+        {
+            if (string.IsNullOrWhiteSpace(Firstname))
+                throw new ArgumentException("Firstname required");
+            if (string.IsNullOrWhiteSpace(Surname))
+                throw new ArgumentException("Surname required");
+        }
+
+        public static User Create(
+            string firstname,
+            string surname,
+            string email,
+            string passwordHash)
+        {
+            return new User(
+                firstname, 
+                surname, 
+                email, 
+                passwordHash);
         }
 
     }

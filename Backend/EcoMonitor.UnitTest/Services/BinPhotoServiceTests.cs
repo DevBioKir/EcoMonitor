@@ -6,7 +6,6 @@ using EcoMonitor.DataAccess.Repositories;
 using EcoMonitor.Infrastracture.Pipeline;
 using EcoMonitor.Infrastracture.Services;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
