@@ -17,7 +17,7 @@ namespace EcoMonitor.Core.ValueObjects
         // Создание из уже захэшированного значения (например, при загрузке из БД)
         public static PasswordHash FromHash(string hash) => new PasswordHash(hash);
         // Создание из plain-текста через интерфейс хешера
-        public static PasswordHash FromPlainText(string password, IPasswordHasher hasher)
+        public static PasswordHash FromPlainPassword(string password, IPasswordHasher hasher)
         {
             var hash = hasher.HashPassword(password);
             return new PasswordHash(hash);

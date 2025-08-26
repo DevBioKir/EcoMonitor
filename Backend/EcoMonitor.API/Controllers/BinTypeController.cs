@@ -1,5 +1,5 @@
 ﻿using EcoMonitor.App.Services;
-using EcoMonitor.Contracts.Contracts;
+using EcoMonitor.Contracts.Contracts.BinType;
 using MapsterMapper;
 using Microsoft.AspNetCore.Mvc;
 

@@ -1,7 +1,12 @@
 ﻿using EcoMonitor.Contracts.Contracts;
+using EcoMonitor.Contracts.Contracts.BinPhoto;
+using EcoMonitor.Contracts.Contracts.BinPhotoBinType;
+using EcoMonitor.Contracts.Contracts.BinType;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using Mapster;
+using NetTopologySuite.Geometries;
+using SixLabors.ImageSharp.ColorSpaces.Companding;
 
 namespace EcoMonitor.App.Mapper
 {
@@ -11,15 +16,24 @@ namespace EcoMonitor.App.Mapper
         {
             // Mapping Entities, Domain for BinPhoto
             config.NewConfig<BinPhoto, BinPhoto>()
-                .ConstructUsing(src => BinPhoto.Create(
-                    src.FileName,
-                    src.UrlFile,
-                    src.Latitude,
-                    src.Longitude,
-                    src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
-                    src.FillLevel,
-                    src.IsOutsideBin,
-                    src.Comment))
+                .ConstructUsing(src =>
+                {
+                    var geomentryFactory = NetTopologySuite.NtsGeometryServices.Instance
+                        .CreateGeometryFactory(srid: 4326);
+                    var point = geomentryFactory.CreatePoint(new Coordinate(src.Location.X, src.Location.Y));
+
+                    return BinPhoto.Create(
+                        src.FileName,
+                        src.UrlFile,
+                        point.Y, // latitude
+                        point.X,  // longitude
+                        src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
+                        src.FillLevel,
+                        src.IsOutsideBin,
+                        src.Comment,
+                        src.UploadedBy
+                    );
+                })
                 .AfterMapping((src, dest) =>
                 {
                     foreach (var bbt in src.BinPhotoBinTypes)
@@ -27,13 +41,16 @@ namespace EcoMonitor.App.Mapper
                         dest.AddBinType(bbt.BinTypeId);
                     }
                 });
+        }
+                
+                
 
             config.NewConfig<BinPhoto, BinPhotoEntity>()
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.FileName, src => src.FileName)
                 .Map(dest => dest.UrlFile, src => src.UrlFile)
-                .Map(dest => dest.Latitude, src => src.Latitude)
-                .Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.Location, src => src.Location)
+                //.Map(dest => dest.Longitude, src => src.Longitude)
                 .Map(dest => dest.UploadedAt, src => src.UploadedAt)
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
                 .Map(dest => dest.Comment, src => src.Comment)

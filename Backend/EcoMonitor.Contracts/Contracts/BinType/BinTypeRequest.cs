@@ -1,4 +1,4 @@
-﻿namespace EcoMonitor.Contracts.Contracts
+﻿namespace EcoMonitor.Contracts.Contracts.BinType
 {
     public record BinTypeRequest(
         string Code,

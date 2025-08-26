@@ -18,10 +18,8 @@ namespace EcoMonitor.DataAccess.Configurations
             builder.Property(p => p.UrlFile)
                 .IsRequired();
 
-            builder.Property(p => p.Latitude)
-                .IsRequired();
-
-            builder.Property(p => p.Longitude)
+            builder.Property(p => p.Location)
+                .HasColumnType("geography (Point,4326)")
                 .IsRequired();
 
             builder.Property(p => p.UploadedAt)
@@ -34,11 +32,18 @@ namespace EcoMonitor.DataAccess.Configurations
                 .IsRequired();
 
             builder.Property(p => p.Comment)
-                .IsRequired();
+                .IsRequired()
+                .HasMaxLength(500);
+
+            builder.HasOne(p => p.UploadedBy)
+                .WithMany(u => u.BinPhoto)
+                .HasForeignKey(p => p.UploadedById)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasMany(bp => bp.BinPhotoBinTypes)
                 .WithOne(bbt => bbt.BinPhoto)
-                .HasForeignKey(bbt => bbt.BinPhotoId);
+                .HasForeignKey(bbt => bbt.BinPhotoId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

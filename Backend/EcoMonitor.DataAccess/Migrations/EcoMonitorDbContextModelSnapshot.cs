@@ -97,6 +97,72 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.ToTable("BinTypes");
                 });
 
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Firstname")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("LastLogindAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("LockedUntil")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Surname")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("isLoginConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserRoles");
+                });
+
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinPhotoBinTypeEntity", b =>
                 {
                     b.HasOne("EcoMonitor.DataAccess.Entities.BinPhotoEntity", "BinPhoto")
@@ -116,6 +182,17 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.Navigation("BinType");
                 });
 
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserEntity", b =>
+                {
+                    b.HasOne("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinPhotoEntity", b =>
                 {
                     b.Navigation("BinPhotoBinTypes");
@@ -124,6 +201,11 @@ namespace EcoMonitor.DataAccess.Migrations
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinTypeEntity", b =>
                 {
                     b.Navigation("BinPhotoBinTypes");
+                });
+
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,4 +1,6 @@
-﻿namespace EcoMonitor.Contracts.Contracts
+﻿using EcoMonitor.Contracts.Contracts.BinType;
+
+namespace EcoMonitor.Contracts.Contracts
 {
     public record BinPhotoWithTypesResponse(
        Guid Id,

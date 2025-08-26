@@ -1,4 +1,5 @@
-﻿using EcoMonitor.Contracts.Contracts;
+﻿using EcoMonitor.Contracts.Contracts.BinPhoto;
+using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
 
 namespace EcoMonitor.App.Services
 {

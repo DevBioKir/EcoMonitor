@@ -1,4 +1,4 @@
-﻿namespace EcoMonitor.Contracts.Contracts
+﻿namespace EcoMonitor.Contracts.Contracts.BinPhoto
 {
     public record BinPhotoRequest(
         Guid Id,

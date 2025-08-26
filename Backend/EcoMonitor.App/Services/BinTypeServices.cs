@@ -1,4 +1,4 @@
-﻿using EcoMonitor.Contracts.Contracts;
+﻿using EcoMonitor.Contracts.Contracts.BinType;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Repositories;
 using MapsterMapper;

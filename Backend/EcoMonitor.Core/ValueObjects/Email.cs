@@ -9,7 +9,7 @@ namespace EcoMonitor.Core.ValueObjects
 
         public string Value { get; }
 
-        public Email(string Value)
+        private Email(string Value)
         {
             this.Value = Value;
         }

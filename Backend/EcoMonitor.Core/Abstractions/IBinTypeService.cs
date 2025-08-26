@@ -1,4 +1,4 @@
-﻿using EcoMonitor.Contracts.Contracts;
+﻿using EcoMonitor.Contracts.Contracts.BinType;
 
 namespace EcoMonitor.App.Services
 {

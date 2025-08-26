@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace EcoMonitor.Contracts.Contracts
+namespace EcoMonitor.Contracts.Contracts.BinPhotoUpload
 {
-    public record BinPhotoUploadRequestTest(
+    public record BinPhotoUploadRequest(
         IFormFile Photo,
-        string BinType,
+        List<Guid> BinTypeId,
         double FillLevel,
         bool IsOutsideBin,
         string Comment);

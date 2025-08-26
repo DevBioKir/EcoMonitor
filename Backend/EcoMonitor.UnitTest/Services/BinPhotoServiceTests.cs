@@ -1,5 +1,6 @@
 ﻿using EcoMonitor.App.Services;
-using EcoMonitor.Contracts.Contracts;
+using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
+using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using EcoMonitor.DataAccess.Repositories;
