@@ -31,7 +31,7 @@ namespace EcoMonitor.Core.Models.Users
 
         private User(
             string firstname,
-            string surnave,
+            string surname,
             Email email,
             PasswordHash passwordHash,
             UserRole role
@@ -39,7 +39,7 @@ namespace EcoMonitor.Core.Models.Users
         {
             Id = Guid.NewGuid();
             Firstname = firstname;
-            Surname = surnave;
+            Surname = surname;
             Email = email;
             PasswordHash = passwordHash;
             Role = role ?? throw new ArgumentNullException(nameof(role));
@@ -47,6 +47,33 @@ namespace EcoMonitor.Core.Models.Users
             CreatedAt = DateTime.UtcNow;
 
             Validate();
+        }
+        private User(
+            Guid id,
+            string firstname,
+            string surname,
+            Email email,
+            PasswordHash passwordHash,
+            UserRole role,
+            //bool isLoginConfirmed,
+            DateTime createdAt,
+            DateTime lastLogindAt,
+            DateTime lockedUntil,
+            List<BinPhoto> photos
+            )
+        {
+            Id = id;
+            Firstname = firstname;
+            Surname = surname;
+            Email = email;
+            PasswordHash = passwordHash;
+            Role = role;
+            RoleId = role.Id;
+            isLoginConfirmed = isLoginConfirmed;
+            CreatedAt = createdAt;
+            LastLogindAt = lastLogindAt;
+            LockedUntil = lockedUntil;
+            _photos = photos ?? new List<BinPhoto>();
         }
 
         private void Validate()
@@ -59,15 +86,34 @@ namespace EcoMonitor.Core.Models.Users
 
         public static User Create(
             string firstname,
-            string surnave,
+            string surname,
             string email,
-            string password,
-            IPasswordHasher hasher)
+            PasswordHash passwordHash)
+            //IPasswordHasher hasher)
         {
             var emailVO = Email.Create(email);
-            var passwordHash = PasswordHash.FromPlainPassword(password, hasher);
+            //var passwordHash = PasswordHash.FromPlainPassword(password, hasher);
 
-            return new User(firstname, surnave, emailVO, passwordHash, UserRole.User);
+            return new User(firstname, surname, emailVO, passwordHash, UserRole.User);
+        }
+
+        public static User Restore(
+            Guid id,
+            string firstname,
+            string surname,
+            string email,
+            PasswordHash passwordHash,
+            UserRole role,
+            //bool isLoginConfirmed,
+            DateTime createdAt,
+            DateTime lastLogindAt,
+            DateTime lockedUntil,
+            List<BinPhoto> photos)
+        {
+            var emailVO = Email.Create(email);
+
+            return new User (
+                id, firstname, surname, emailVO, passwordHash, role, createdAt, lastLogindAt, lockedUntil, photos);
         }
 
         public bool CheckPassword(string plainPassword, IPasswordHasher hasher) => 
@@ -87,6 +133,5 @@ namespace EcoMonitor.Core.Models.Users
 
         public bool HasPermission(Permission permission) => 
             Role.HasPermission(permission);
-
     }
 }

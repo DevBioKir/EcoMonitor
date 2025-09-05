@@ -15,6 +15,7 @@ namespace EcoMonitor.UnitTest
     {
         protected EcoMonitorDbContext _context { get; private set; }
         protected IMapper _mapper;
+        protected IPasswordHasher _passwordHasher;
         protected IServiceProvider _serviceProvider; //контейнер зависимостей
 
         public TestBase()
@@ -38,6 +39,7 @@ namespace EcoMonitor.UnitTest
             var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwrootTest");
             services.AddSingleton<IImageStorageService>(new ImageStorageService(webRootPath));
             services.AddSingleton<IGeolocationService, GeolocationService>();
+            services.AddSingleton<IPasswordHasher, IPasswordHasher>();
 
             services.AddLogging();
 
@@ -45,6 +47,7 @@ namespace EcoMonitor.UnitTest
 
             _context = _serviceProvider.GetRequiredService<EcoMonitorDbContext>();
             _mapper = _serviceProvider.GetRequiredService<IMapper>();
+            _passwordHasher = _serviceProvider.GetRequiredService<IPasswordHasher>();
 
             SeeData();
         }

@@ -116,7 +116,8 @@ namespace EcoMonitor.App.Services
                 BinTypeId: request.BinTypeId,
                 fillLevel: request.FillLevel,
                 isOutsideBin: request.IsOutsideBin,
-                comment: request.Comment);
+                comment: request.Comment,
+                );
 
             //var binPhoto = BinPhoto.Create(
             //    fileName: Path.GetFileName(request.Photo.FileName),

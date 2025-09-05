@@ -1,7 +1,4 @@
-﻿using EcoMonitor.Contracts.Contracts.BinPhoto;
-using EcoMonitor.Contracts.Contracts.User;
-
-namespace EcoMonitor.Contracts.Contracts.Users
+﻿namespace EcoMonitor.Contracts.Contracts.Users
 {
     /// <summary>
     /// Переделать Request, потому что принимает меньше данных для регистрации пользователя
@@ -21,5 +18,5 @@ namespace EcoMonitor.Contracts.Contracts.Users
         string Firstname,
         string Surname,
         string Email,
-        string PasswordHash);
+        string Password);
 }

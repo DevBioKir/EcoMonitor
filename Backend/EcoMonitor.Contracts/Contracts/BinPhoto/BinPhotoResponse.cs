@@ -1,14 +1,18 @@
-﻿namespace EcoMonitor.Contracts.Contracts.BinPhoto
+﻿using EcoMonitor.Contracts.Contracts.User;
+
+namespace EcoMonitor.Contracts.Contracts.BinPhoto
 {
     public record BinPhotoResponse(
        Guid Id,
        string FileName,
        string UrlFile,
-       double Latitude,
-       double Longitude,
+       string Location,
+       //double Latitude,
+       //double Longitude,
        DateTime UploadedAt,
        List<Guid> BinTypeId,
        double FillLevel,
        bool IsOutsideBin,
-       string Comment);
+       string Comment,
+       UserResponse UploadedBy);
 }

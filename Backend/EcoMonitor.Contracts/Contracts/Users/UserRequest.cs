@@ -7,7 +7,7 @@ namespace EcoMonitor.Contracts.Contracts.User
         string Firstname,
         string Surname,
         string Email,
-        string PasswordHash,
+        string Password,
         bool isLoginConfirmed,
         Guid RoleId,
         UserRoleRequest Role,

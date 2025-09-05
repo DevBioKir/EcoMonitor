@@ -1,4 +1,4 @@
-﻿using EcoMonitor.Core.Models.Users;
+﻿using EcoMonitor.Core.ValueObjects;
 
 namespace EcoMonitor.DataAccess.Entities.Users
 {
@@ -9,7 +9,7 @@ namespace EcoMonitor.DataAccess.Entities.Users
         public string Surname { get; set; } = string.Empty;
         public string Email { get; set; }
 
-        public string PasswordHash { get; set; }
+        public PasswordHash PasswordHash { get; set; }
         public bool isLoginConfirmed { get; set; }
 
         public Guid RoleId { get; set; }

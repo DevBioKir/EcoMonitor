@@ -1,15 +1,16 @@
 using EcoMonitor.App.Mapper;
+using EcoMonitor.App.Services;
 using EcoMonitor.DataAccess;
 using EcoMonitor.DataAccess.Repositories;
+using EcoMonitor.Infrastracture.Abstractions;
+using EcoMonitor.Infrastracture.Authentication;
 using EcoMonitor.Infrastracture.Middleware;
+using EcoMonitor.Infrastracture.Pipeline;
+using EcoMonitor.Infrastracture.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using EcoMonitor.App.Services;
-using EcoMonitor.Infrastracture.Abstractions;
-using EcoMonitor.Infrastracture.Services;
 using Microsoft.Extensions.FileProviders;
-using EcoMonitor.Infrastracture.Pipeline;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -62,6 +63,15 @@ builder.Services.AddScoped<IBinTypeService, BinTypeService>();
 builder.Services.AddScoped<IGeolocationService, GeolocationService>();
 
 builder.Services.AddScoped<IImagePipeline, ImagePipeline>();
+
+
+
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddScoped<IJWTService, JWTService>();
+
+
+
 
 builder.WebHost.UseUrls("http://0.0.0.0:5198");
 

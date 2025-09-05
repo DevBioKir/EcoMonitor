@@ -72,12 +72,12 @@ namespace EcoMonitor.Core.Models.Users
         public static UserRole Create(
             string name, 
             string? description = null,
-            IEnumerable<Permission> permisson = null)
+            IEnumerable<Permission> permission = null)
         {
             if (string.IsNullOrWhiteSpace(name)) 
                 throw new ArgumentNullException("Role name cannot be empty", nameof(name));
 
-            return new UserRole(name, description, permisson);
+            return new UserRole(name, description, permission);
         }
 
         internal void AddUser(User user)

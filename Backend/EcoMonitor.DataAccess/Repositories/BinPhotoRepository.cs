@@ -37,13 +37,13 @@ namespace EcoMonitor.DataAccess.Repositories
             double west)
         {
             var photos = await _context.BinPhotos
-                .Where(b => b.Latitude <= north && b.Latitude >= south
-                && b.Longitude >= west && b.Longitude <= east)
+                .Where(b => b.Location.Y <= north && b.Location.Y >= south
+                && b.Location.X >= west && b.Location.X <= east)
                 .Select(b => new
                 {
                     b.FileName,
-                    b.Latitude,
-                    b.Longitude,
+                    b.Location.Y,
+                    b.Location.X,
                     b.FillLevel
                 }).ToListAsync();
 
