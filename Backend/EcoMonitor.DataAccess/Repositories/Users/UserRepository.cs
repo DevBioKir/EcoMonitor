@@ -44,7 +44,7 @@ namespace EcoMonitor.DataAccess.Repositories.Users
         public async Task<IEnumerable<User>> GetUserIdAsync(Guid id)
         {
             var userEntity = await _context.Users
-                .Include()
+                .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.Id == id)
                 ;
 

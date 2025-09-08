@@ -13,6 +13,7 @@ namespace EcoMonitor.Infrastracture.Authentication
         private readonly JwtSecurityTokenHandler _tokenHandler;
 
         public JWTService(
+            // обертка, через которую ASP передает настройки, обычно из appsettings.json
             IOptions<JwtSettings> jwtSettings)
         {
             _jwtSettings = jwtSettings.Value;
@@ -22,6 +23,7 @@ namespace EcoMonitor.Infrastracture.Authentication
         {
             var claims = new List<Claim>
             {
+                // Claims зашиваем данные пользователя в токен
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email.Value),
                 new Claim(ClaimTypes.Name, $"{user.Firstname} {user.Surname}"),
@@ -34,7 +36,9 @@ namespace EcoMonitor.Infrastracture.Authentication
                 claims.Add(new Claim("permission", permission.Code));
             }
 
+            // создаем ключ
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
+            // алгоритм шифрования 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
