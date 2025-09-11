@@ -1,11 +1,12 @@
 ﻿using EcoMonitor.Core.Models.Users;
 using EcoMonitor.DataAccess.Entities.Users;
+using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoMonitor.DataAccess.Repositories.Users
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly EcoMonitorDbContext _context;
         private readonly IMapper _mapper;
@@ -18,37 +19,66 @@ namespace EcoMonitor.DataAccess.Repositories.Users
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            var usersEntity = await _context.Users
-                .Include(u => u.BinPhoto).ThenInclude(b => b.BinPhotoBinTypes)
-                .Include(u => u.Role).ThenInclude(ur => ur.Permissions)
-                .ToListAsync();
-
-            return _mapper.Map<IEnumerable<User>>(usersEntity);
-        }
-
-        public async Task AddUserAsync(User user)
-        {
-            try
-            {
-                var userEntity = _mapper.Map<UserEntity>(user);
-                await _context.Users.AddAsync(userEntity);
-            }
-            catch (Exception ex)
-            {
-                
-            }
-        }
-
-        public async Task<IEnumerable<User>> GetUserIdAsync(Guid id)
-        {
-            var userEntity = await _context.Users
+            var entities = await _context.Users
                 .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.Id == id)
-                ;
+                .ThenInclude(r => r.Permissions)
+                .Include(u => u.BinPhoto)
+                .ToListAsync(cancellationToken);
 
-            return _mapper.Map<IEnumerable<User>>(userEntity);
+            return _mapper.Map<List<User>>(entities);
+        }
+
+        public async Task AddAsync(User user, CancellationToken cancellationToken = default)
+        {
+            var entity = _mapper.Map<UserEntity>(user);
+            await _context.Users.AddAsync(entity, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var entity = await _context.Users
+                .Include(u => u.Role)
+                .ThenInclude(r => r.Permissions)
+                .Include(u => u.BinPhoto)
+                .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
+            return _mapper.Map<User>(entity);
+        }
+
+        public async Task<User> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+        {
+            var entity = await _context.Users
+                .Include(u => u.Role)
+                .ThenInclude(r => r.Permissions)
+                .Include(u => u.BinPhoto)
+                .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+
+            return _mapper.Map<User>(entity);
+        }
+
+        public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
+        {
+            var entity = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
+            if (entity == null) return;
+
+
+            user.Adapt(entity);
+
+            _context.Users.Update(entity);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var entity = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+            if (entity != null)
+            {
+                _context.Users.Remove(entity);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
         }
     }
 }

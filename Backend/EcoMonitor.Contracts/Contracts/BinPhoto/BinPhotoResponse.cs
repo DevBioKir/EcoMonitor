@@ -6,13 +6,12 @@ namespace EcoMonitor.Contracts.Contracts.BinPhoto
        Guid Id,
        string FileName,
        string UrlFile,
-       string Location,
-       //double Latitude,
-       //double Longitude,
+       LocationDTO Location,
        DateTime UploadedAt,
        List<Guid> BinTypeId,
        double FillLevel,
        bool IsOutsideBin,
        string Comment,
-       UserResponse UploadedBy);
+       UserResponse UploadedBy,
+       Guid UploadedById);
 }

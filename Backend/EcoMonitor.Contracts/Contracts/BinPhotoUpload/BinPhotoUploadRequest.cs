@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using EcoMonitor.Contracts.Contracts.User;
+using Microsoft.AspNetCore.Http;
 
 namespace EcoMonitor.Contracts.Contracts.BinPhotoUpload
 {
@@ -7,5 +8,7 @@ namespace EcoMonitor.Contracts.Contracts.BinPhotoUpload
         List<Guid> BinTypeId,
         double FillLevel,
         bool IsOutsideBin,
-        string Comment);
+        string Comment,
+        UserRequest UploadedBy,
+        Guid UploadedById);
 }

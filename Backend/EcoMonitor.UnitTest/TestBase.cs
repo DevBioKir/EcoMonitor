@@ -1,4 +1,7 @@
-﻿using EcoMonitor.App.Mapper;
+﻿using EcoMonitor.App.Abstractions;
+using EcoMonitor.App.Factory.Users;
+using EcoMonitor.App.Mapper;
+using EcoMonitor.Core.Models.Users;
 using EcoMonitor.DataAccess;
 using EcoMonitor.Infrastracture.Abstractions;
 using EcoMonitor.Infrastracture.Pipeline;
@@ -16,6 +19,8 @@ namespace EcoMonitor.UnitTest
         protected EcoMonitorDbContext _context { get; private set; }
         protected IMapper _mapper;
         protected IPasswordHasher _passwordHasher;
+        protected IUserFactory _userFactory;
+        protected User _user;
         protected IServiceProvider _serviceProvider; //контейнер зависимостей
 
         public TestBase()
@@ -31,15 +36,29 @@ namespace EcoMonitor.UnitTest
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString());
             });
 
-            var config = new TypeAdapterConfig();
-            config.Scan(typeof(MappingConfig).Assembly);
-            services.AddSingleton(config);
-            services.AddSingleton<IMapper, ServiceMapper>();
+            // var config = new TypeAdapterConfig();
+            // config.Scan(typeof(MappingConfig).Assembly);
+            // services.AddSingleton(config);
+            // services.AddSingleton<IMapper, ServiceMapper>();
+
+            services.AddSingleton<TypeAdapterConfig>(sp =>
+            {
+                var config = new TypeAdapterConfig();
+                var userFactory = sp.GetRequiredService<IUserFactory>();
+                new MappingConfig(userFactory).Register(config);
+                return config;
+            });
+            services.AddScoped<IMapper>(sp =>
+            {
+                var config = sp.GetRequiredService<TypeAdapterConfig>();
+                return new ServiceMapper(sp, config);
+            });
 
             var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwrootTest");
             services.AddSingleton<IImageStorageService>(new ImageStorageService(webRootPath));
             services.AddSingleton<IGeolocationService, GeolocationService>();
-            services.AddSingleton<IPasswordHasher, IPasswordHasher>();
+            services.AddSingleton<IPasswordHasher, PasswordHasher>();
+            services.AddSingleton<IUserFactory, UserFactory>();
 
             services.AddLogging();
 
@@ -48,6 +67,15 @@ namespace EcoMonitor.UnitTest
             _context = _serviceProvider.GetRequiredService<EcoMonitorDbContext>();
             _mapper = _serviceProvider.GetRequiredService<IMapper>();
             _passwordHasher = _serviceProvider.GetRequiredService<IPasswordHasher>();
+            _userFactory = _serviceProvider.GetRequiredService<IUserFactory>();
+
+
+
+            _user = _userFactory.Create(
+                "Peter",
+                "Petrov",
+                "petrov@mail.ru",
+                "wadsaf341232sad");
 
             SeeData();
         }

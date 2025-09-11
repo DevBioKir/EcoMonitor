@@ -23,7 +23,8 @@ namespace EcoMonitor.UnitTest.Repositories
                 new List<Guid> { plasticId },
                 0.7,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 ),
                 BinPhoto.Create(
                 "Бак на Кирова.jpg",
@@ -33,7 +34,8 @@ namespace EcoMonitor.UnitTest.Repositories
                 new List<Guid> { plasticId, organicId },
                 0.8,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 )
             };
 
@@ -62,14 +64,15 @@ namespace EcoMonitor.UnitTest.Repositories
             var organicId = Guid.NewGuid();
 
             var binPhoto = BinPhoto.Create(
-                "Бак на Кирова.jpg",
+                "Бак на Калинина.jpg",
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
-                55.75,
-                37.61,
-                new List<Guid> { plasticId, organicId },
-                0.8,
+                57.55,
+                38.41,
+                new List<Guid> { plasticId },
+                0.7,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 );
 
             var binPhotoEntity = _mapper.Map<BinPhotoEntity>(binPhoto);
@@ -89,8 +92,8 @@ namespace EcoMonitor.UnitTest.Repositories
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
                 result.UrlFile);
-            Assert.Equal(55.75, result.Latitude);
-            Assert.Equal(37.61, result.Longitude);
+            Assert.Equal(55.75, result.Location.Y);
+            Assert.Equal(37.61, result.Location.X);
             //Assert.Equal("Plastic", result.BinType);
             Assert.Equal(0.8, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
@@ -105,14 +108,15 @@ namespace EcoMonitor.UnitTest.Repositories
             var organicId = Guid.NewGuid();
 
             var binPhoto = BinPhoto.Create(
-                "Бак на Кирова.jpg",
+                "Бак на Калинина.jpg",
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
-                55.75,
-                37.61,
-                new List<Guid> { plasticId, organicId },
-                0.8,
+                57.55,
+                38.41,
+                new List<Guid> { plasticId },
+                0.7,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 );
 
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
@@ -127,8 +131,8 @@ namespace EcoMonitor.UnitTest.Repositories
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
                 result.UrlFile);
-            Assert.Equal(55.75, result.Latitude);
-            Assert.Equal(37.61, result.Longitude);
+            Assert.Equal(55.75, result.Location.Y);
+            Assert.Equal(37.61, result.Location.X);
             //Assert.Equal("Plastic", result.BinType);
             Assert.Equal(0.8, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
@@ -143,14 +147,15 @@ namespace EcoMonitor.UnitTest.Repositories
             var organicId = Guid.NewGuid();
 
             var binPhoto = BinPhoto.Create(
-                "Бак на Кирова.jpg",
+                "Бак на Калинина.jpg",
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
-                55.75,
-                37.61,
-                new List<Guid> { plasticId, organicId },
-                0.8,
+                57.55,
+                38.41,
+                new List<Guid> { plasticId },
+                0.7,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 );
 
             var binPhotoEntity = _mapper.Map<BinPhotoEntity>(binPhoto);

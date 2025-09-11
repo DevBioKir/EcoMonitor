@@ -5,6 +5,6 @@ namespace EcoMonitor.Infrastracture.Abstractions
 {
     public interface IImagePipeline
     {
-        Task<ProcessedImageResult> ProcessAsync(IFormFile file, CancellationToken ct);
+        Task<ProcessedImageResult> ProcessAsync(IFormFile file, CancellationToken ct = default);
     }
 }

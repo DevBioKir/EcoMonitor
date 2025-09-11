@@ -2,6 +2,7 @@
 using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Repositories;
+using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Abstractions;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ namespace EcoMonitor.App.Services
         private readonly IBinPhotoRepository _binPhotoRepository;
         private readonly ILogger<BinPhotoService> _logger;
         private readonly IImagePipeline _pipeline;
+        private readonly IUserRepository _userRepository;
 
         //private readonly IImageStorageService _storage;
         //private readonly IGeolocationService _geo;
@@ -24,8 +26,8 @@ namespace EcoMonitor.App.Services
             IBinPhotoRepository binPhotoRepository,
             ILogger<BinPhotoService> logger,
             IImagePipeline pipeline)
-            //IImageStorageService storage,
-            //IGeolocationService geo)
+        //IImageStorageService storage,
+        //IGeolocationService geo)
         {
             _mapper = mapper;
             _binPhotoRepository = binPhotoRepository;
@@ -106,7 +108,9 @@ namespace EcoMonitor.App.Services
 
             //var (lat, lon) = _geo.GeoLocationService(exif);
 
-            var processed = await _pipeline.ProcessAsync(request.Photo, ct);
+            var user = await _userRepository.GetByIdAsync(request.UploadedById);
+
+            var processed = await _pipeline.ProcessAsync(request.Photo);
 
             var binPhoto = BinPhoto.Create(
                 fileName: Path.GetFileName(request.Photo.FileName),
@@ -117,6 +121,7 @@ namespace EcoMonitor.App.Services
                 fillLevel: request.FillLevel,
                 isOutsideBin: request.IsOutsideBin,
                 comment: request.Comment,
+                uploadedBy: user
                 );
 
             //var binPhoto = BinPhoto.Create(

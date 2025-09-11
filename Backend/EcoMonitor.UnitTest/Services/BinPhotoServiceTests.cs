@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using EcoMonitor.Contracts.Contracts.User;
 
 namespace EcoMonitor.UnitTest.Services
 {
@@ -32,7 +33,8 @@ namespace EcoMonitor.UnitTest.Services
                 new List<Guid> { plasticId },
                 0.7,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 ),
                 BinPhoto.Create(
                 "Бак на Кирова.jpg",
@@ -42,7 +44,8 @@ namespace EcoMonitor.UnitTest.Services
                 new List<Guid> { plasticId, organicId },
                 0.8,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 )
             };
 
@@ -92,7 +95,8 @@ namespace EcoMonitor.UnitTest.Services
                 new List<Guid> { plasticId, organicId },
                 0.8,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 );
 
             var binPhotoEntity = _mapper.Map<BinPhotoEntity>(binPhoto);
@@ -126,8 +130,8 @@ namespace EcoMonitor.UnitTest.Services
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
                 result.UrlFile);
-            Assert.Equal(55.75, result.Latitude);
-            Assert.Equal(37.61, result.Longitude);
+            Assert.Equal(55.75, result.Location.Latitude);
+            Assert.Equal(37.61, result.Location.Longitude);
             //Assert.Equal("Plastic", result.BinType);
             Assert.Equal(0.8, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
@@ -149,7 +153,8 @@ namespace EcoMonitor.UnitTest.Services
                 new List<Guid> { plasticId, organicId },
                 0.8,
                 true,
-                "Test photo"
+                "Test photo",
+                _user
                 );
 
             var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
@@ -178,8 +183,8 @@ namespace EcoMonitor.UnitTest.Services
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
                 result.UrlFile);
-            Assert.Equal(55.75, result.Latitude);
-            Assert.Equal(37.61, result.Longitude);
+            Assert.Equal(55.75, result.Location.Latitude);
+            Assert.Equal(37.61, result.Location.Longitude);
             //Assert.Equal("Plastic", result.BinType);
             Assert.Equal(0.8, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
@@ -206,12 +211,16 @@ namespace EcoMonitor.UnitTest.Services
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
+            var userRequest = _mapper.Map<UserRequest>(_user);
+
             var request = new BinPhotoUploadRequest(
                 Photo: formFile,
                 BinTypeId: new List<Guid> { plasticId, organicId },
                 FillLevel: 0.6,
                 IsOutsideBin: true,
-                Comment: "Бак на кирова");
+                Comment: "Бак на кирова",
+                userRequest,
+                userRequest.Id);
 
             var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             Directory.CreateDirectory(webRootPath);

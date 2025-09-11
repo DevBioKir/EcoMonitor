@@ -3,7 +3,7 @@ using Konscious.Security.Cryptography;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace EcoMonitor.Core.ValueObjects
+namespace EcoMonitor.Infrastracture.Services
 {
     public class PasswordHasher : IPasswordHasher
     {

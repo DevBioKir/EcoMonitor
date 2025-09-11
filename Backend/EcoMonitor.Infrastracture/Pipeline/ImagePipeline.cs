@@ -29,7 +29,7 @@ namespace EcoMonitor.Infrastracture.Pipeline
             _logger = logger;
         }
 
-        public async Task<ProcessedImageResult> ProcessAsync(IFormFile file, CancellationToken ct)
+        public async Task<ProcessedImageResult> ProcessAsync(IFormFile file, CancellationToken ct = default)
         {
             if (file == null) throw new ArgumentNullException(nameof(file));
             if (file.Length == 0) throw new InvalidOperationException("File is empty");

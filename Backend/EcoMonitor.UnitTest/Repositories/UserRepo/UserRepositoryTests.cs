@@ -28,7 +28,7 @@ namespace EcoMonitor.UnitTest.Repositories.UserRepo
                 user.Create(
                     "Peter",
                     "Petrov",
-                    "petrov@mail",
+                    "petrov@mail.ru",
                     "wadsaf341232sad")
             };
 
@@ -39,8 +39,9 @@ namespace EcoMonitor.UnitTest.Repositories.UserRepo
 
             var userRepo = new UserRepository(_context, _mapper);
 
+            var ct = new CancellationToken();
             // Act
-            var result = await userRepo.GetAllUsersAsync();
+            var result = await userRepo.GetAllAsync(ct);
 
             // Assert
             // Assert
