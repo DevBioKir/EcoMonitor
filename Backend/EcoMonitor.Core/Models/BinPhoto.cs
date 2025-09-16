@@ -12,7 +12,9 @@ namespace EcoMonitor.Core.Models
         //public double Longitude { get; private set; }
 
         // PostGIS
-        public Point Location { get; private set; } = null!;
+        //public Point Location { get; private set; } = null!;
+        public double Latitude { get; private set; }
+        public double Longitude { get; private set; }
         public DateTime UploadedAt { get; private set; }
         public double FillLevel { get; private set; }
         public bool IsOutsideBin { get; private set; }
@@ -26,8 +28,8 @@ namespace EcoMonitor.Core.Models
         private BinPhoto(
             string fileName,
             string urlFile,
-            double latitude,
             double longitude,
+            double latitude,
             IEnumerable<Guid> BinTypeId,
             double fillLevel,
             bool isOutsideBin,
@@ -45,15 +47,14 @@ namespace EcoMonitor.Core.Models
             Id = Guid.NewGuid();
             FileName = fileName;
             UrlFile = urlFile;
-            Location = point;
+            Latitude = latitude;
+            Longitude = longitude;
             UploadedAt = DateTime.UtcNow;
             FillLevel = fillLevel;
             IsOutsideBin = isOutsideBin;
             Comment = comment;
             UploadedBy = uploadedBy;
             UploadedById = uploadedBy.Id;
-
-            Validate();
         }
 
         private void Validate()
@@ -64,7 +65,7 @@ namespace EcoMonitor.Core.Models
             if (string.IsNullOrWhiteSpace(UrlFile)) 
                 throw new ArgumentException("UrlFile required");
 
-            ValidateLocation(Location);
+            ValidateLocation(Longitude, Latitude);
 
             if (FillLevel < 0.0 || FillLevel > 1.0) 
                 throw new ArgumentOutOfRangeException(nameof(FillLevel), "FillLevel must be between 0.0 and 1.0");
@@ -73,23 +74,26 @@ namespace EcoMonitor.Core.Models
                 throw new Exception("At least one BinType is required");
         }
 
-        private void ValidateLocation(Point location)
+        private void ValidateLocation(double longitude, double latitude)
         {
-            if (location == null)
-                throw new ArgumentNullException(nameof(location));
+            if (longitude == null)
+                throw new ArgumentNullException(nameof(longitude));
+            if (latitude == null)
+                throw new ArgumentNullException(nameof(latitude));
+            
 
-            if (location.Y < -90 || location.Y > 90)
-                throw new ArgumentOutOfRangeException(nameof(location.Y), "Latitude must be between -90 and 90 degrees");
+            if (latitude < -90 || latitude > 90)
+                throw new ArgumentOutOfRangeException(nameof(latitude), "Latitude must be between -90 and 90 degrees");
 
-            if (location.X < -180 || location.X > 180)
-                throw new ArgumentOutOfRangeException(nameof(location.X), "Longitude must be between -180 and 180 degrees");
+            if (longitude < -180 || longitude > 180)
+                throw new ArgumentOutOfRangeException(nameof(longitude), "Longitude must be between -180 and 180 degrees");
         }
 
         public static BinPhoto Create(
             string fileName,
             string urlFile,
-            double latitude,
             double longitude,
+            double latitude,
             IEnumerable<Guid> BinTypeId,
             double fillLevel,
             bool isOutsideBin,
@@ -116,6 +120,8 @@ namespace EcoMonitor.Core.Models
             {
                 photo.AddBinType(id);
             }
+
+            photo.Validate();
 
             return photo;
         }

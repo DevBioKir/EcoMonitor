@@ -130,8 +130,8 @@ namespace EcoMonitor.UnitTest.Services
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
                 result.UrlFile);
-            Assert.Equal(55.75, result.Location.Latitude);
-            Assert.Equal(37.61, result.Location.Longitude);
+            Assert.Equal(55.75, result.Latitude);
+            Assert.Equal(37.61, result.Longitude);
             //Assert.Equal("Plastic", result.BinType);
             Assert.Equal(0.8, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
@@ -183,8 +183,8 @@ namespace EcoMonitor.UnitTest.Services
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
                 result.UrlFile);
-            Assert.Equal(55.75, result.Location.Latitude);
-            Assert.Equal(37.61, result.Location.Longitude);
+            Assert.Equal(55.75, result.Latitude);
+            Assert.Equal(37.61, result.Longitude);
             //Assert.Equal("Plastic", result.BinType);
             Assert.Equal(0.8, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
@@ -198,6 +198,8 @@ namespace EcoMonitor.UnitTest.Services
         [InlineData("IMG_6453.HEIC", "image/heic")]
         public async Task UploadImage_ShouldReturnCorrectResponse(string fileName, string contentType)
         {
+            
+
             var imagePath = Path.Combine("TestPhotos", fileName);
             var imagesBytes = await File.ReadAllBytesAsync(imagePath);
             var stream = new MemoryStream(imagesBytes);

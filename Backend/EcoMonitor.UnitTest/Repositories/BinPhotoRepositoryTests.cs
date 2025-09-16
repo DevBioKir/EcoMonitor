@@ -88,14 +88,14 @@ namespace EcoMonitor.UnitTest.Repositories
             // Assert
             Assert.NotNull(result);
             Assert.Equal(binPhoto.Id, result.Id);
-            Assert.Equal("Бак на Кирова.jpg", result.FileName);
+            Assert.Equal("Бак на Калинина.jpg", result.FileName);
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
                 result.UrlFile);
-            Assert.Equal(55.75, result.Location.Y);
-            Assert.Equal(37.61, result.Location.X);
+            Assert.Equal(57.55, result.Latitude);
+            Assert.Equal(38.41, result.Longitude);
             //Assert.Equal("Plastic", result.BinType);
-            Assert.Equal(0.8, result.FillLevel);
+            Assert.Equal(0.7, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
             Assert.Equal("Test photo", result.Comment);
         }
@@ -127,14 +127,14 @@ namespace EcoMonitor.UnitTest.Repositories
             // Assert
             Assert.NotNull(result);
             Assert.Equal(binPhoto.Id, result.Id);
-            Assert.Equal("Бак на Кирова.jpg", result.FileName);
+            Assert.Equal("Бак на Калинина.jpg", result.FileName);
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
                 result.UrlFile);
-            Assert.Equal(55.75, result.Location.Y);
-            Assert.Equal(37.61, result.Location.X);
+            Assert.Equal(57.55, result.Latitude);
+            Assert.Equal(38.41, result.Longitude);
             //Assert.Equal("Plastic", result.BinType);
-            Assert.Equal(0.8, result.FillLevel);
+            Assert.Equal(0.7, result.FillLevel);
             Assert.Equal(true, result.IsOutsideBin);
             Assert.Equal("Test photo", result.Comment);
         }

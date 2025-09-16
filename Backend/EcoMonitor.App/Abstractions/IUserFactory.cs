@@ -10,7 +10,7 @@ namespace EcoMonitor.App.Abstractions
         User Restore(Guid id,
             string firstname,
             string surname,
-            string email,
+            Email email,
             PasswordHash passwordHash,
             UserRole role,
             DateTime createdAt,

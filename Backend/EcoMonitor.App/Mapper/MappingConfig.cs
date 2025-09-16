@@ -11,6 +11,7 @@ using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Entities;
 using EcoMonitor.DataAccess.Entities.Users;
 using Mapster;
+using NetTopologySuite.Geometries;
 
 namespace EcoMonitor.App.Mapper
 {
@@ -26,14 +27,32 @@ namespace EcoMonitor.App.Mapper
         public void Register(TypeAdapterConfig config)
         {
             /// <summary>
+            /// Mapping VO, string for Email
+            /// </summary>
+            config.NewConfig<Email, string>()
+                .MapWith(src => src.Value);
+
+            config.NewConfig<string, Email>()
+                .MapWith(src => Email.Create(src));
+
+            /// <summary>
+            /// Mapping VO, string for PasswordHash
+            /// </summary>
+            config.NewConfig<PasswordHash, string>()
+                .MapWith(src => src.Hash);
+
+            config.NewConfig<string, PasswordHash>()
+                .MapWith(src => PasswordHash.FromHash(src));
+  
+            /// <summary>
             /// Mapping Entities, Domain for BinPhoto
             /// </summary>
             config.NewConfig<BinPhoto, BinPhoto>()
                 .ConstructUsing(src => BinPhoto.Create(
                         src.FileName,
                         src.UrlFile,
-                        src.Location.Y, // latitude
-                        src.Location.X,  // longitude
+                        src.Longitude,  // longitude
+                        src.Latitude, // latitude
                         src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
                         src.FillLevel,
                         src.IsOutsideBin,
@@ -47,38 +66,59 @@ namespace EcoMonitor.App.Mapper
                     }
                 });
 
+            config.NewConfig<Point, Point>()
+                .MapWith(src => src == null ? null : new Point(new Coordinate(src.X, src.Y)) { SRID = 4326 });
+
             config.NewConfig<BinPhoto, BinPhotoEntity>()
+                .PreserveReference(true) // одна ссылка - один объект
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.FileName, src => src.FileName)
                 .Map(dest => dest.UrlFile, src => src.UrlFile)
-                .Map(dest => dest.Location, src => src.Location)
-                //.Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.Location, src => new Point(src.Longitude, src.Latitude) {SRID = 4326})
                 .Map(dest => dest.UploadedAt, src => src.UploadedAt)
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
                 .Map(dest => dest.Comment, src => src.Comment)
                 .Map(dest => dest.BinPhotoBinTypes, src =>
-        src.BinPhotoBinTypes.Select(bbt => bbt.Adapt<BinPhotoBinTypeEntity>()).ToList())
+                src.BinPhotoBinTypes.Select(bbt => bbt.Adapt<BinPhotoBinTypeEntity>()).ToList())
                 .Map(dest => dest.UploadedBy, src => src.UploadedBy);
                 //.Ignore(dest => dest.BinPhotoBinTypes);
 
             config.NewConfig<BinPhotoEntity, BinPhoto>()
-                .ConstructUsing(src => BinPhoto.Create(
-                    src.FileName,
-                    src.UrlFile,
-                    src.Location.Y, // latitude
-                    src.Location.X,  // longitude
-                    src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
-                    src.FillLevel,
-                    src.IsOutsideBin,
-                    src.Comment,
-                    src.UploadedBy != null ? src.UploadedBy.Adapt<User>() : null))
+                .ConstructUsing(src =>
+                    BinPhoto.Create(
+                        src.FileName,
+                        src.UrlFile,
+                        src.Location.Y,  // latitude
+                        src.Location.X,  // longitude
+                        src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
+                        src.FillLevel,
+                        src.IsOutsideBin,
+                        src.Comment,
+                        src.UploadedBy != null 
+                            ? _userFactory.Restore(
+                                src.UploadedBy.Id,
+                                src.UploadedBy.Firstname,
+                                src.UploadedBy.Surname,
+                                Email.Create(src.UploadedBy.Email),
+                                PasswordHash.FromHash(src.UploadedBy.PasswordHash),
+                                UserRole.Create(                  // <- здесь
+                                    src.UploadedBy.Role.Name,
+                                    src.UploadedBy.Role.Description,
+                                    src.UploadedBy.Role.Permissions.Select(p => new Permission(p.Code)).ToList()
+                                ),
+                                src.UploadedBy.CreatedAt,
+                                src.UploadedBy.LastLogindAt,
+                                src.UploadedBy.LockedUntil,
+                                new List<BinPhoto>()
+                            )
+                            : null
+                    )
+                )
                 .Ignore(dest => dest.BinPhotoBinTypes)
                 .AfterMapping((src, dest) =>
                 {
                     foreach (var bbt in src.BinPhotoBinTypes)
-                    {
                         dest.AddBinType(bbt.BinTypeId);
-                    }
                 });
 
             /// <summary>
@@ -116,14 +156,21 @@ namespace EcoMonitor.App.Mapper
             /// Mapping Entities, Domain for User
             /// </summary>
             config.NewConfig<User, UserEntity>()
+                .PreserveReference(true) // одна ссылка - один объект
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Firstname, src => src.Firstname)
                 .Map(dest => dest.Surname, src => src.Surname)
-                .Map(dest => dest.Email, src => src.Email.Value)          // VO → string
+                .Map(dest => dest.Email, src => src.Email.Value) // VO → string
                 .Map(dest => dest.PasswordHash, src => src.PasswordHash.Hash) // VO → string
                 .Map(dest => dest.isLoginConfirmed, src => src.isLoginConfirmed)
                 .Map(dest => dest.RoleId, src => src.RoleId)
-                .Map(dest => dest.Role, src => src.Role.Adapt<UserRoleEntity>())
+                .Map(dest => dest.Role, src => new UserRoleEntity
+                    {
+                        Id = src.Role.Id,
+                        Name = src.Role.Name,
+                        Description = src.Role.Description,
+                        Permissions = src.Role.Permissions.Select(p => new PermissionEntity { Code = p.Code }).ToList()
+                    })
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
                 .Map(dest => dest.LastLogindAt, src => src.LastLogindAt)
                 .Map(dest => dest.LockedUntil, src => src.LockedUntil)
@@ -134,30 +181,33 @@ namespace EcoMonitor.App.Mapper
                     src.Id,
                     src.Firstname,
                     src.Surname,
-                    src.Email,
-                    src.PasswordHash,
-                    src.Role.Adapt<UserRole>(),
+                    Email.Create(src.Email),
+                    PasswordHash.FromHash(src.PasswordHash),
+                    UserRole.Create(
+                        src.Role.Name,
+                        src.Role.Description,
+                        src.Role.Permissions.Select(p => new Permission(p.Code)).ToList()),
                     src.CreatedAt,
                     src.LastLogindAt,
                     src.LockedUntil,
-                    src.BinPhoto.Adapt<List<BinPhoto>>()
+                    src.BinPhoto.Select(bp => bp.Adapt<BinPhoto>()).ToList()
                 ));
 
             /// <summary>
             /// Mapping Entities, Domain for UserRole
             /// </summary>
             config.NewConfig<UserRoleEntity, UserRole>()
-                .Map(dest => dest, src => UserRole.Create(
+                .ConstructUsing(src => UserRole.Create(
                     src.Name,
                     src.Description,
-                    src.Permissions.Select(p => new Permission(p.Code))
-                    ));
+                    src.Permissions.Select(p => new Permission(p.Code)).ToList()
+                ));
 
             config.NewConfig<UserRole, UserRoleEntity>()
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Name, src => src.Name)
                 .Map(dest => dest.Description, src => src.Description)
-                .Map(dest => dest.Permissions, src => src.Permissions.Select(p => new PermissionEntity { Code = p.Code }));
+                .Map(dest => dest.Permissions, src => src.Permissions.Select(p => new PermissionEntity { Code = p.Code }).ToList());
 
             /// <summary>
             /// Mapping Entities, Domain for Permission
@@ -165,6 +215,8 @@ namespace EcoMonitor.App.Mapper
             config.NewConfig<PermissionEntity, Permission>()
                 .ConstructUsing(src => new Permission(src.Code));
 
+            config.NewConfig<Permission, PermissionEntity>()
+                .Map(dest => dest.Code, src => src.Code);
 
             /// <summary>
             /// Mapping DTOs for User
@@ -206,8 +258,8 @@ namespace EcoMonitor.App.Mapper
                 .ConstructUsing(src => BinPhoto.Create(
                     src.FileName,
                     src.UrlFile,
-                    src.Location.Y, // latitude
-                    src.Location.X,  // longitude
+                    src.Latitude, // latitude
+                    src.Longitude,  // longitude
                     src.BinTypeId,
                     src.FillLevel,
                     src.IsOutsideBin,
@@ -218,8 +270,8 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.FileName, src => src.FileName)
                 .Map(dest => dest.UrlFile, src => src.UrlFile)
-                .Map(dest => dest.Location, src => src.Location)
-                //.Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.Latitude, src => src.Latitude)
                 .Map(dest => dest.UploadedAt, src => src.UploadedAt)
                 .Map(dest => dest.BinTypeId, src => src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId).ToList())
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
@@ -232,8 +284,8 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.FileName, src => src.FileName)
                 .Map(dest => dest.UrlFile, src => src.UrlFile)
-                .Map(dest => dest.Location, src => src.Location)
-                //.Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.Latitude, src => src.Latitude)
                 .Map(dest => dest.UploadedAt, src => src.UploadedAt)
                 .Map(dest => dest.BinTypeId, src =>
                     src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId).ToList())
@@ -270,9 +322,8 @@ namespace EcoMonitor.App.Mapper
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.FileName, src => src.FileName)
             .Map(dest => dest.UrlFile, src => src.UrlFile)
-            .Map(dest => dest.Location, src => src.Location)
-            //.Map(dest => dest.Latitude, src => src.Latitude)
-            //.Map(dest => dest.Longitude, src => src.Longitude)
+            .Map(dest => dest.Longitude, src => src.Longitude)
+            .Map(dest => dest.Latitude, src => src.Latitude)
             .Map(dest => dest.UploadedAt, src => src.UploadedAt)
             .Map(dest => dest.FillLevel, src => src.FillLevel)
             .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)

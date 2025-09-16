@@ -18,19 +18,20 @@ namespace EcoMonitor.DataAccess.Repositories
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<BinPhoto>> GetAllBinPhotosAsync()
+        public async Task<IReadOnlyList<BinPhoto>> GetAllBinPhotosAsync()
         {
             var binPhotosEntity = await _context.BinPhotos
                 .Include(bp => bp.BinPhotoBinTypes)
                 .ThenInclude(bbt => bbt.BinType)
+                //.AsNoTracking()
                 .ToListAsync();
 
-            var binPhotos = _mapper.Map<IEnumerable<BinPhoto>>(binPhotosEntity);
+            var binPhotos = _mapper.Map<List<BinPhoto>>(binPhotosEntity);
 
             return binPhotos;
         }
 
-        public async Task<IEnumerable<BinPhoto>> GetPhotosInBoundsAsync(
+        public async Task<IReadOnlyList<BinPhoto>> GetPhotosInBoundsAsync(
             double north,
             double south,
             double east,
@@ -47,7 +48,7 @@ namespace EcoMonitor.DataAccess.Repositories
                     b.FillLevel
                 }).ToListAsync();
 
-            return _mapper.Map<IEnumerable<BinPhoto>>(photos);
+            return _mapper.Map<List<BinPhoto>>(photos);
         }
 
         public async Task<BinPhoto> AddBinPhotoAsync(

@@ -15,7 +15,7 @@ namespace EcoMonitor.DataAccess.Entities
         public bool IsOutsideBin { get; set; } = false;
         public string Comment { get; set; } = string.Empty;
 
-        public ICollection<BinPhotoBinTypeEntity> BinPhotoBinTypes { get; private set; } = new List<BinPhotoBinTypeEntity>();
+        public ICollection<BinPhotoBinTypeEntity> BinPhotoBinTypes { get; set; } = new List<BinPhotoBinTypeEntity>();
         public UserEntity UploadedBy { get; set; }
         public Guid UploadedById { get; set; }
     }

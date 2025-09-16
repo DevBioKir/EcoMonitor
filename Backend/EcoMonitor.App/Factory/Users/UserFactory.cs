@@ -25,7 +25,7 @@ namespace EcoMonitor.App.Factory.Users
         public User Restore(Guid id,
             string firstname,
             string surname,
-            string email,
+            Email email,
             PasswordHash passwordHash,
             UserRole role,
             DateTime createdAt,

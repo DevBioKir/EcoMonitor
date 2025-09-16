@@ -75,39 +75,6 @@ namespace EcoMonitor.App.Services
 
         public async Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request, CancellationToken ct)
         {
-            //var relativePath = await _storage.SaveImageAsync(request.Photo);
-            //var absolutePath = Path.Combine("wwwroot", relativePath);
-
-            //var decoderOptions = new DecoderOptions()
-            //{
-            //    Configuration = new Configuration(
-            //        new AvifConfigurationModule(),
-            //        new HeifConfigurationModule(),
-            //        new JpegConfigurationModule())
-            //};
-            //using var uploadedPhoto = await Image.LoadAsync(decoderOptions, absolutePath);
-
-            //var exif = uploadedPhoto.Metadata.ExifProfile;
-
-            //_logger.LogInformation("Metadata: {Meta}", uploadedPhoto.Metadata);
-            //_logger.LogInformation("ExifProfile: {Exif}", uploadedPhoto.Metadata.ExifProfile);
-
-            //if (exif == null)
-            //{
-            //    _logger.LogWarning("EXIF не найден");
-            //    Console.WriteLine("EXIF не найден");
-            //}
-            //else
-            //{
-            //    foreach (var val in exif.Values)
-            //    {
-            //        _logger.LogInformation("EXIF: {Tag} = {Value}", val.Tag, val.GetValue());
-            //        Console.WriteLine($"EXIF: {val.Tag} = {val.GetValue()}");
-            //    }
-            //}
-
-            //var (lat, lon) = _geo.GeoLocationService(exif);
-
             var user = await _userRepository.GetByIdAsync(request.UploadedById);
 
             var processed = await _pipeline.ProcessAsync(request.Photo);
@@ -123,16 +90,6 @@ namespace EcoMonitor.App.Services
                 comment: request.Comment,
                 uploadedBy: user
                 );
-
-            //var binPhoto = BinPhoto.Create(
-            //    fileName: Path.GetFileName(request.Photo.FileName),
-            //    urlFile: "/" + relativePath.Replace("\\", "/"),
-            //    latitude: lat ?? 0,
-            //    longitude: lon ?? 0,
-            //    BinTypeId: request.BinTypeId,
-            //    fillLevel: request.FillLevel,
-            //    isOutsideBin: request.IsOutsideBin,
-            //    comment: request.Comment);
 
             await _binPhotoRepository.AddBinPhotoAsync(binPhoto);
 

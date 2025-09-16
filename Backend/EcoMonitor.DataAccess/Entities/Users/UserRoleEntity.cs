@@ -8,8 +8,8 @@ namespace EcoMonitor.DataAccess.Entities.Users
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
 
-        public ICollection<UserEntity> Users = new List<UserEntity>();
+        public ICollection<UserEntity> Users { get; set; } = new List<UserEntity>();
 
-        public ICollection<PermissionEntity> Permissions = new List<PermissionEntity>();
+        public ICollection<PermissionEntity> Permissions { get; set; } = new List<PermissionEntity>();
     }
 }

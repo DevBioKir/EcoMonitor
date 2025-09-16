@@ -9,7 +9,7 @@ namespace EcoMonitor.DataAccess.Entities.Users
         public string Surname { get; set; } = string.Empty;
         public string Email { get; set; }
 
-        public PasswordHash PasswordHash { get; set; }
+        public string PasswordHash { get; set; }
         public bool isLoginConfirmed { get; set; }
 
         public Guid RoleId { get; set; }
@@ -19,6 +19,6 @@ namespace EcoMonitor.DataAccess.Entities.Users
         public DateTime LastLogindAt { get; set; }
         public DateTime LockedUntil { get; set; }
 
-        public ICollection<BinPhotoEntity> BinPhoto = new List<BinPhotoEntity>();
+        public ICollection<BinPhotoEntity> BinPhoto { get; set; } = new List<BinPhotoEntity>();
     }
 }

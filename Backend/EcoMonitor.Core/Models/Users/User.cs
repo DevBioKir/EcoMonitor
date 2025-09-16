@@ -101,7 +101,7 @@ namespace EcoMonitor.Core.Models.Users
             Guid id,
             string firstname,
             string surname,
-            string email,
+            Email email,
             PasswordHash passwordHash,
             UserRole role,
             //bool isLoginConfirmed,
@@ -110,10 +110,10 @@ namespace EcoMonitor.Core.Models.Users
             DateTime lockedUntil,
             List<BinPhoto> photos)
         {
-            var emailVO = Email.Create(email);
+            //var emailVO = Email.Create(email);
 
             return new User (
-                id, firstname, surname, emailVO, passwordHash, role, createdAt, lastLogindAt, lockedUntil, photos);
+                id, firstname, surname, email, passwordHash, role, createdAt, lastLogindAt, lockedUntil, photos);
         }
 
         public bool CheckPassword(string plainPassword, IPasswordHasher hasher) => 
