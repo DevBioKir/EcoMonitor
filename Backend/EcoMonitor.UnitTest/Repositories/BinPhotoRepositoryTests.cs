@@ -1,5 +1,8 @@
 ﻿using EcoMonitor.Core.Models;
+using EcoMonitor.Core.Models.Users;
+using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Entities;
+using EcoMonitor.DataAccess.Entities.Users;
 using EcoMonitor.DataAccess.Repositories;
 
 namespace EcoMonitor.UnitTest.Repositories
@@ -12,6 +15,26 @@ namespace EcoMonitor.UnitTest.Repositories
             // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
+
+            var roleEntity = new UserRoleEntity
+            {
+                Id = UserRole.User.Id,
+                Name = UserRole.User.Name,
+                Description = UserRole.User.Description,
+                Permissions = UserRole.User.Permissions
+                                .Select(p => new PermissionEntity { Code = p.Code })
+                                .ToList()
+            };
+
+            await _context.UserRoles.AddAsync(roleEntity);
+            await _context.SaveChangesAsync();
+
+            var userEntity = _mapper.Map<UserEntity>(_user);
+            userEntity.RoleId = roleEntity.Id;
+            userEntity.Role = roleEntity;
+
+            await _context.Users.AddAsync(userEntity);
+            await _context.SaveChangesAsync();
 
             var binPhotos = new List<BinPhoto>()
             {
@@ -39,7 +62,13 @@ namespace EcoMonitor.UnitTest.Repositories
                 )
             };
 
-            var binPhotosEntity = _mapper.Map<List<BinPhotoEntity>>(binPhotos);
+            var binPhotosEntity = binPhotos.Select(bp =>
+            {
+                var entity = _mapper.Map<BinPhotoEntity>(bp);
+                entity.UploadedById = userEntity.Id;
+                entity.UploadedBy = userEntity;
+                return entity;
+            }).ToList();
 
             await _context.BinPhotos.AddRangeAsync(binPhotosEntity);
             await _context.SaveChangesAsync();
@@ -47,13 +76,22 @@ namespace EcoMonitor.UnitTest.Repositories
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
 
             // Act
-            var result = await binPhotoRepo.GetAllBinPhotosAsync();
+            var photos = await binPhotoRepo.GetAllBinPhotosAsync();
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count());
-            Assert.Contains(result, bp => bp.FileName == "Бак на Калинина.jpg");
-            Assert.Contains(result, bp => bp.FileName == "Бак на Кирова.jpg");
+            Assert.NotNull(photos);
+            Assert.Equal(2, photos.Count());
+            Assert.Contains(photos, bp => bp.FileName == "Бак на Калинина.jpg");
+            Assert.Contains(photos, bp => bp.FileName == "Бак на Кирова.jpg");
+
+            foreach (var photo in photos)
+            {
+                Assert.NotNull(photo.UploadedBy);
+                Assert.Equal(_user.Email.Value, photo.UploadedBy.Email.Value);
+                Assert.Equal(_user.Firstname, photo.UploadedBy.Firstname);
+                Assert.Equal(_user.Surname, photo.UploadedBy.Surname);
+                Assert.Equal(_user.Role.Name, photo.UploadedBy.Role.Name);
+            }
         }
 
         [Fact]
@@ -61,7 +99,27 @@ namespace EcoMonitor.UnitTest.Repositories
         {
             // Arrange
             var plasticId = Guid.NewGuid();
-            var organicId = Guid.NewGuid();
+            
+            var roleEntity = new UserRoleEntity
+            {
+                Id = UserRole.User.Id,
+                Name = UserRole.User.Name,
+                Description = UserRole.User.Description,
+                Permissions = UserRole.User.Permissions
+                    .Select(p => new PermissionEntity { Code = p.Code })
+                    .ToList()
+            };
+            
+            await _context.UserRoles.AddAsync(roleEntity);
+            await _context.SaveChangesAsync();
+
+            var userEntity = _mapper.Map<UserEntity>(_user);
+            
+            userEntity.RoleId = roleEntity.Id;
+            userEntity.Role = roleEntity;
+
+            await _context.Users.AddAsync(userEntity);
+            await _context.SaveChangesAsync();
 
             var binPhoto = BinPhoto.Create(
                 "Бак на Калинина.jpg",
@@ -76,28 +134,39 @@ namespace EcoMonitor.UnitTest.Repositories
                 );
 
             var binPhotoEntity = _mapper.Map<BinPhotoEntity>(binPhoto);
+            
+            binPhotoEntity.UploadedById = userEntity.Id;
+            binPhotoEntity.UploadedBy = userEntity;
 
             await _context.BinPhotos.AddAsync(binPhotoEntity);
             await _context.SaveChangesAsync();
 
             var binPhotoRepo = new BinPhotoRepository(_context, _mapper);
 
+
             // Act
-            var result = await binPhotoRepo.GetPhotoByIdAsync(binPhotoEntity.Id);
+            var photo = await binPhotoRepo.GetPhotoByIdAsync(binPhotoEntity.Id);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(binPhoto.Id, result.Id);
-            Assert.Equal("Бак на Калинина.jpg", result.FileName);
+            Assert.NotNull(photo);
+            Assert.Equal(binPhoto.Id, photo.Id);
+            Assert.Equal("Бак на Калинина.jpg", photo.FileName);
             Assert.Equal(
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
-                result.UrlFile);
-            Assert.Equal(57.55, result.Latitude);
-            Assert.Equal(38.41, result.Longitude);
+                photo.UrlFile);
+            Assert.Equal(57.55, photo.Latitude);
+            Assert.Equal(38.41, photo.Longitude);
             //Assert.Equal("Plastic", result.BinType);
-            Assert.Equal(0.7, result.FillLevel);
-            Assert.Equal(true, result.IsOutsideBin);
-            Assert.Equal("Test photo", result.Comment);
+            Assert.Equal(0.7, photo.FillLevel);
+            Assert.Equal(true, photo.IsOutsideBin);
+            Assert.Equal("Test photo", photo.Comment);
+
+            Assert.NotNull(photo.UploadedBy);
+            Assert.Equal(_user.Id, photo.UploadedBy.Id);
+            Assert.Equal(_user.Email.Value, photo.UploadedBy.Email.Value);
+            Assert.Equal(_user.Firstname, photo.UploadedBy.Firstname);
+            Assert.Equal(_user.Surname, photo.UploadedBy.Surname);
+            Assert.Equal(_user.Role.Name, photo.UploadedBy.Role.Name);
         }
 
         [Fact]

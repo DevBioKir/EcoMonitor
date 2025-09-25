@@ -29,8 +29,22 @@ namespace EcoMonitor.Core.Models.Users
             if (permissions != null)
                 _permissions.AddRange(permissions);
         }
+        
+        private UserRole(
+            Guid id,
+            string name, 
+            string description, 
+            IEnumerable<Permission>? permissions = null)
+        {
+            Id = Guid.NewGuid();
+            Name = name;
+            Description = description ?? string.Empty;
 
-        public static readonly UserRole Admin = new (
+            if (permissions != null)
+                _permissions.AddRange(permissions);
+        }
+
+        public static readonly UserRole Admin = new(
             "Admin",
             "Full access",
             new[]
@@ -78,6 +92,15 @@ namespace EcoMonitor.Core.Models.Users
                 throw new ArgumentNullException("Role name cannot be empty", nameof(name));
 
             return new UserRole(name, description, permission);
+        }
+
+        public static UserRole Restore(
+            Guid id,
+            string name,
+            string? description = null,
+            IEnumerable<Permission>? permissions = null)
+        {
+            return new UserRole(id, name, description, permissions);
         }
 
         internal void AddUser(User user)

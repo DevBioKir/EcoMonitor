@@ -6,23 +6,17 @@ using EcoMonitor.Infrastracture.Abstractions;
 
 namespace EcoMonitor.App.Factory.Users
 {
-    public class UserFactory : IUserFactory
+    public class UserFactory(IPasswordHasher passwordHasher) : IUserFactory
     {
-        private readonly IPasswordHasher _passwordHasher;
-
-        public UserFactory(IPasswordHasher passwordHasher)
-        {
-            _passwordHasher = passwordHasher;
-        }
-
         public User Create(string firstname, string surname, string email, string password)
         {
-            var passwordHash = PasswordHash.FromPlainPassword(password, _passwordHasher);
+            var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);
 
             return User.Create(firstname, surname, email, passwordHash);
         }
-
-        public User Restore(Guid id,
+        
+        public User Restore(
+            Guid id,
             string firstname,
             string surname,
             Email email,
@@ -31,7 +25,7 @@ namespace EcoMonitor.App.Factory.Users
             DateTime createdAt,
             DateTime lastLogindAt,
             DateTime lockedUntil,
-            List<BinPhoto> photos)
+            List<EcoMonitor.Core.Models.BinPhoto> photos)
         {
             return User.Restore(id, firstname, surname, email, passwordHash, role, createdAt, lastLogindAt, lockedUntil, photos);
         }

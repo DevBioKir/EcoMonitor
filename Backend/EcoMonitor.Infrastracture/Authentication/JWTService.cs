@@ -13,7 +13,7 @@ namespace EcoMonitor.Infrastracture.Authentication
         private readonly JwtSecurityTokenHandler _tokenHandler;
 
         public JWTService(
-            // обертка, через которую ASP передает настройки, обычно из appsettings.json
+            // обертка, через которую ASP передает настройки из appsettings.json
             IOptions<JwtSettings> jwtSettings)
         {
             _jwtSettings = jwtSettings.Value;

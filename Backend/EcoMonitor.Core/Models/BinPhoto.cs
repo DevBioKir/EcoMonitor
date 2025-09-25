@@ -8,9 +8,6 @@ namespace EcoMonitor.Core.Models
         public Guid Id { get; private set; }
         public string FileName { get; private set; } = string.Empty;
         public string UrlFile { get; private set; } = string.Empty;
-        //public double Latitude { get; private set; }
-        //public double Longitude { get; private set; }
-
         // PostGIS
         //public Point Location { get; private set; } = null!;
         public double Latitude { get; private set; }
@@ -28,8 +25,8 @@ namespace EcoMonitor.Core.Models
         private BinPhoto(
             string fileName,
             string urlFile,
-            double longitude,
             double latitude,
+            double longitude,
             IEnumerable<Guid> BinTypeId,
             double fillLevel,
             bool isOutsideBin,
@@ -50,6 +47,32 @@ namespace EcoMonitor.Core.Models
             Latitude = latitude;
             Longitude = longitude;
             UploadedAt = DateTime.UtcNow;
+            FillLevel = fillLevel;
+            IsOutsideBin = isOutsideBin;
+            Comment = comment;
+            UploadedBy = uploadedBy;
+            UploadedById = uploadedBy.Id;
+        }
+
+        private BinPhoto(
+            Guid id,
+            string fileName,
+            string urlFile,
+            double latitude,
+            double longitude,
+            DateTime uploadedAt,
+            IEnumerable<Guid> BinTypeId,
+            double fillLevel,
+            bool isOutsideBin,
+            string comment,
+            User uploadedBy)
+        {
+            Id = id;
+            FileName = fileName;
+            UrlFile = urlFile;
+            Latitude = latitude;
+            Longitude = longitude;
+            UploadedAt = uploadedAt;
             FillLevel = fillLevel;
             IsOutsideBin = isOutsideBin;
             Comment = comment;
@@ -92,8 +115,8 @@ namespace EcoMonitor.Core.Models
         public static BinPhoto Create(
             string fileName,
             string urlFile,
-            double longitude,
             double latitude,
+            double longitude,
             IEnumerable<Guid> BinTypeId,
             double fillLevel,
             bool isOutsideBin,
@@ -125,7 +148,48 @@ namespace EcoMonitor.Core.Models
 
             return photo;
         }
+        
+        public static BinPhoto Restore(
+            Guid id,
+            string fileName,
+            string urlFile,
+            double latitude,
+            double longitude,
+            DateTime uploadedAt,
+            IEnumerable<Guid> BinTypeId,
+            double fillLevel,
+            bool isOutsideBin,
+            string comment,
+            User uploadedBy)
+        {
+            var photo = new BinPhoto(
+                id, 
+                fileName,
+                urlFile,
+                latitude,
+                longitude,
+                uploadedAt,
+                BinTypeId,
+                fillLevel,
+                isOutsideBin,
+                comment,
+                uploadedBy);
 
+            if (BinTypeId == null || !BinTypeId.Any())
+            {
+                throw new Exception("BinTypeId required");
+            }
+
+            foreach (var binTypeId in BinTypeId)
+            {
+                photo.AddBinType(binTypeId);
+            }
+
+            photo.Validate();
+
+            return photo;
+        }
+        
         public void AddBinType(Guid binTypeId)
         {
             if (!BinPhotoBinTypes.Any(x => x.BinTypeId == binTypeId) 
@@ -142,6 +206,11 @@ namespace EcoMonitor.Core.Models
             {
                 BinPhotoBinTypes.Remove(link);
             }
+        }
+
+        public void SetUploadedBy(User uploadedBy)
+        {
+            UploadedBy = uploadedBy ?? throw new ArgumentNullException(nameof(uploadedBy));
         }
     }
 }

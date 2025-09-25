@@ -18,7 +18,7 @@ var env = builder.Environment;
 
 builder.Services.AddControllers();
 
-//для Swagger
+//пїЅпїЅпїЅ Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -32,7 +32,7 @@ TypeAdapterConfig.GlobalSettings.Scan(typeof(MappingConfig).Assembly);
 builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
-// Регистрируем путь как строку
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 builder.Services.AddSingleton(env.WebRootPath);
 builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
 
@@ -50,7 +50,7 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://192.168.1.154:8081")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
-                  //.AllowCredentials(); для куки
+                  //.AllowCredentials(); пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         });
 });
 
@@ -80,7 +80,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // Включаем Swagger в Development
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Swagger пїЅ Development
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -100,6 +100,7 @@ app.UseCors("AllowFrontend");
 
 //app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

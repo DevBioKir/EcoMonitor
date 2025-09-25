@@ -22,7 +22,10 @@ namespace EcoMonitor.DataAccess.Repositories
         {
             var binPhotosEntity = await _context.BinPhotos
                 .Include(bp => bp.BinPhotoBinTypes)
-                .ThenInclude(bbt => bbt.BinType)
+                    .ThenInclude(bbt => bbt.BinType)
+                .Include(bp => bp.UploadedBy)
+                    .ThenInclude(u => u.Role)
+                        .ThenInclude(r => r.Permissions)
                 //.AsNoTracking()
                 .ToListAsync();
 
@@ -66,7 +69,10 @@ namespace EcoMonitor.DataAccess.Repositories
         {
             var entityBinPhoto = await _context.BinPhotos
                 .Include(bp => bp.BinPhotoBinTypes)
-                .ThenInclude(bbt => bbt.BinType)
+                    .ThenInclude(bbt => bbt.BinType)
+                .Include(bp => bp.UploadedBy)
+                    .ThenInclude(u => u.Role)
+                    .ThenInclude(r => r.Permissions)
                 .FirstOrDefaultAsync(b => b.Id == photoBinId);
 
             if (entityBinPhoto == null)

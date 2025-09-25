@@ -16,9 +16,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EcoMonitor.Contracts\EcoMonitor.Contracts.csproj" />
-    <ProjectReference Include="..\EcoMonitor.Core\EcoMonitor.Core.csproj" />
     <ProjectReference Include="..\EcoMonitor.DataAccess\EcoMonitor.DataAccess.csproj" />
     <ProjectReference Include="..\EcoMonitor.Infrastracture\EcoMonitor.Infrastracture.csproj" />
+    <ProjectReference Include="..\EcoMonitor.Core\EcoMonitor.Core.csproj" />
   </ItemGroup>
 
 </Project>

@@ -76,11 +76,11 @@ namespace EcoMonitor.UnitTest.Repositories.UserRepo
         public async Task GetUserById_ReturnTheFondUser()
         {
             // Arrange
-            var userFactory = new UserFactory(_passwordHasher);
+            //var userFactory = new UserFactory(_passwordHasher);
 
             var emailIvan = Email.Create("ivanov@mail.ry");
 
-            var user = userFactory.Create(
+            var user = _userFactory.Create(
                     "Ivan",
                     "Ivanov",
                     emailIvan.Value,

@@ -83,25 +83,27 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.UploadedBy, src => src.UploadedBy);
                 //.Ignore(dest => dest.BinPhotoBinTypes);
 
-            config.NewConfig<BinPhotoEntity, BinPhoto>()
-                .ConstructUsing(src =>
-                    BinPhoto.Create(
-                        src.FileName,
-                        src.UrlFile,
-                        src.Location.Y,  // latitude
-                        src.Location.X,  // longitude
-                        src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
-                        src.FillLevel,
-                        src.IsOutsideBin,
-                        src.Comment,
-                        src.UploadedBy != null 
-                            ? _userFactory.Restore(
+                config.NewConfig<BinPhotoEntity, BinPhoto>()
+                    .MapWith(src =>
+                        BinPhoto.Restore(
+                            src.Id,
+                            src.FileName,
+                            src.UrlFile,
+                            src.Location.Y,
+                            src.Location.X,
+                            src.UploadedAt,
+                            src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
+                            src.FillLevel,
+                            src.IsOutsideBin,
+                            src.Comment,
+                            _userFactory.Restore(
                                 src.UploadedBy.Id,
                                 src.UploadedBy.Firstname,
                                 src.UploadedBy.Surname,
                                 Email.Create(src.UploadedBy.Email),
                                 PasswordHash.FromHash(src.UploadedBy.PasswordHash),
-                                UserRole.Create(                  // <- здесь
+                                UserRole.Restore(
+                                    src.UploadedBy.Role.Id,
                                     src.UploadedBy.Role.Name,
                                     src.UploadedBy.Role.Description,
                                     src.UploadedBy.Role.Permissions.Select(p => new Permission(p.Code)).ToList()
@@ -111,15 +113,93 @@ namespace EcoMonitor.App.Mapper
                                 src.UploadedBy.LockedUntil,
                                 new List<BinPhoto>()
                             )
-                            : null
-                    )
-                )
-                .Ignore(dest => dest.BinPhotoBinTypes)
-                .AfterMapping((src, dest) =>
-                {
-                    foreach (var bbt in src.BinPhotoBinTypes)
-                        dest.AddBinType(bbt.BinTypeId);
-                });
+                        )
+                    );
+                
+                // config.NewConfig<BinPhotoEntity, BinPhoto>()
+                //     .ConstructUsing(src =>
+                //         BinPhoto.Create(
+                //             src.FileName,
+                //             src.UrlFile,
+                //             src.Location.Y,  // latitude
+                //             src.Location.X,  // longitude
+                //             src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
+                //             src.FillLevel,
+                //             src.IsOutsideBin,
+                //             src.Comment,
+                //             null
+                //         )
+                //     )
+                //     .Ignore(dest => dest.BinPhotoBinTypes)
+                //     .AfterMapping((src, dest) =>
+                //     {
+                //         if (src.UploadedBy != null)
+                //         {
+                //             var user = User.Restore(
+                //                 src.UploadedBy.Id,
+                //                 src.UploadedBy.Firstname,
+                //                 src.UploadedBy.Surname,
+                //                 Email.Create(src.UploadedBy.Email),
+                //                 PasswordHash.FromHash(src.UploadedBy.PasswordHash),
+                //                 UserRole.Restore(
+                //                     src.UploadedBy.Role.Id,
+                //                     src.UploadedBy.Role.Name,
+                //                     src.UploadedBy.Role.Description,
+                //                     src.UploadedBy.Role.Permissions
+                //                         .Select(p => new Permission(p.Code))
+                //                         .ToList()
+                //                 ),
+                //                 src.UploadedBy.CreatedAt,
+                //                 src.UploadedBy.LastLogindAt,
+                //                 src.UploadedBy.LockedUntil,
+                //                 new List<BinPhoto>()
+                //             );
+                //
+                //             dest.SetUploadedBy(user);
+                //         }
+                //         
+                //         foreach (var bbt in src.BinPhotoBinTypes)
+                //             dest.AddBinType(bbt.BinTypeId);
+                //     });
+                
+            // config.NewConfig<BinPhotoEntity, BinPhoto>()
+            //     .ConstructUsing(src =>
+            //         BinPhoto.Create(
+            //             src.FileName,
+            //             src.UrlFile,
+            //             src.Location.Y,  // latitude
+            //             src.Location.X,  // longitude
+            //             src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
+            //             src.FillLevel,
+            //             src.IsOutsideBin,
+            //             src.Comment,
+            //             src.UploadedBy != null 
+            //                 ? _userFactory.Restore(
+            //                     src.UploadedBy.Id,
+            //                     src.UploadedBy.Firstname,
+            //                     src.UploadedBy.Surname,
+            //                     Email.Create(src.UploadedBy.Email),
+            //                     PasswordHash.FromHash(src.UploadedBy.PasswordHash),
+            //                     UserRole.Restore(     
+            //                         src.UploadedBy.Role.Id,
+            //                         src.UploadedBy.Role.Name,
+            //                         src.UploadedBy.Role.Description,
+            //                         src.UploadedBy.Role.Permissions.Select(p => new Permission(p.Code)).ToList()
+            //                     ),
+            //                     src.UploadedBy.CreatedAt,
+            //                     src.UploadedBy.LastLogindAt,
+            //                     src.UploadedBy.LockedUntil,
+            //                     new List<BinPhoto>()
+            //                 )
+            //                 : null
+            //         )
+            //     )
+            //     .Ignore(dest => dest.BinPhotoBinTypes)
+            //     .AfterMapping((src, dest) =>
+            //     {
+            //         foreach (var bbt in src.BinPhotoBinTypes)
+            //             dest.AddBinType(bbt.BinTypeId);
+            //     });
 
             /// <summary>
             /// Mapping Entities, Domain for BinType

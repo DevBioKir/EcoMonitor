@@ -2,15 +2,14 @@
 using EcoMonitor.App.Factory.Users;
 using EcoMonitor.App.Mapper;
 using EcoMonitor.Core.Models.Users;
+using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess;
 using EcoMonitor.Infrastracture.Abstractions;
-using EcoMonitor.Infrastracture.Pipeline;
 using EcoMonitor.Infrastracture.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace EcoMonitor.UnitTest
 {
@@ -35,11 +34,6 @@ namespace EcoMonitor.UnitTest
             {
                 options.UseInMemoryDatabase(Guid.NewGuid().ToString());
             });
-
-            // var config = new TypeAdapterConfig();
-            // config.Scan(typeof(MappingConfig).Assembly);
-            // services.AddSingleton(config);
-            // services.AddSingleton<IMapper, ServiceMapper>();
 
             services.AddSingleton<TypeAdapterConfig>(sp =>
             {
@@ -71,11 +65,14 @@ namespace EcoMonitor.UnitTest
 
 
 
+            var emailIvan = Email.Create("ivanov@mail.ry");
+            
             _user = _userFactory.Create(
                 "Peter",
                 "Petrov",
-                "petrov@mail.ru",
+                emailIvan.Value,
                 "wadsaf341232sad");
+
 
             SeeData();
         }
