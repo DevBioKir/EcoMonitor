@@ -89,10 +89,8 @@ namespace EcoMonitor.Core.Models.Users
             string surname,
             string email,
             PasswordHash passwordHash)
-            //IPasswordHasher hasher)
         {
             var emailVO = Email.Create(email);
-            //var passwordHash = PasswordHash.FromPlainPassword(password, hasher);
 
             return new User(firstname, surname, emailVO, passwordHash, UserRole.User);
         }
@@ -110,8 +108,6 @@ namespace EcoMonitor.Core.Models.Users
             DateTime lockedUntil,
             List<BinPhoto> photos)
         {
-            //var emailVO = Email.Create(email);
-
             return new User (
                 id, firstname, surname, email, passwordHash, role, createdAt, lastLogindAt, lockedUntil, photos);
         }
@@ -119,9 +115,9 @@ namespace EcoMonitor.Core.Models.Users
         public bool CheckPassword(string plainPassword, IPasswordHasher hasher) => 
             PasswordHash.Verify(plainPassword, hasher);
 
-        public void SetPole(UserRole newRole, User currentUser)
+        public void SetRole(UserRole newRole, User currentUser)
         {
-            if(newRole == null) throw new ArgumentNullException(nameof(newRole));
+            if (newRole == null) throw new ArgumentNullException(nameof(newRole));
             if (currentUser == null) throw new ArgumentNullException(nameof(currentUser));
 
             if(!currentUser.HasPermission(Permission.RolesManage))
@@ -131,7 +127,11 @@ namespace EcoMonitor.Core.Models.Users
             RoleId = newRole.Id;
         }
 
-        public bool HasPermission(Permission permission) => 
-            Role.HasPermission(permission);
+        public bool HasPermission(Permission permission) => Role.HasPermission(permission);
+        public void UpdateFirstname(string newFirstname) => Firstname = newFirstname;
+        public void UpdateSurname(string newSurname) => Surname = newSurname;
+        public void UpdateEmail(string newEmail) => Email = Email.Create(newEmail);
+        public void UpdateRole(UserRole newRole) => Role = newRole;
+        public void UpdateLastLoggedAt(DateTime newLastLoggedAt) => LastLogindAt = newLastLoggedAt;
     }
 }

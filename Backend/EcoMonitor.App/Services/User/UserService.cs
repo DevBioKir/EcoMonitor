@@ -1,4 +1,6 @@
+using EcoMonitor.App.Abstractions;
 using EcoMonitor.Contracts.Contracts.User;
+using EcoMonitor.DataAccess;
 using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Authentication;
 using MapsterMapper;
@@ -8,17 +10,20 @@ namespace EcoMonitor.App.Services.User;
 
 public class UserService : IUserService
 {
+    private readonly IUserFactory _userFactory;
     private readonly IMapper _mapper;
     private readonly IUserRepository _userRepository;
     private readonly  IJWTService _jwtTokenService;
     private readonly ILogger<UserService> _logger;
 
     public UserService(
+        IUserFactory userFactory,
         IMapper mapper, 
         IUserRepository userRepository, 
         IJWTService jwtTokenService, 
         ILogger<UserService> logger)
     {
+        _userFactory = userFactory;
         _mapper = mapper;
         _userRepository = userRepository;
         _jwtTokenService = jwtTokenService;
@@ -35,7 +40,12 @@ public class UserService : IUserService
 
     public async Task AddAsync(UserRequest user, CancellationToken cancellationToken = default)
     {
-        var userDomain = _mapper.Map<Core.Models.Users.User>(user);
+        var userDomain = _userFactory.Create(
+                                    user.Firstname,
+                                    user.Surname,
+                                    user.Email,
+                                    user.Password);
+        
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }
 
@@ -55,6 +65,14 @@ public class UserService : IUserService
 
     public async Task<UserResponse> UpdateAsync(UserRequest user, CancellationToken cancellationToken = default)
     {
+        var selectedUser = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
+        if (selectedUser == null)
+            throw new KeyNotFoundException($"User with id {user.Id} not found");
+        
+        
+        
+        selectedUser.SetКole();
+        
         var userDomain = _mapper.Map<Core.Models.Users.User>(user);
         await _userRepository.UpdateAsync(userDomain, cancellationToken);
         
