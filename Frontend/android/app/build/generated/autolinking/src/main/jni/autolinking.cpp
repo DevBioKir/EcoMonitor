@@ -12,6 +12,7 @@
 #include <rngesturehandler_codegen.h>
 #include <react/renderer/components/rngesturehandler_codegen/ComponentDescriptors.h>
 #include <RNImagePickerSpec.h>
+#include <rnreanimated.h>
 #include <safeareacontext.h>
 #include <react/renderer/components/safeareacontext/ComponentDescriptors.h>
 #include <rnscreens.h>
@@ -32,6 +33,10 @@ return module_rngesturehandler_codegen;
 auto module_RNImagePickerSpec = RNImagePickerSpec_ModuleProvider(moduleName, params);
 if (module_RNImagePickerSpec != nullptr) {
 return module_RNImagePickerSpec;
+}
+auto module_rnreanimated = rnreanimated_ModuleProvider(moduleName, params);
+if (module_rnreanimated != nullptr) {
+return module_rnreanimated;
 }
 auto module_safeareacontext = safeareacontext_ModuleProvider(moduleName, params);
 if (module_safeareacontext != nullptr) {
@@ -66,6 +71,7 @@ providerRegistry->add(concreteComponentDescriptorProvider<RNSScreenComponentDesc
 providerRegistry->add(concreteComponentDescriptorProvider<RNSScreenFooterComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNSScreenContentWrapperComponentDescriptor>());
 providerRegistry->add(concreteComponentDescriptorProvider<RNSModalScreenComponentDescriptor>());
+providerRegistry->add(concreteComponentDescriptorProvider<RNSBottomTabsComponentDescriptor>());
   return;
 }
 

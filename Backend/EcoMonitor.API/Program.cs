@@ -1,14 +1,16 @@
 using EcoMonitor.App.Mapper;
+using EcoMonitor.App.Services;
 using EcoMonitor.DataAccess;
 using EcoMonitor.DataAccess.Repositories;
+using EcoMonitor.Infrastracture.Abstractions;
+using EcoMonitor.Infrastracture.Authentication;
 using EcoMonitor.Infrastracture.Middleware;
-using Microsoft.AspNetCore.Http.Features;
+using EcoMonitor.Infrastracture.Pipeline;
+using EcoMonitor.Infrastracture.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
-using EcoMonitor.App.Services;
-using EcoMonitor.Infrastracture.Abstractions;
-using EcoMonitor.Infrastracture.Services;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -16,7 +18,7 @@ var env = builder.Environment;
 
 builder.Services.AddControllers();
 
-//для Swagger
+//пїЅпїЅпїЅ Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -30,7 +32,7 @@ TypeAdapterConfig.GlobalSettings.Scan(typeof(MappingConfig).Assembly);
 builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
-// Регистрируем путь как строку
+// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 builder.Services.AddSingleton(env.WebRootPath);
 builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
 
@@ -48,15 +50,28 @@ builder.Services.AddCors(options =>
             policy.WithOrigins("http://192.168.1.154:8081")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
-                  //.AllowCredentials(); для куки
+                  //.AllowCredentials(); пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
         });
 });
 
 builder.Services.AddScoped<IBinPhotoRepository, BinPhotoRepository>();
+builder.Services.AddScoped<IBinTypeRepository, BinTypeRepository>();
 
 builder.Services.AddScoped<IBinPhotoService, BinPhotoService>();
+builder.Services.AddScoped<IBinTypeService, BinTypeService>();
 
 builder.Services.AddScoped<IGeolocationService, GeolocationService>();
+
+builder.Services.AddScoped<IImagePipeline, ImagePipeline>();
+
+
+
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddScoped<IJWTService, JWTService>();
+
+
+
 
 builder.WebHost.UseUrls("http://0.0.0.0:5198");
 
@@ -65,10 +80,19 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // Включаем Swagger в Development
+    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Swagger пїЅ Development
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(env.ContentRootPath, "wwwroot", "Photos")),
+    RequestPath = "/Photos"
+});
+
+app.UseStaticFiles();
 
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
@@ -76,6 +100,7 @@ app.UseCors("AllowFrontend");
 
 //app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

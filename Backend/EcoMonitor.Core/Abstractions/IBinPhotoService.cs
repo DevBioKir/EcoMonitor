@@ -1,14 +1,19 @@
-﻿using EcoMonitor.Contracts.Contracts;
-using EcoMonitor.Core.Models;
+﻿using EcoMonitor.Contracts.Contracts.BinPhoto;
+using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
 
 namespace EcoMonitor.App.Services
 {
     public interface IBinPhotoService
     {
-        Task<ICollection<BinPhotoResponse>> GetAllBinPhotosAsync();
+        Task<IReadOnlyList<BinPhotoResponse>> GetAllBinPhotosAsync();
         Task<BinPhotoResponse> GetPhotoByIdAsync(Guid photoBinId);
         Task<BinPhotoResponse> AddBinPhotoAsync(BinPhotoRequest requestBinPhoto);
         Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId);
-        Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request);
+        Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request, CancellationToken ct);
+        Task<IEnumerable<BinPhotoResponse>> GetPhotosInBoundsAsync(
+            double north,
+            double south,
+            double east,
+            double west);
     }
 }

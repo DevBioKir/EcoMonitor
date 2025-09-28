@@ -1,4 +1,6 @@
 import { Component } from "react";
+import { FlatList, Text, TouchableOpacity, View } from 'react-native';
+import { getAllPhotos } from "../services/GetAllBinPhotos"
 
 export class AllPhotosScreen extends Component {
     state = {
@@ -6,14 +8,22 @@ export class AllPhotosScreen extends Component {
         isLoading: false,
     };
 
-    componentsDidMount = () => {
+    componentDidMount = () => {
         this.onRefresh();
     };
 
     getMoreData = (isRefreshing) => {};
 
-    onRefresh = () => {
-        this.getMoreData(true);
+    onRefresh = async() => {
+        this.setState({isLoading: true});
+        try{
+            const date = await getAllPhotos();
+            this.setState({list: date})
+        } catch (err) {
+            console.error(err);
+        } finally {
+            this.setState({isLoading: false})
+        }
     };
 
     jnScrollToEnd = ({distanceFromEnd}) => {
@@ -24,14 +34,29 @@ export class AllPhotosScreen extends Component {
     };
 
     onItemPress = (item) => {
-        this.props.navigation.navigate('info', {person: item});
+        this.props.navigation.navigate('PhotoInfo', {photo: item});
     };
 
-    keyExtractor = (person) => person.login.uuid;
+    keyExtractor = (item) => item.id || item.url || String(item.someUniqueId);
 
-    renderItem = ({item}) => {
-        return (
-            <></>
-        );
-    }
+    renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => this.onItemPress(item)}>
+      <View style={{ padding: 10, borderBottomWidth: 1, borderColor: '#ddd' }}>
+        <Text>{item.comment || 'Без комментария'}</Text>
+        {/* можно добавить превью фото, дату и т.п. */}
+      </View>
+    </TouchableOpacity>
+  );
+
+  render() {
+    return (
+      <FlatList
+        data={this.state.list}
+        keyExtractor={this.keyExtractor}
+        renderItem={this.renderItem}
+        refreshing={this.state.isLoading}
+        onRefresh={this.onRefresh}
+      />
+    );
+  }
 }

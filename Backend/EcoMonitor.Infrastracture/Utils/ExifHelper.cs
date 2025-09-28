@@ -1,4 +1,5 @@
-﻿using SixLabors.ImageSharp;
+﻿using EcoMonitor.Infrastracture.Abstractions;
+using SixLabors.ImageSharp;
 
 namespace EcoMonitor.Infrastracture.Utils
 {

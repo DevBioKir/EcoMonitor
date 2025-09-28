@@ -113,6 +113,8 @@ dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
     implementation("com.yandex.android:maps.mobile:4.17.0-lite")
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("org.json:json:20230227")
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

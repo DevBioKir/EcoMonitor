@@ -1,0 +1,12 @@
+﻿[HttpPost("login")]
+public IActionResult Login([FromBody] LoginRequest request, [FromServices] IJwtTokenService jwtService)
+{
+    // тут проверяешь пользователя в БД
+    var user = _userRepository.GetByEmail(request.Email);
+
+    if (user == null || !user.CheckPassword(request.Password))
+        return Unauthorized();
+
+    var token = jwtService.GenerateToken(user);
+    return Ok(new { token });
+}

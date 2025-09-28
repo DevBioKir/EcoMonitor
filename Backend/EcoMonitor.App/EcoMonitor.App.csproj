@@ -7,7 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="HeyRed.ImageSharp.Heif" Version="2.1.3" />
+    <PackageReference Include="LibHeif.Native" Version="1.15.1" />
     <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
   </ItemGroup>
 
@@ -15,10 +18,7 @@
     <ProjectReference Include="..\EcoMonitor.Contracts\EcoMonitor.Contracts.csproj" />
     <ProjectReference Include="..\EcoMonitor.DataAccess\EcoMonitor.DataAccess.csproj" />
     <ProjectReference Include="..\EcoMonitor.Infrastracture\EcoMonitor.Infrastracture.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Abstractions\" />
+    <ProjectReference Include="..\EcoMonitor.Core\EcoMonitor.Core.csproj" />
   </ItemGroup>
 
 </Project>

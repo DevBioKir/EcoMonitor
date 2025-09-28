@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoMonitor.Infrastracture",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoMonitor.Contracts", "EcoMonitor.Contracts\EcoMonitor.Contracts.csproj", "{ACD7E5A1-9016-4E14-A8D4-07577380F178}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EcoMonitor.AI", "EcoMonitor.AI\EcoMonitor.AI.csproj", "{7F98E0C3-A18C-425B-A051-EEE8D75988D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{ACD7E5A1-9016-4E14-A8D4-07577380F178}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACD7E5A1-9016-4E14-A8D4-07577380F178}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACD7E5A1-9016-4E14-A8D4-07577380F178}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7F98E0C3-A18C-425B-A051-EEE8D75988D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7F98E0C3-A18C-425B-A051-EEE8D75988D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7F98E0C3-A18C-425B-A051-EEE8D75988D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7F98E0C3-A18C-425B-A051-EEE8D75988D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

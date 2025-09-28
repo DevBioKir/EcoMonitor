@@ -4,7 +4,7 @@ export interface BinPhotoUploadRequest {
     name: string;
     type: string;
   };
-  binType: string;
+  binTypeId: string[];
   fillLevel: number;
   isOutsideBin: boolean;
   comment: string;
