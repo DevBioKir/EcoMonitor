@@ -1,6 +1,7 @@
 using EcoMonitor.App.Abstractions;
+using EcoMonitor.App.Services.Authorization;
 using EcoMonitor.Contracts.Contracts.User;
-using EcoMonitor.DataAccess;
+using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Authentication;
 using MapsterMapper;
@@ -13,33 +14,55 @@ public class UserService : IUserService
     private readonly IUserFactory _userFactory;
     private readonly IMapper _mapper;
     private readonly IUserRepository _userRepository;
-    private readonly  IJWTService _jwtTokenService;
+    private readonly IAuthService _authService;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly IJWTService _jwtTokenService;
     private readonly ILogger<UserService> _logger;
 
     public UserService(
         IUserFactory userFactory,
-        IMapper mapper, 
-        IUserRepository userRepository, 
-        IJWTService jwtTokenService, 
+        IMapper mapper,
+        IUserRepository userRepository,
+        IAuthService authService,
+        IAuthorizationService authorizationService,
+        IJWTService jwtTokenService,
         ILogger<UserService> logger)
     {
         _userFactory = userFactory;
         _mapper = mapper;
         _userRepository = userRepository;
+        _authService = authService;
+        _authorizationService = authorizationService;
         _jwtTokenService = jwtTokenService;
         _logger = logger;
     }
 
 
-    public async Task<IReadOnlyList<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<UserResponse>> GetAllAsync(
+        Guid currentUserId, 
+        CancellationToken cancellationToken = default)
     {
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
+        if (currentUser == null) 
+            throw new UnauthorizedAccessException("Current user not found");
+        
+        if (!currentUser.HasPermission(Permission.UsersView))
+            throw new UnauthorizedAccessException($"You do not have permission to view all users");
+        
         var users =  await _userRepository.GetAllAsync(cancellationToken);
         
         return _mapper.Map<IReadOnlyList<UserResponse>>(users);
     }
 
-    public async Task AddAsync(UserRequest user, CancellationToken cancellationToken = default)
+    public async Task AddAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
     {
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
+        if (currentUser == null) 
+            throw new UnauthorizedAccessException("Current user not found");
+        
+        if (!currentUser.HasPermission(Permission.UsersAdd))
+            throw new UnauthorizedAccessException("You do not have permission to add users");
+        
         var userDomain = _userFactory.Create(
                                     user.Firstname,
                                     user.Surname,
@@ -49,8 +72,15 @@ public class UserService : IUserService
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }
 
-    public async Task<UserResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<UserResponse> GetByIdAsync(Guid id, Guid currentUserId, CancellationToken cancellationToken = default)
     {
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
+        if (currentUser == null) 
+            throw new UnauthorizedAccessException("Current user not found");
+        
+        if (!currentUser.HasPermission(Permission.UsersView))
+            throw new UnauthorizedAccessException($"You do not have permission to view all users");
+        
         var user =  await _userRepository.GetByIdAsync(id, cancellationToken);
         
         return _mapper.Map<UserResponse>(user);
@@ -68,11 +98,7 @@ public class UserService : IUserService
         var selectedUser = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
         if (selectedUser == null)
             throw new KeyNotFoundException($"User with id {user.Id} not found");
-        
-        
-        
-        selectedUser.SetКole();
-        
+ 
         var userDomain = _mapper.Map<Core.Models.Users.User>(user);
         await _userRepository.UpdateAsync(userDomain, cancellationToken);
         

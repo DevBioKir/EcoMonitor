@@ -6,6 +6,6 @@ namespace EcoMonitor.App.Services;
 
 public interface IAuthService
 {
-    Task<AuthResponse> Login(AuthRequest request, CancellationToken cancellationToken = default);
+    Task<AuthResponse> LoginAsync(AuthRequest request, CancellationToken cancellationToken = default);
     Task ChangePassword(Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
 }
