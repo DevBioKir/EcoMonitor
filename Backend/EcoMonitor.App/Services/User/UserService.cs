@@ -14,40 +14,31 @@ public class UserService : IUserService
     private readonly IUserFactory _userFactory;
     private readonly IMapper _mapper;
     private readonly IUserRepository _userRepository;
-    private readonly IAuthService _authService;
     private readonly IAuthorizationService _authorizationService;
-    private readonly IJWTService _jwtTokenService;
     private readonly ILogger<UserService> _logger;
 
     public UserService(
         IUserFactory userFactory,
         IMapper mapper,
         IUserRepository userRepository,
-        IAuthService authService,
         IAuthorizationService authorizationService,
-        IJWTService jwtTokenService,
         ILogger<UserService> logger)
     {
         _userFactory = userFactory;
         _mapper = mapper;
         _userRepository = userRepository;
-        _authService = authService;
         _authorizationService = authorizationService;
-        _jwtTokenService = jwtTokenService;
         _logger = logger;
     }
-
-
+    
     public async Task<IReadOnlyList<UserResponse>> GetAllAsync(
         Guid currentUserId, 
         CancellationToken cancellationToken = default)
     {
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
-        if (currentUser == null) 
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
             throw new UnauthorizedAccessException("Current user not found");
         
-        if (!currentUser.HasPermission(Permission.UsersView))
-            throw new UnauthorizedAccessException($"You do not have permission to view all users");
+        _authorizationService.CheckPermisson(currentUser, Permission.UsersView);
         
         var users =  await _userRepository.GetAllAsync(cancellationToken);
         
@@ -56,12 +47,10 @@ public class UserService : IUserService
 
     public async Task AddAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
     {
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
-        if (currentUser == null) 
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
             throw new UnauthorizedAccessException("Current user not found");
         
-        if (!currentUser.HasPermission(Permission.UsersAdd))
-            throw new UnauthorizedAccessException("You do not have permission to add users");
+        _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
         
         var userDomain = _userFactory.Create(
                                     user.Firstname,
@@ -72,15 +61,8 @@ public class UserService : IUserService
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }
 
-    public async Task<UserResponse> GetByIdAsync(Guid id, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<UserResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken);
-        if (currentUser == null) 
-            throw new UnauthorizedAccessException("Current user not found");
-        
-        if (!currentUser.HasPermission(Permission.UsersView))
-            throw new UnauthorizedAccessException($"You do not have permission to view all users");
-        
         var user =  await _userRepository.GetByIdAsync(id, cancellationToken);
         
         return _mapper.Map<UserResponse>(user);
@@ -93,20 +75,32 @@ public class UserService : IUserService
         return _mapper.Map<UserResponse>(userEmail);
     }
 
-    public async Task<UserResponse> UpdateAsync(UserRequest user, CancellationToken cancellationToken = default)
+    public async Task<UserResponse> UpdateAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
     {
-        var selectedUser = await _userRepository.GetByIdAsync(user.Id, cancellationToken);
-        if (selectedUser == null)
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
+            throw new UnauthorizedAccessException("Current user not found");
+        
+        _authorizationService.CheckPermisson(currentUser, Permission.UsersEdit);
+        
+        var selectedUser = await _userRepository.GetByIdAsync(user.Id, cancellationToken) ??
             throw new KeyNotFoundException($"User with id {user.Id} not found");
- 
-        var userDomain = _mapper.Map<Core.Models.Users.User>(user);
-        await _userRepository.UpdateAsync(userDomain, cancellationToken);
+        
+        selectedUser.UpdateFirstname(user.Firstname);
+        selectedUser.UpdateSurname(user.Surname);
+        //selectedUser.UpdateEmail(user.Email);
+
+        await _userRepository.UpdateAsync(selectedUser, cancellationToken);
         
         return _mapper.Map<UserResponse>(user);
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Guid id, Guid currentUserId, CancellationToken cancellationToken = default)
     {
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
+            throw new UnauthorizedAccessException("Current user not found");
+        
+        _authorizationService.CheckPermisson(currentUser, Permission.UsersDelete);
+        
         await _userRepository.DeleteAsync(id, cancellationToken);
     }
 }
