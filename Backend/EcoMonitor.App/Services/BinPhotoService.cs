@@ -37,9 +37,23 @@ namespace EcoMonitor.App.Services
             //_geo = geo;
         }
         public async Task<BinPhotoResponse> AddBinPhotoAsync(
-            BinPhotoRequest requestBinPhoto)
+            BinPhotoRequest request)
         {
-            var domainBinPhoto = _mapper.Map<BinPhoto>(requestBinPhoto);
+            var uploadedBy = await _userRepository.GetByIdAsync(request.UploadedById);
+            if (uploadedBy == null)
+                throw new KeyNotFoundException("User not found");
+            
+            var domainBinPhoto = BinPhoto.Create(
+                request.FileName,
+                request.UrlFile,
+                request.Latitude,
+                request.Longitude,
+                request.BinTypeId,
+                request.FillLevel,
+                request.IsOutsideBin,
+                request.Comment,
+                uploadedBy);
+            
             var addBinPhoto = await _binPhotoRepository.AddBinPhotoAsync(domainBinPhoto);
 
             return _mapper.Map<BinPhotoResponse>(addBinPhoto);

@@ -115,91 +115,6 @@ namespace EcoMonitor.App.Mapper
                             )
                         )
                     );
-                
-                // config.NewConfig<BinPhotoEntity, BinPhoto>()
-                //     .ConstructUsing(src =>
-                //         BinPhoto.Create(
-                //             src.FileName,
-                //             src.UrlFile,
-                //             src.Location.Y,  // latitude
-                //             src.Location.X,  // longitude
-                //             src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
-                //             src.FillLevel,
-                //             src.IsOutsideBin,
-                //             src.Comment,
-                //             null
-                //         )
-                //     )
-                //     .Ignore(dest => dest.BinPhotoBinTypes)
-                //     .AfterMapping((src, dest) =>
-                //     {
-                //         if (src.UploadedBy != null)
-                //         {
-                //             var user = User.Restore(
-                //                 src.UploadedBy.Id,
-                //                 src.UploadedBy.Firstname,
-                //                 src.UploadedBy.Surname,
-                //                 Email.Create(src.UploadedBy.Email),
-                //                 PasswordHash.FromHash(src.UploadedBy.PasswordHash),
-                //                 UserRole.Restore(
-                //                     src.UploadedBy.Role.Id,
-                //                     src.UploadedBy.Role.Name,
-                //                     src.UploadedBy.Role.Description,
-                //                     src.UploadedBy.Role.Permissions
-                //                         .Select(p => new Permission(p.Code))
-                //                         .ToList()
-                //                 ),
-                //                 src.UploadedBy.CreatedAt,
-                //                 src.UploadedBy.LastLogindAt,
-                //                 src.UploadedBy.LockedUntil,
-                //                 new List<BinPhoto>()
-                //             );
-                //
-                //             dest.SetUploadedBy(user);
-                //         }
-                //         
-                //         foreach (var bbt in src.BinPhotoBinTypes)
-                //             dest.AddBinType(bbt.BinTypeId);
-                //     });
-                
-            // config.NewConfig<BinPhotoEntity, BinPhoto>()
-            //     .ConstructUsing(src =>
-            //         BinPhoto.Create(
-            //             src.FileName,
-            //             src.UrlFile,
-            //             src.Location.Y,  // latitude
-            //             src.Location.X,  // longitude
-            //             src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
-            //             src.FillLevel,
-            //             src.IsOutsideBin,
-            //             src.Comment,
-            //             src.UploadedBy != null 
-            //                 ? _userFactory.Restore(
-            //                     src.UploadedBy.Id,
-            //                     src.UploadedBy.Firstname,
-            //                     src.UploadedBy.Surname,
-            //                     Email.Create(src.UploadedBy.Email),
-            //                     PasswordHash.FromHash(src.UploadedBy.PasswordHash),
-            //                     UserRole.Restore(     
-            //                         src.UploadedBy.Role.Id,
-            //                         src.UploadedBy.Role.Name,
-            //                         src.UploadedBy.Role.Description,
-            //                         src.UploadedBy.Role.Permissions.Select(p => new Permission(p.Code)).ToList()
-            //                     ),
-            //                     src.UploadedBy.CreatedAt,
-            //                     src.UploadedBy.LastLogindAt,
-            //                     src.UploadedBy.LockedUntil,
-            //                     new List<BinPhoto>()
-            //                 )
-            //                 : null
-            //         )
-            //     )
-            //     .Ignore(dest => dest.BinPhotoBinTypes)
-            //     .AfterMapping((src, dest) =>
-            //     {
-            //         foreach (var bbt in src.BinPhotoBinTypes)
-            //             dest.AddBinType(bbt.BinTypeId);
-            //     });
 
             /// <summary>
             /// Mapping Entities, Domain for BinType
@@ -331,20 +246,26 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.LockedUntil, src => src.LockedUntil)
                 .Map(dest => dest.BinPhoto, src => src.Photos.Adapt<List<BinPhotoEntity>>());
 
+            config.NewConfig<User, RegisterUserRequest>()
+                .Map(dest => dest.Firstname, src => src.Firstname)
+                .Map(dest => dest.Surname, src => src.Surname)
+                .Map(dest => dest.Email, src => src.Email.Value)
+                .Map(dest => dest.Password, src => src.PasswordHash.Hash);
+
             /// <summary>
             /// Mapping DTOs for BinPhoto
             /// </summary>
-            config.NewConfig<BinPhotoRequest, BinPhoto>()
-                .ConstructUsing(src => BinPhoto.Create(
-                    src.FileName,
-                    src.UrlFile,
-                    src.Latitude, // latitude
-                    src.Longitude,  // longitude
-                    src.BinTypeId,
-                    src.FillLevel,
-                    src.IsOutsideBin,
-                    src.Comment,
-                    src.UploadedBy != null ? src.UploadedBy.Adapt<User>() : null));
+            // config.NewConfig<BinPhotoRequest, BinPhoto>()
+            //     .ConstructUsing(src => BinPhoto.Create(
+            //         src.FileName,
+            //         src.UrlFile,
+            //         src.Latitude, // latitude
+            //         src.Longitude,  // longitude
+            //         src.BinTypeId,
+            //         src.FillLevel,
+            //         src.IsOutsideBin,
+            //         src.Comment,
+            //         src.UploadedBy != null ? src.UploadedBy.Adapt<User>() : null));
 
             config.NewConfig<BinPhoto, BinPhotoRequest>()
                 .Map(dest => dest.Id, src => src.Id)
@@ -357,7 +278,8 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
                 .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
                 .Map(dest => dest.Comment, src => src.Comment)
-                .Map(dest => dest.UploadedBy, src => src.UploadedBy);
+                .Map(dest => dest.UploadedById, src => src.UploadedBy.Id)
+                .Ignore(dest => dest.UploadedBy);
 
 
             config.NewConfig<BinPhoto, BinPhotoResponse>()
