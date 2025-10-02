@@ -1,5 +1,6 @@
 ﻿using EcoMonitor.App.Services;
 using EcoMonitor.Contracts.Contracts.Auth;
+using EcoMonitor.Contracts.Contracts.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -9,14 +10,14 @@ namespace EcoMonitor.API.Controllers.Authorization;
 [Route("api/[controller]")]
 public class AuthorizationController : ControllerBase
 {
-    private readonly IAuthService _authorizationService;
+    private readonly IAuthService _authService;
     private readonly ILogger<AuthorizationController> _logger;
 
     public AuthorizationController(
-        IAuthService authorizationService,
+        IAuthService authService,
         ILogger<AuthorizationController> logger)
     {
-        _authorizationService = authorizationService;
+        _authService = authService;
         _logger = logger;
     }
 
@@ -26,7 +27,7 @@ public class AuthorizationController : ControllerBase
     {
         try
         {
-            var response = await _authorizationService.LoginAsync(request, cancellationToken);
+            var response = await _authService.LoginAsync(request, cancellationToken);
             return Ok(response);
         }
         catch (UnauthorizedAccessException ex)
@@ -37,6 +38,26 @@ public class AuthorizationController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error during login for user: {Email}", request.Email);
+            return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
+        }
+    }
+
+    [HttpPost("register")]
+    public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await _authService.RegisterAsync(request, cancellationToken);
+            return Ok(response);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Failed registration attempt for user: {Email}", request.Email);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during registration for user: {Email}", request.Email);
             return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
         }
     }

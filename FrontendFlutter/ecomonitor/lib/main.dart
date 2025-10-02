@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:yandex_maps_mapkit_lite/mapkit.dart';
+import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
 import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
 import 'package:yandex_maps_mapkit_lite/init.dart' as init;
-import 'package:yandex_maps_mapkit_lite/image.dart' as image_provider show ImageProvider;
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Запрашиваем разрешение на геолокацию в рантайме
+  final status = await Permission.location.request();
+  if (status.isGranted) {
+    print('Location permission granted');
+  } else {
+    print('Location permission denied');
+    // Можно обработать случай отказа
+  }
+
+  const apiKey = 'b435f7c5-a250-4eb7-a2f8-3fff029ceb53';
+  await init.initMapkit(apiKey: apiKey);
+
   runApp(const MyApp());
 }
 
@@ -15,108 +29,89 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Минимальная Яндекс.Карта')),
-        body: YandexMap(
-          onMapCreated: (mapWindow) {
-            final map = mapWindow.map;
+      home: const MapScreen(),
+    );
+  }
+}
 
-            // Координаты центра Екатеринбурга
-            final center = Point(latitude: 56.838926, longitude: 60.605702);
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
 
-            // Перемещаем камеру
-            map.move(CameraPosition(center, zoom: 12, azimuth: 0, tilt: 0));
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
 
-            // Добавляем простую метку (без кастомного изображения)
-            map.mapObjects.addEmptyPlacemark(center);
-          },
-        ),
+class _MapScreenState extends State<MapScreen> {
+  bool _isMapkitActive = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startMapkit();
+  }
+
+  @override
+  void dispose() {
+    _stopMapkit();
+    super.dispose();
+  }
+
+  void _startMapkit() {
+    if (!_isMapkitActive) {
+      _isMapkitActive = true;
+      mapkit.onStart();
+    }
+  }
+
+  void _stopMapkit() {
+    if (_isMapkitActive) {
+      _isMapkitActive = false;
+      mapkit.onStop();
+    }
+  }
+
+  void _onMapCreated(MapWindow mapWindow) {
+    final center = Point(latitude: 56.838926, longitude: 60.605702);
+    mapWindow.map.move(
+      CameraPosition(center, zoom: 12, azimuth: 0, tilt: 0),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Yandex Map Minimal')),
+      body: YandexMap(
+        onMapCreated: _onMapCreated,
+        platformViewType: PlatformViewType.Hybrid,
       ),
     );
   }
 }
 
-// import 'package:flutter/material.dart';
-// import 'package:yandex_maps_mapkit_lite/image.dart' as image_provider show ImageProvider;
-// import 'package:yandex_maps_mapkit_lite/init.dart' as init;
-// import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
-// import 'package:yandex_maps_mapkit_lite/mapkit.dart';
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   init.initMapkit(apiKey: '4e4c2599-8ba3-4d0a-bda1-a60a22dd2b00').then((_) {
-//     runApp(const MyApp());
-//   });
-// }
-
-// class MyApp extends StatefulWidget {
+// class MyApp extends StatelessWidget {
 //   const MyApp({super.key});
-
-//   @override
-//   State<MyApp> createState() => _MyAppState();
-// }
-
-// class _MyAppState extends State<MyApp> {
-//   MapWindow? _mapWindow;
-
-//   // Координаты центра Екатеринбурга
-//   static const Point _ekaterinburgCenter = Point(latitude: 56.838926, longitude: 60.605702);
-//   static const String _placemarkDescription = 'Центр Екатеринбурга';
-//   static const String _placemarkIcon = 'assets/ic_pin.png';
 
 //   @override
 //   Widget build(BuildContext context) {
 //     return MaterialApp(
 //       home: Scaffold(
-//         appBar: AppBar(title: const Text("Яндекс.Карта")),
-//         body: Stack(
-//           children: [
-//             YandexMap(
-//               onMapCreated: (mapWindow) async {
-//                 _mapWindow = mapWindow;
-//                 final map = mapWindow.map;
-
-//                 // Перемещение камеры на Екатеринбург
-//                 map.move(
-//                   CameraPosition(
-//                     _ekaterinburgCenter,
-//                     zoom: 12.0,
-//                     azimuth: 0.0,
-//                     tilt: 0.0,
-//                   ),
-//                 );
-
-//                 final image = await image_provider.ImageProvider.fromImageProvider(AssetImage(_placemarkIcon));
-//                 // Добавление одной метки
-//                 map.mapObjects.addPlacemarkWithImage(
-//                   _ekaterinburgCenter,
-//                   image
-//                 );
-//               },
-//             ),
-//             Positioned(
-//               bottom: 20,
-//               left: 20,
-//               right: 20,
-//               child: ElevatedButton(
-//                 onPressed: () {
-//                   // Перемещение камеры к метке и показ SnackBar
-//                   _mapWindow?.map.move(
-//                     CameraPosition(
-//                       _ekaterinburgCenter,
-//                       zoom: 15.0,
-//                       azimuth: 0.0,
-//                       tilt: 0.0,
-//                     ),
-//                   );
-//                   ScaffoldMessenger.of(context).showSnackBar(
-//                     SnackBar(content: Text('Клик по: $_placemarkDescription')),
-//                   );
-//                 },
-//                 child: const Text('Центр Екатеринбурга'),
-//               ),
-//             ),
-//           ],
+//         appBar: AppBar(title: const Text('Минимальная Яндекс.Карта')),
+//         body: SizedBox.expand(
+//           child: YandexMap(
+//             onMapCreated: (mapWindow) async {
+//               print('Map created');
+//               final map = mapWindow.map;
+//               final center = Point(latitude: 56.838926, longitude: 60.605702);
+//               try {
+//                 map.move(CameraPosition(center, zoom: 12, azimuth: 0, tilt: 0));
+//                 map.mapObjects.addEmptyPlacemark(center);
+//                 print('Map moved and placemark added');
+//               } catch (e) {
+//                 print('Error moving map or adding placemark: $e');
+//               }
+//             },
+//           ),
 //         ),
 //       ),
 //     );

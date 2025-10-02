@@ -1,16 +1,21 @@
+using EcoMonitor.App.Abstractions;
 using EcoMonitor.Contracts.Contracts.Auth;
+using EcoMonitor.Contracts.Contracts.Users;
 using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Authentication;
+using MapsterMapper;
 using Microsoft.AspNet.Identity;
 using IPasswordHasher = EcoMonitor.Infrastracture.Abstractions.IPasswordHasher;
 
 namespace EcoMonitor.App.Services.Authorization;
 
-public class AuthService(IUserRepository _userRepository, 
+public class AuthService(IUserRepository _userRepository,
+    IUserFactory _userFactory,
     IPasswordHasher _passwordHasher, 
     IJWTService _jwtService, 
-    JwtSettings _jwtSettings) : IAuthService
+    JwtSettings _jwtSettings,
+    IMapper _mapper) : IAuthService
 {
     public async Task<AuthResponse> LoginAsync(AuthRequest request, CancellationToken cancellationToken = default)
     {
@@ -25,6 +30,19 @@ public class AuthService(IUserRepository _userRepository,
         return new AuthResponse(
             token,
             _jwtSettings.ExpiresInMinutes * 60);
+    }
+
+    public async Task<AuthResponse> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken = default)
+    {
+        var existing =  await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        if (existing == null)
+            throw new InvalidOperationException("User with this email already exists");
+        
+        var userDomain = _userFactory.Create(request.Firstname, request.Surname, request.Email, request.Password);
+        await _userRepository.AddAsync(userDomain, cancellationToken);
+        var token = _jwtService.GenerateToken(userDomain);
+        
+        return new AuthResponse(token, _jwtSettings.ExpiresInMinutes * 60);
     }
 
     public async Task ChangePassword(Guid userId, string currentPassword, string newPassword,

@@ -68,8 +68,6 @@ namespace EcoMonitor.UnitTest.Services
 
             var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
 
-            //var binPhotosRequest = _mapper.Map<BinPhotoRequest>(binPhotos);
-
             // Act
             var result = await binPhotoService.GetAllBinPhotosAsync();
 
