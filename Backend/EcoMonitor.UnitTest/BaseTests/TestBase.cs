@@ -4,6 +4,8 @@ using EcoMonitor.App.Mapper;
 using EcoMonitor.Core.Models.Users;
 using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess;
+using EcoMonitor.DataAccess.Entities.Users;
+using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Abstractions;
 using EcoMonitor.Infrastracture.Services;
 using Mapster;
@@ -20,6 +22,7 @@ namespace EcoMonitor.UnitTest
         protected IPasswordHasher _passwordHasher;
         protected IUserFactory _userFactory;
         protected User _user;
+        protected IUserRepository _userRepository;
         protected IServiceProvider _serviceProvider; //контейнер зависимостей
 
         public TestBase()
@@ -53,6 +56,7 @@ namespace EcoMonitor.UnitTest
             services.AddSingleton<IGeolocationService, GeolocationService>();
             services.AddSingleton<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IUserFactory, UserFactory>();
+            services.AddSingleton<IUserRepository, UserRepository>();
 
             services.AddLogging();
 
@@ -62,25 +66,59 @@ namespace EcoMonitor.UnitTest
             _mapper = _serviceProvider.GetRequiredService<IMapper>();
             _passwordHasher = _serviceProvider.GetRequiredService<IPasswordHasher>();
             _userFactory = _serviceProvider.GetRequiredService<IUserFactory>();
+            _userRepository = _serviceProvider.GetRequiredService<IUserRepository>();
 
+            var email = Email.Create("ivanov@mail.ru");
 
-
-            var emailIvan = Email.Create("ivanov@mail.ry");
-            
-            _user = _userFactory.Create(
-                "Peter",
-                "Petrov",
-                emailIvan.Value,
-                "wadsaf341232sad");
-
-
-            SeeData();
+            // _user = _userFactory.Create(
+            //     "Peter",
+            //     "Petrov",
+            //     email.Value,
+            //     "somepassword"
+            // );
+            CreateUser().GetAwaiter().GetResult();
+            //SeeData();
         }
 
         /// <summary>
         /// seedata позволяет заполнять начальными данными 
         /// </summary>
-        protected virtual void SeeData() { }
+        protected virtual void SeeData() {}
+
+        private async Task CreateUser()
+        {
+            var email = Email.Create("ivanov@mail.ru");
+
+            _user = _userFactory.Create(
+                "Peter",
+                "Petrov",
+                email.Value,
+                "somepassword"
+            );
+
+            // Создаем роль с разрешениями
+            var roleEntity = new UserRoleEntity
+            {
+                Id = UserRole.User.Id,
+                Name = UserRole.User.Name,
+                Description = UserRole.User.Description,
+                Permissions = UserRole.User.Permissions
+                    .Select(p => new PermissionEntity { Code = p.Code })
+                    .ToList()
+            };
+
+            await _context.UserRoles.AddAsync(roleEntity);
+            await _context.SaveChangesAsync();
+
+            // Мапим пользователя в сущность и связываем с ролью
+            var userEntity = _mapper.Map<UserEntity>(_user);
+            userEntity.RoleId = roleEntity.Id;
+            userEntity.Role = roleEntity;
+
+            // Добавляем пользователя в базу и сохраняем
+            await _context.Users.AddAsync(userEntity);
+            await _context.SaveChangesAsync();
+        }
 
         public void Dispose()
         {

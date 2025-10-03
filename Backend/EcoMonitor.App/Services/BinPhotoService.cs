@@ -25,7 +25,8 @@ namespace EcoMonitor.App.Services
             IMapper mapper,
             IBinPhotoRepository binPhotoRepository,
             ILogger<BinPhotoService> logger,
-            IImagePipeline pipeline)
+            IImagePipeline pipeline,
+            IUserRepository userRepository)
         //IImageStorageService storage,
         //IGeolocationService geo)
         {
@@ -33,12 +34,16 @@ namespace EcoMonitor.App.Services
             _binPhotoRepository = binPhotoRepository;
             _logger = logger;
             _pipeline = pipeline;
+            _userRepository = userRepository;
             //_storage = storage;
             //_geo = geo;
         }
         public async Task<BinPhotoResponse> AddBinPhotoAsync(
             BinPhotoRequest request)
         {
+            if (request == null)
+                throw new KeyNotFoundException("Request is null");
+            
             var uploadedBy = await _userRepository.GetByIdAsync(request.UploadedById);
             if (uploadedBy == null)
                 throw new KeyNotFoundException("User not found");

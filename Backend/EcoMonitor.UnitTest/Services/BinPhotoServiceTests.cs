@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using EcoMonitor.Contracts.Contracts.User;
+using EcoMonitor.Core.Models.Users;
+using EcoMonitor.DataAccess.Entities.Users;
 
 namespace EcoMonitor.UnitTest.Services
 {
@@ -23,6 +25,26 @@ namespace EcoMonitor.UnitTest.Services
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
+            var roleEntity = new UserRoleEntity
+            {
+                Id = UserRole.User.Id,
+                Name = UserRole.User.Name,
+                Description = UserRole.User.Description,
+                Permissions = UserRole.User.Permissions
+                    .Select(p => new PermissionEntity { Code = p.Code })
+                    .ToList()
+            };
+
+            await _context.UserRoles.AddAsync(roleEntity);
+            await _context.SaveChangesAsync();
+
+            var userEntity = _mapper.Map<UserEntity>(_user);
+            userEntity.RoleId = roleEntity.Id;
+            userEntity.Role = roleEntity;
+
+            await _context.Users.AddAsync(userEntity);
+            await _context.SaveChangesAsync();
+            
             var binPhotos = new List<BinPhoto>()
             {
                 BinPhoto.Create(
@@ -49,7 +71,13 @@ namespace EcoMonitor.UnitTest.Services
                 )
             };
 
-            var binPhotosEntity = _mapper.Map<List<BinPhotoEntity>>(binPhotos);
+            var binPhotosEntity = binPhotos.Select(bp =>
+            {
+                var entity = _mapper.Map<BinPhotoEntity>(bp);
+                entity.UploadedById = userEntity.Id;
+                entity.UploadedBy = userEntity;
+                return entity;
+            }).ToList();
 
             await _context.BinPhotos.AddRangeAsync(binPhotosEntity);
             await _context.SaveChangesAsync();
@@ -66,7 +94,7 @@ namespace EcoMonitor.UnitTest.Services
 
             var pipeline = new ImagePipeline(imageStorageService, geoLocationService, loggerPipeline);
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline, _userRepository);
 
             // Act
             var result = await binPhotoService.GetAllBinPhotosAsync();
@@ -76,6 +104,7 @@ namespace EcoMonitor.UnitTest.Services
             Assert.Equal(2, result.Count);
             Assert.Contains(result, bp => bp.FileName == "Бак на Калинина.jpg");
             Assert.Contains(result, bp => bp.FileName == "Бак на Кирова.jpg");
+            //Assert.Contains(result, bp => bp.UploadedById = _user.Id);
         }
 
         [Fact]
@@ -85,6 +114,26 @@ namespace EcoMonitor.UnitTest.Services
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
 
+            var roleEntity = new UserRoleEntity
+            {
+                Id = UserRole.User.Id,
+                Name = UserRole.User.Name,
+                Description = UserRole.User.Description,
+                Permissions = UserRole.User.Permissions
+                    .Select(p => new PermissionEntity { Code = p.Code })
+                    .ToList()
+            };
+
+            await _context.UserRoles.AddAsync(roleEntity);
+            await _context.SaveChangesAsync();
+
+            var userEntity = _mapper.Map<UserEntity>(_user);
+            userEntity.RoleId = roleEntity.Id;
+            userEntity.Role = roleEntity;
+
+            await _context.Users.AddAsync(userEntity);
+            await _context.SaveChangesAsync();
+            
             var binPhoto = BinPhoto.Create(
                 "Бак на Кирова.jpg",
                 "C:\\EcoMonitor\\EcoMonitor\\Backend\\EcoMonitor\\EcoMonitor.API\\wwwroot\\BinPhotos",
@@ -98,6 +147,9 @@ namespace EcoMonitor.UnitTest.Services
                 );
 
             var binPhotoEntity = _mapper.Map<BinPhotoEntity>(binPhoto);
+            
+            binPhotoEntity.UploadedById = userEntity.Id;
+            binPhotoEntity.UploadedBy = userEntity;
 
             await _context.BinPhotos.AddAsync(binPhotoEntity);
             await _context.SaveChangesAsync();
@@ -114,7 +166,7 @@ namespace EcoMonitor.UnitTest.Services
 
             var pipeline = new ImagePipeline(imageStorageService, geoLocationService, loggerPipeline);
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline, _userRepository);
 
             var binPhotoRequest = _mapper.Map<BinPhotoRequest>(binPhotoEntity);
 
@@ -142,6 +194,26 @@ namespace EcoMonitor.UnitTest.Services
             // Arrange
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
+            
+            var roleEntity = new UserRoleEntity
+            {
+                Id = UserRole.User.Id,
+                Name = UserRole.User.Name,
+                Description = UserRole.User.Description,
+                Permissions = UserRole.User.Permissions
+                    .Select(p => new PermissionEntity { Code = p.Code })
+                    .ToList()
+            };
+
+            await _context.UserRoles.AddAsync(roleEntity);
+            await _context.SaveChangesAsync();
+
+            var userEntity = _mapper.Map<UserEntity>(_user);
+            userEntity.RoleId = roleEntity.Id;
+            userEntity.Role = roleEntity;
+
+            await _context.Users.AddAsync(userEntity);
+            await _context.SaveChangesAsync();
 
             var binPhoto = BinPhoto.Create(
                 "Бак на Кирова.jpg",
@@ -154,6 +226,14 @@ namespace EcoMonitor.UnitTest.Services
                 "Test photo",
                 _user
                 );
+            
+            var binPhotoEntity = _mapper.Map<BinPhotoEntity>(binPhoto);
+            
+            binPhotoEntity.UploadedById = userEntity.Id;
+            binPhotoEntity.UploadedBy = userEntity;
+
+            await _context.BinPhotos.AddAsync(binPhotoEntity);
+            await _context.SaveChangesAsync();
 
             var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
             Directory.CreateDirectory(webRootPath);
@@ -167,7 +247,7 @@ namespace EcoMonitor.UnitTest.Services
 
             var pipeline = new ImagePipeline(imageStorageService, geoLocationService, loggerPipeline);
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline, _userRepository);
 
             var binPhotoRequest = _mapper.Map<BinPhotoRequest>(binPhoto);
 
@@ -188,16 +268,13 @@ namespace EcoMonitor.UnitTest.Services
             Assert.Equal(true, result.IsOutsideBin);
             Assert.Equal("Test photo", result.Comment);
         }
-
-        //[Fact]
+        
         [Theory]
         [InlineData("20250630_201412.jpg", "image/jpg")]
         [InlineData("Home.png", "image/png")]
         [InlineData("IMG_6453.HEIC", "image/heic")]
         public async Task UploadImage_ShouldReturnCorrectResponse(string fileName, string contentType)
         {
-            
-
             var imagePath = Path.Combine("TestPhotos", fileName);
             var imagesBytes = await File.ReadAllBytesAsync(imagePath);
             var stream = new MemoryStream(imagesBytes);
@@ -210,7 +287,7 @@ namespace EcoMonitor.UnitTest.Services
 
             var plasticId = Guid.NewGuid();
             var organicId = Guid.NewGuid();
-
+            
             var userRequest = _mapper.Map<UserRequest>(_user);
 
             var request = new BinPhotoUploadRequest(
@@ -234,7 +311,7 @@ namespace EcoMonitor.UnitTest.Services
 
             var pipeline = new ImagePipeline(imageStorageService, geoLocationService, loggerPipeline);
 
-            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline);
+            var binPhotoService = new BinPhotoService(_mapper, binPhotoRepo, loggerService, pipeline, _userRepository);
             var ct = new CancellationToken();
 
             // Act

@@ -278,10 +278,8 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
                 .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
                 .Map(dest => dest.Comment, src => src.Comment)
-                .Map(dest => dest.UploadedById, src => src.UploadedBy.Id)
-                .Ignore(dest => dest.UploadedBy);
-
-
+                .Map(dest => dest.UploadedById, src => src.UploadedBy.Id);
+            
             config.NewConfig<BinPhoto, BinPhotoResponse>()
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.FileName, src => src.FileName)
@@ -294,7 +292,8 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
                 .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
                 .Map(dest => dest.Comment, src => src.Comment)
-                .Map(dest => dest.UploadedBy, src => src.UploadedBy);
+                .Map(dest => dest.UploadedBy, src => src.UploadedBy)
+                .Map(dest => dest.UploadedById, src => src.UploadedById);
 
             /// <summary>
             /// Mapping DTOs for BinType

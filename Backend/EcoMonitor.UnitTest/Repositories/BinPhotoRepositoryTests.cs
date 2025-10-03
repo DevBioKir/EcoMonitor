@@ -91,6 +91,8 @@ namespace EcoMonitor.UnitTest.Repositories
                 Assert.Equal(_user.Firstname, photo.UploadedBy.Firstname);
                 Assert.Equal(_user.Surname, photo.UploadedBy.Surname);
                 Assert.Equal(_user.Role.Name, photo.UploadedBy.Role.Name);
+                Assert.NotNull(photo.UploadedBy.Role);
+                Assert.False(string.IsNullOrWhiteSpace(photo.UploadedBy.Role.Name));
             }
         }
 
@@ -167,6 +169,8 @@ namespace EcoMonitor.UnitTest.Repositories
             Assert.Equal(_user.Firstname, photo.UploadedBy.Firstname);
             Assert.Equal(_user.Surname, photo.UploadedBy.Surname);
             Assert.Equal(_user.Role.Name, photo.UploadedBy.Role.Name);
+            Assert.NotNull(photo.UploadedBy.Role);
+            Assert.False(string.IsNullOrWhiteSpace(photo.UploadedBy.Role.Name));
         }
 
         [Fact]
