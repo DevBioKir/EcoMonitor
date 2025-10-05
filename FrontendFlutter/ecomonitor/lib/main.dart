@@ -1,3 +1,4 @@
+import 'package:ecomonitor/Screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:yandex_maps_mapkit_lite/mapkit.dart';
 import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
@@ -29,7 +30,26 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const MapScreen(),
+      title: 'EcoMonitor',
+      home: LoginScreen(
+        onLogin: (login, password) async {
+          await Future.delayed(const Duration(seconds: 1));
+          if (login.isNotEmpty && password.isNotEmpty) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const MapScreen()),
+            );
+          } else {
+            throw Exception('Login and password must not be empty');
+          }
+        }, 
+        onRegister: () {
+          print('Go to the registration screen');
+        },
+        ),
+        routes: {
+          '/map': (_) => const MapScreen(),
+        },
     );
   }
 }
