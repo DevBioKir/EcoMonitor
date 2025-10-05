@@ -18,7 +18,7 @@ void main() async {
     // Можно обработать случай отказа
   }
 
-  const apiKey = 'b435f7c5-a250-4eb7-a2f8-3fff029ceb53';
+  const apiKey = '';
   await init.initMapkit(apiKey: apiKey);
 
   runApp(const MyApp());
