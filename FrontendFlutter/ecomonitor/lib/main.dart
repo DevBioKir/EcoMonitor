@@ -1,13 +1,18 @@
-import 'package:ecomonitor/Screens/login_screen.dart';
+import 'package:ecomonitor/core/network/api_client.dart';
+import 'package:ecomonitor/screens/login_screen.dart';
+import 'package:ecomonitor/screens/map_screen.dart';
+import 'package:ecomonitor/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:yandex_maps_mapkit_lite/mapkit.dart';
-import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
-import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
-import 'package:yandex_maps_mapkit_lite/init.dart' as init;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:yandex_maps_mapkit_lite/init.dart' as init;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  print('Loading .env...');
+  await dotenv.load(fileName: ".env.development");
 
   // Запрашиваем разрешение на геолокацию в рантайме
   final status = await Permission.location.request();
@@ -18,14 +23,33 @@ void main() async {
     // Можно обработать случай отказа
   }
 
-  const apiKey = '';
-  await init.initMapkit(apiKey: apiKey);
+  final apiKey = dotenv.env['YANDEX_MAP_API_KEY'];
+  print('API KEY: $apiKey');
+  //final apiKey = "b435f7c5-a250-4eb7-a2f8-3fff029ceb53";
 
-  runApp(const MyApp());
+  if (apiKey == null) {
+    throw Exception('YANDEX_MAP_API_KEY not found in .env file!');
+  }
+
+  try {
+    print('Initializing MapKit...');
+    await init.initMapkit(apiKey: apiKey);
+    print('MapKit initialized successfully!');
+  } catch (e) {
+    print('MapKit initialization failed: $e');
+  }
+
+  final storage = const FlutterSecureStorage();
+  final apiClient = ApiClient(
+    'http://localhost:5198/', () async => await storage.read(key: 'auth_token') ?? '');
+  final authService = AuthService(apiClient);
+
+  runApp(const MyApp(authService: authService));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final AuthService authService;
+  const MyApp({super.key, required this.authService});
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +57,12 @@ class MyApp extends StatelessWidget {
       title: 'EcoMonitor',
       home: LoginScreen(
         onLogin: (login, password) async {
+          final token = await auth
           await Future.delayed(const Duration(seconds: 1));
           if (login.isNotEmpty && password.isNotEmpty) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (_) => const MapScreen()),
+              MaterialPageRoute(builder: (context) => MapScreen()),
             );
           } else {
             throw Exception('Login and password must not be empty');
@@ -48,66 +73,13 @@ class MyApp extends StatelessWidget {
         },
         ),
         routes: {
-          '/map': (_) => const MapScreen(),
+          '/map': (context) => MapScreen(),
         },
     );
   }
 }
 
-class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
 
-  @override
-  State<MapScreen> createState() => _MapScreenState();
-}
-
-class _MapScreenState extends State<MapScreen> {
-  bool _isMapkitActive = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _startMapkit();
-  }
-
-  @override
-  void dispose() {
-    _stopMapkit();
-    super.dispose();
-  }
-
-  void _startMapkit() {
-    if (!_isMapkitActive) {
-      _isMapkitActive = true;
-      mapkit.onStart();
-    }
-  }
-
-  void _stopMapkit() {
-    if (_isMapkitActive) {
-      _isMapkitActive = false;
-      mapkit.onStop();
-    }
-  }
-
-  void _onMapCreated(MapWindow mapWindow) {
-    final center = Point(latitude: 56.838926, longitude: 60.605702);
-    mapWindow.map.move(
-      CameraPosition(center, zoom: 12, azimuth: 0, tilt: 0),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Yandex Map Minimal')),
-      body: YandexMap(
-        onMapCreated: _onMapCreated,
-        platformViewType: PlatformViewType.Hybrid,
-      ),
-    );
-  }
-}
 
 // class MyApp extends StatelessWidget {
 //   const MyApp({super.key});

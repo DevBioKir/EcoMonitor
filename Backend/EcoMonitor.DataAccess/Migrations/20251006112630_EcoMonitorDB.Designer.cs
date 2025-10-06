@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -12,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcoMonitor.DataAccess.Migrations
 {
     [DbContext(typeof(EcoMonitorDbContext))]
-    [Migration("20250826122122_EcoMonitorDB")]
+    [Migration("20251006112630_EcoMonitorDB")]
     partial class EcoMonitorDB
     {
         /// <inheritdoc />
@@ -23,6 +24,7 @@ namespace EcoMonitor.DataAccess.Migrations
                 .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinPhotoBinTypeEntity", b =>
@@ -48,7 +50,8 @@ namespace EcoMonitor.DataAccess.Migrations
 
                     b.Property<string>("Comment")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -61,20 +64,23 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.Property<bool>("IsOutsideBin")
                         .HasColumnType("boolean");
 
-                    b.Property<double>("Latitude")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("Longitude")
-                        .HasColumnType("double precision");
+                    b.Property<Point>("Location")
+                        .IsRequired()
+                        .HasColumnType("geography (Point,4326)");
 
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UploadedById")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("UrlFile")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UploadedById");
 
                     b.ToTable("BinPhotos");
                 });
@@ -98,6 +104,21 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BinTypes");
+                });
+
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.PermissionEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PermissionEntity");
                 });
 
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserEntity", b =>
@@ -166,6 +187,21 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("PermissionEntityUserRoleEntity", b =>
+                {
+                    b.Property<Guid>("PermissionsId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("RolesId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("PermissionsId", "RolesId");
+
+                    b.HasIndex("RolesId");
+
+                    b.ToTable("PermissionEntityUserRoleEntity");
+                });
+
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinPhotoBinTypeEntity", b =>
                 {
                     b.HasOne("EcoMonitor.DataAccess.Entities.BinPhotoEntity", "BinPhoto")
@@ -185,6 +221,17 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.Navigation("BinType");
                 });
 
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinPhotoEntity", b =>
+                {
+                    b.HasOne("EcoMonitor.DataAccess.Entities.Users.UserEntity", "UploadedBy")
+                        .WithMany("BinPhoto")
+                        .HasForeignKey("UploadedById")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("UploadedBy");
+                });
+
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserEntity", b =>
                 {
                     b.HasOne("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", "Role")
@@ -196,6 +243,21 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("PermissionEntityUserRoleEntity", b =>
+                {
+                    b.HasOne("EcoMonitor.DataAccess.Entities.Users.PermissionEntity", null)
+                        .WithMany()
+                        .HasForeignKey("PermissionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", null)
+                        .WithMany()
+                        .HasForeignKey("RolesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinPhotoEntity", b =>
                 {
                     b.Navigation("BinPhotoBinTypes");
@@ -204,6 +266,11 @@ namespace EcoMonitor.DataAccess.Migrations
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinTypeEntity", b =>
                 {
                     b.Navigation("BinPhotoBinTypes");
+                });
+
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserEntity", b =>
+                {
+                    b.Navigation("BinPhoto");
                 });
 
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", b =>

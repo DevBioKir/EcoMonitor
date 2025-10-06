@@ -11,6 +11,7 @@ using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using NetTopologySuite.Geometries;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -24,7 +25,9 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<EcoMonitorDbContext>(options =>
 {
-    options.UseNpgsql(configuration.GetConnectionString(nameof(EcoMonitorDbContext)));
+    options.UseNpgsql(
+        configuration.GetConnectionString(nameof(EcoMonitorDbContext)),
+        npgsqlOptions => npgsqlOptions.UseNetTopologySuite());
 });
 
 TypeAdapterConfig.GlobalSettings.Scan(typeof(MappingConfig).Assembly);

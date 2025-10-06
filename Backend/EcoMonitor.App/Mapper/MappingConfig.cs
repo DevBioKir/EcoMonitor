@@ -18,7 +18,7 @@ namespace EcoMonitor.App.Mapper
     public class MappingConfig : IRegister
     {
         private readonly IUserFactory _userFactory;
-
+        
         public MappingConfig(IUserFactory userFactory)
         {
             _userFactory = userFactory;
