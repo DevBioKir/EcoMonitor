@@ -70,6 +70,14 @@ namespace EcoMonitor.DataAccess.Repositories.Users
             _context.Users.Update(entity);
             await _context.SaveChangesAsync(cancellationToken);
         }
+        
+        public async Task UpdateLastLoggedAtAsync(User user, DateTime date, CancellationToken cancellationToken = default)
+        {
+            await _context.Users
+                .Where(u => u.Id == user.Id)
+                .ExecuteUpdateAsync(u => u.SetProperty(
+                    p => p.LastLogindAt, date), cancellationToken);
+        }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
         {

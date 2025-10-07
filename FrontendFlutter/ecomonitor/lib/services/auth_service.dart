@@ -14,7 +14,7 @@ class AuthService {
       'password' : password,
     });
 
-    final token = response.data['Token'] as String?;
+    final token = response.data['token'] as String?;
     if (token == null){
       throw Exception('Authorization token not found in response');
     }

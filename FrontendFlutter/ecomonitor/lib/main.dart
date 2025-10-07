@@ -41,14 +41,15 @@ void main() async {
 
   final storage = const FlutterSecureStorage();
   final apiClient = ApiClient(
-    'http://localhost:5198/', () async => await storage.read(key: 'auth_token') ?? '');
+    "http://localhost:5198/", () async => await storage.read(key: 'auth_token') ?? '');
   final authService = AuthService(apiClient);
 
-  runApp(const MyApp(authService: authService));
+  runApp(MyApp(authService: authService));
 }
 
 class MyApp extends StatelessWidget {
   final AuthService authService;
+
   const MyApp({super.key, required this.authService});
 
   @override
@@ -56,18 +57,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'EcoMonitor',
       home: LoginScreen(
-        onLogin: (login, password) async {
-          final token = await auth
-          await Future.delayed(const Duration(seconds: 1));
-          if (login.isNotEmpty && password.isNotEmpty) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => MapScreen()),
-            );
-          } else {
-            throw Exception('Login and password must not be empty');
-          }
-        }, 
+        authService: authService,
         onRegister: () {
           print('Go to the registration screen');
         },

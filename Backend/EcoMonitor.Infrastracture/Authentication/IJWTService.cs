@@ -5,5 +5,6 @@ namespace EcoMonitor.Infrastracture.Authentication
     public interface IJWTService
     {
         string GenerateToken(User user);
+        string GenerateRefreshToken();
     }
 }

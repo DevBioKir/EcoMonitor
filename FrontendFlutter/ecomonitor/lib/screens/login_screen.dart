@@ -1,11 +1,17 @@
+import 'package:ecomonitor/screens/map_screen.dart';
+import 'package:ecomonitor/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class LoginScreen extends StatefulWidget{
-  final Future<void> Function(String login, String password) onLogin;
+  //final Future<void> Function(String login, String password) onLogin;
   final VoidCallback onRegister;
+  final AuthService authService;
 
-  const LoginScreen({super.key, required this.onLogin, required this.onRegister});
+  const LoginScreen({
+    super.key,
+    required this.onRegister,
+    required this.authService});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -13,7 +19,7 @@ class LoginScreen extends StatefulWidget{
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _loginController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _loading = false;
@@ -21,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
-    _loginController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -33,10 +39,18 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try{
-      await widget.onLogin(
-      _loginController.text.trim(),
+      final token = await widget.authService.login(
+      _emailController.text.trim(),
       _passwordController.text.trim(),
       );
+
+      if (token.isNotEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MapScreen()));
+      } else {
+        throw Exception('Token is empty');
+      } 
     } catch (e) {
       setState(() {
         _error = e.toString();
@@ -64,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Text(_error!, style: const TextStyle(color: Colors.red)),
                   ),
                   TextFormField(
-                    controller: _loginController,
+                    controller: _emailController,
                     enabled: !_loading,
                     decoration: const InputDecoration(
                       labelText: 'Login',

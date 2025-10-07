@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace EcoMonitor.Infrastracture.Authentication
@@ -13,7 +14,6 @@ namespace EcoMonitor.Infrastracture.Authentication
         private readonly JwtSecurityTokenHandler _tokenHandler;
 
         public JWTService(
-            // обертка, через которую ASP передает настройки из appsettings.json
             IOptions<JwtSettings> jwtSettings)
         {
             _jwtSettings = jwtSettings.Value;
@@ -50,6 +50,14 @@ namespace EcoMonitor.Infrastracture.Authentication
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToHexString(randomNumber);
         }
     }
 }

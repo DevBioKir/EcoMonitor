@@ -1,5 +1,6 @@
 namespace EcoMonitor.Contracts.Contracts.Auth;
 
 public record AuthResponse(
-    string Token,
+    string AccessToken,
+    string RefreshToken,
     int Expires);

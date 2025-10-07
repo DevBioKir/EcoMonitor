@@ -1,7 +1,12 @@
+using EcoMonitor.App.Abstractions;
+using EcoMonitor.App.Factory.Users;
 using EcoMonitor.App.Mapper;
 using EcoMonitor.App.Services;
+using EcoMonitor.App.Services.Authorization;
+using EcoMonitor.App.Services.User;
 using EcoMonitor.DataAccess;
 using EcoMonitor.DataAccess.Repositories;
+using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Abstractions;
 using EcoMonitor.Infrastracture.Authentication;
 using EcoMonitor.Infrastracture.Middleware;
@@ -30,9 +35,16 @@ builder.Services.AddDbContext<EcoMonitorDbContext>(options =>
         npgsqlOptions => npgsqlOptions.UseNetTopologySuite());
 });
 
-TypeAdapterConfig.GlobalSettings.Scan(typeof(MappingConfig).Assembly);
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IUserFactory, UserFactory>();
 
-builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings);
+var serviceProvider = builder.Services.BuildServiceProvider();
+var userFactory = serviceProvider.GetRequiredService<IUserFactory>();
+
+var config = new TypeAdapterConfig();
+config.Apply(new MappingConfig(userFactory));
+
+builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
 
 // ������������ ���� ��� ������
@@ -50,7 +62,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://192.168.1.154:8081")
+            policy.WithOrigins("http://192.168.1.255")
+            //policy.WithOrigins("http://192.168.1.255:8081")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
                   //.AllowCredentials(); ��� ����
@@ -59,22 +72,20 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<IBinPhotoRepository, BinPhotoRepository>();
 builder.Services.AddScoped<IBinTypeRepository, BinTypeRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IBinPhotoService, BinPhotoService>();
 builder.Services.AddScoped<IBinTypeService, BinTypeService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthorizationService, AuthorizationService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddScoped<IGeolocationService, GeolocationService>();
 
 builder.Services.AddScoped<IImagePipeline, ImagePipeline>();
 
-
-
-
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddScoped<IJWTService, JWTService>();
-
-
-
 
 builder.WebHost.UseUrls("http://0.0.0.0:5198");
 

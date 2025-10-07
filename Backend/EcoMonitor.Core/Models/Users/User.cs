@@ -42,6 +42,7 @@ namespace EcoMonitor.Core.Models.Users
             Surname = surname;
             Email = email;
             PasswordHash = passwordHash;
+            isLoginConfirmed = true;
             Role = role ?? throw new ArgumentNullException(nameof(role));
             RoleId = role.Id;
             CreatedAt = DateTime.UtcNow;
@@ -55,7 +56,7 @@ namespace EcoMonitor.Core.Models.Users
             Email email,
             PasswordHash passwordHash,
             UserRole role,
-            //bool isLoginConfirmed,
+            //bool _isLoginConfirmed,
             DateTime createdAt,
             DateTime lastLogindAt,
             DateTime lockedUntil,
@@ -69,7 +70,7 @@ namespace EcoMonitor.Core.Models.Users
             PasswordHash = passwordHash;
             Role = role;
             RoleId = role.Id;
-            isLoginConfirmed = isLoginConfirmed;
+            //isLoginConfirmed = true;
             CreatedAt = createdAt;
             LastLogindAt = lastLogindAt;
             LockedUntil = lockedUntil;
