@@ -6,9 +6,11 @@ using EcoMonitor.Contracts.Contracts.BinType;
 using EcoMonitor.Contracts.Contracts.User;
 using EcoMonitor.Contracts.Contracts.Users;
 using EcoMonitor.Core.Models;
+using EcoMonitor.Core.Models.Auth;
 using EcoMonitor.Core.Models.Users;
 using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Entities;
+using EcoMonitor.DataAccess.Entities.Auth;
 using EcoMonitor.DataAccess.Entities.Users;
 using Mapster;
 using NetTopologySuite.Geometries;
@@ -212,6 +214,44 @@ namespace EcoMonitor.App.Mapper
 
             config.NewConfig<Permission, PermissionEntity>()
                 .Map(dest => dest.Code, src => src.Code);
+            
+            /// <summary>
+            /// Mapping Entities, Domain for RefreshToken
+            /// </summary>
+            config.NewConfig<RefreshTokenEntity, RefreshToken>()
+                .ConstructUsing(src => RefreshToken.Restore(
+                    src.Id,
+                    src.UserId,
+                    _userFactory.Restore(
+                        src.User.Id,
+                        src.User.Firstname,
+                        src.User.Surname,
+                        Email.Create(src.User.Email),
+                        PasswordHash.FromHash(src.User.PasswordHash),
+                        UserRole.Restore(
+                            src.User.Role.Id,
+                            src.User.Role.Name,
+                            src.User.Role.Description,
+                            src.User.Role.Permissions.Select(p => new Permission(p.Code)).ToList()
+                        ),
+                        src.User.CreatedAt,
+                        src.User.LastLogindAt,
+                        src.User.LockedUntil,
+                        new List<BinPhoto>()
+                        ),
+                    src.TokenHash,
+                    src.IssuedAt,
+                    src.ExpireAt,
+                    src.Revoked));
+
+            config.NewConfig<RefreshToken, RefreshTokenEntity>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.UserId, src => src.UserId)
+                .Map(dest => dest.User, src => src.User)
+                .Map(dest => dest.TokenHash, src => src.TokenHash)
+                .Map(dest => dest.IssuedAt, src => src.IssuedAt)
+                .Map(dest => dest.ExpireAt, src => src.ExpireAt)
+                .Map(dest => dest.Revoked, src => src.Revoked);
 
             /// <summary>
             /// Mapping DTOs for User

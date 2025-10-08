@@ -12,9 +12,6 @@ namespace EcoMonitor.DataAccess.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql
-                ("CREATE EXTENSION IF NOT EXISTS postgis;");
-            
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:PostgresExtension:postgis", ",,");
 
@@ -132,6 +129,28 @@ namespace EcoMonitor.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TokenHash = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    IssuedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    ExpireAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Revoked = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BinPhotoBinType",
                 columns: table => new
                 {
@@ -171,6 +190,12 @@ namespace EcoMonitor.DataAccess.Migrations
                 column: "RolesId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_UserId_TokenHash",
+                table: "RefreshTokens",
+                columns: new[] { "UserId", "TokenHash" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleId",
                 table: "Users",
                 column: "RoleId");
@@ -179,14 +204,14 @@ namespace EcoMonitor.DataAccess.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql
-                ("DROP EXTENSION IF EXISTS postgis;");
-            
             migrationBuilder.DropTable(
                 name: "BinPhotoBinType");
 
             migrationBuilder.DropTable(
                 name: "PermissionEntityUserRoleEntity");
+
+            migrationBuilder.DropTable(
+                name: "RefreshTokens");
 
             migrationBuilder.DropTable(
                 name: "BinPhotos");

@@ -1,4 +1,5 @@
 ﻿using EcoMonitor.Core.ValueObjects;
+using EcoMonitor.DataAccess.Entities.Auth;
 
 namespace EcoMonitor.DataAccess.Entities.Users
 {
@@ -18,6 +19,7 @@ namespace EcoMonitor.DataAccess.Entities.Users
         public DateTime CreatedAt { get; set; }
         public DateTime LastLogindAt { get; set; }
         public DateTime LockedUntil { get; set; }
+        public ICollection<RefreshTokenEntity> RefreshTokens { get; set; } = new List<RefreshTokenEntity>();
 
         public ICollection<BinPhotoEntity> BinPhoto { get; set; } = new List<BinPhotoEntity>();
     }

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcoMonitor.DataAccess.Migrations
 {
     [DbContext(typeof(EcoMonitorDbContext))]
-    [Migration("20251006112630_EcoMonitorDB")]
+    [Migration("20251008114251_EcoMonitorDB")]
     partial class EcoMonitorDB
     {
         /// <inheritdoc />
@@ -26,6 +26,37 @@ namespace EcoMonitor.DataAccess.Migrations
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "postgis");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Auth.RefreshTokenEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("ExpireAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("Revoked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("RefreshTokens");
+                });
 
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinPhotoBinTypeEntity", b =>
                 {
@@ -202,6 +233,17 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.ToTable("PermissionEntityUserRoleEntity");
                 });
 
+            modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Auth.RefreshTokenEntity", b =>
+                {
+                    b.HasOne("EcoMonitor.DataAccess.Entities.Users.UserEntity", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.BinPhotoBinTypeEntity", b =>
                 {
                     b.HasOne("EcoMonitor.DataAccess.Entities.BinPhotoEntity", "BinPhoto")
@@ -271,6 +313,8 @@ namespace EcoMonitor.DataAccess.Migrations
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserEntity", b =>
                 {
                     b.Navigation("BinPhoto");
+
+                    b.Navigation("RefreshTokens");
                 });
 
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", b =>

@@ -1,11 +1,15 @@
+using System.Diagnostics.Contracts;
+using System.Security.Cryptography;
+using System.Text;
 using EcoMonitor.App.Abstractions;
 using EcoMonitor.Contracts.Contracts.Auth;
 using EcoMonitor.Contracts.Contracts.Users;
+using EcoMonitor.Core.Models.Auth;
 using EcoMonitor.Core.ValueObjects;
+using EcoMonitor.DataAccess.Repositories.Auth;
 using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Authentication;
 using MapsterMapper;
-using Microsoft.AspNet.Identity;
 using Microsoft.Extensions.Options;
 using IPasswordHasher = EcoMonitor.Infrastracture.Abstractions.IPasswordHasher;
 
@@ -19,6 +23,7 @@ public class AuthService : IAuthService
     private readonly IJWTService _jwtService;
     private readonly JwtSettings _jwtSettings;
     private readonly IMapper _mapper;
+    private readonly IRefreshTokenRepository _refreshTokenRepository;
 
     public AuthService(
         IUserRepository userRepository,
@@ -26,7 +31,8 @@ public class AuthService : IAuthService
         IPasswordHasher passwordHasher,
         IJWTService jwtService,
         IOptions<JwtSettings> options,
-        IMapper mapper)
+        IMapper mapper,
+        IRefreshTokenRepository refreshTokenRepository)
     {
         _userRepository = userRepository;
         _userFactory = userFactory;
@@ -34,19 +40,32 @@ public class AuthService : IAuthService
         _jwtService = jwtService;
         _jwtSettings = options.Value;
         _mapper = mapper;
+        _refreshTokenRepository = refreshTokenRepository;
     }
     
     public async Task<AuthResponse> LoginAsync(AuthRequest request, CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user == null || !user.CheckPassword(request.Password, _passwordHasher))
-            return null;
+            throw new InvalidOperationException("Invalid credentials");
         
-        user.UpdateLastLoggedAt(DateTime.UtcNow);
-        await _userRepository.UpdateLastLoggedAtAsync(user, DateTime.UtcNow, cancellationToken); //update loggedAt
+        //user.UpdateLastLoggedAt(DateTime.UtcNow);
+        
+        // not tracked by context
+        //update loggedAt
+        await _userRepository.UpdateLastLoggedAtAsync(user, DateTime.UtcNow, cancellationToken);
 
         var accessToken = _jwtService.GenerateToken(user);
         var refreshToken = _jwtService.GenerateRefreshToken();
+        
+        var refreshTokenHash = Hash(refreshToken);
+        
+        var refreshTokenDomain = RefreshToken.Create(
+            user.Id,
+            user,
+            refreshTokenHash);
+        
+        await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain);
         
         return new AuthResponse(
             accessToken,
@@ -56,8 +75,8 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken = default)
     {
-        var existing =  await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        if (existing != null)
+        var user =  await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
+        if (user != null)
             throw new InvalidOperationException("User with this email already exists");
         
         var userDomain = _userFactory.Create(request.Firstname, request.Surname, request.Email, request.Password);
@@ -66,21 +85,112 @@ public class AuthService : IAuthService
         var accessToken = _jwtService.GenerateToken(userDomain);
         var refreshToken = _jwtService.GenerateRefreshToken();
         
+        var refreshTokenHash = Hash(refreshToken);
+        
+        var refreshTokenDomain = RefreshToken.Create(
+            userDomain.Id,
+            userDomain,
+            refreshTokenHash);
+        
+        await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain);
+        
         return new AuthResponse(accessToken, 
             refreshToken, 
             _jwtSettings.ExpiresInMinutes * 60);
     }
 
-    public async Task ChangePassword(Guid userId, string currentPassword, string newPassword,
+    public async Task<AuthResponse> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword,
         CancellationToken cancellationToken = default)
     {
         var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
         
-        if (user == null) 
+        if (user == null)
             throw new KeyNotFoundException("User not found");
         if (!user.CheckPassword(currentPassword, _passwordHasher))
             throw new UnauthorizedAccessException("Current password is incorrect");
         
-        var newHash = PasswordHash.FromPlainPassword(newPassword, _passwordHasher);
+        //var newHash = PasswordHash.FromPlainPassword(newPassword, _passwordHasher);
+        
+        user.ChangePassword(currentPassword, newPassword,  _passwordHasher);
+        await _userRepository.UpdateAsync(user, cancellationToken);
+        
+        var activeTokens = await _refreshTokenRepository
+            .GetAllByUserIdAsync(userId, cancellationToken);
+        
+        foreach (var activeToken in activeTokens.Where(a => a.IsActive()))
+        {
+            await _refreshTokenRepository.RevokeAsync(activeToken, cancellationToken);
+        }
+        
+        var accessToken = _jwtService.GenerateToken(user);
+        var refreshToken = _jwtService.GenerateRefreshToken();
+        
+        var refreshTokenHash = Hash(refreshToken);
+        
+        var refreshTokenDomain = RefreshToken.Create(
+            user.Id,
+            user,
+            refreshTokenHash);
+        
+        await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain);
+        
+        return new AuthResponse(
+            accessToken,
+            refreshToken,
+            _jwtSettings.ExpiresInMinutes * 60);
+    }
+
+    public async Task<AuthResponse> RefreshTokenAsync(string refreshTokenValue,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(refreshTokenValue))
+            throw new ArgumentException("Refresh token must be provided",  nameof(refreshTokenValue));
+        
+        var refreshTokenHash = Hash(refreshTokenValue);
+        
+        var storedRefreshToken = await _refreshTokenRepository.GetByTokenHashAsync(refreshTokenHash);
+        if (storedRefreshToken == null || !storedRefreshToken.IsActive())
+            throw new UnauthorizedAccessException("Invalid or expired refresh token");
+        
+        var user = await _userRepository.GetByIdAsync(storedRefreshToken.UserId, cancellationToken);
+        if (user == null)
+            throw new UnauthorizedAccessException("Invalid refresh token");
+
+        await _refreshTokenRepository.RevokeAsync(storedRefreshToken, cancellationToken);
+        
+        var newAccessToken = _jwtService.GenerateToken(user);
+        var newRefreshTokenValue =  _jwtService.GenerateRefreshToken();
+        var newRefreshTokenHash = Hash(newRefreshTokenValue);
+        
+        var newRefreshToken = RefreshToken.Create(user.Id, user, newRefreshTokenHash);
+        await _refreshTokenRepository.AddRefreshTokenAsync(newRefreshToken, cancellationToken);
+
+        return new AuthResponse(
+            newAccessToken,
+            newRefreshTokenValue,
+            _jwtSettings.ExpiresInMinutes * 60);
+    }
+
+    public async Task RevokeRefreshTokenAsync(string refreshTokenValue,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(refreshTokenValue))
+            throw new ArgumentException("Refresh token must be provided",  nameof(refreshTokenValue));
+        
+        var refreshTokenHash = Hash(refreshTokenValue);
+        
+        var storedRefreshToken = await _refreshTokenRepository.GetByTokenHashAsync(refreshTokenHash);
+        if (storedRefreshToken == null || !storedRefreshToken.IsActive())
+            throw new UnauthorizedAccessException("Invalid or expired refresh token");
+        
+        storedRefreshToken.Revoke();
+        
+        await _refreshTokenRepository.UpdateAsync(storedRefreshToken, cancellationToken);
+    }
+
+    private string Hash(string token)
+    {
+        using var sha = SHA256.Create();
+        return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(token)));
     }
 }

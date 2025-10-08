@@ -1,4 +1,5 @@
-﻿using EcoMonitor.Core.ValueObjects;
+﻿using EcoMonitor.Core.Models.Auth;
+using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.Infrastracture.Abstractions;
 
 namespace EcoMonitor.Core.Models.Users
@@ -23,7 +24,10 @@ namespace EcoMonitor.Core.Models.Users
         public DateTime CreatedAt { get; private set; }
         public DateTime LastLogindAt { get; private set; }
         public DateTime LockedUntil { get; private set; }
-
+        
+        private readonly List<RefreshToken> _refreshTokens = new();
+        public IReadOnlyCollection<RefreshToken> RefreshTokens =>  _refreshTokens.AsReadOnly();
+        
         private readonly List<BinPhoto> _photos = new();
         public IReadOnlyCollection<BinPhoto> Photos => _photos.AsReadOnly();
 
@@ -134,5 +138,28 @@ namespace EcoMonitor.Core.Models.Users
         public void UpdateEmail(string newEmail) => Email = Email.Create(newEmail);
         public void UpdateRole(UserRole newRole) => Role = newRole;
         public void UpdateLastLoggedAt(DateTime newLastLoggedAt) => LastLogindAt = newLastLoggedAt;
+
+        public void ChangePassword(string currentPassword, string newPassword, IPasswordHasher hasher)
+        {
+            if(!CheckPassword(currentPassword, hasher))
+                throw new UnauthorizedAccessException("Current password is incorrect");
+            
+            var newHash = PasswordHash.FromPlainPassword(currentPassword, hasher);
+            PasswordHash =  newHash;
+        }
+        public void AddRefreshToken(RefreshToken token) => _refreshTokens.Add(token);
+
+        public void RevokeRefreshToken(string tokenHash)
+        {
+            var token = _refreshTokens.FirstOrDefault(r => r.TokenHash == tokenHash);
+            
+            if (token != null)
+            {
+                token.Revoke();
+            }
+        }
+        
+        public bool HasValidRefreshToken(string tokenHash) 
+            => _refreshTokens.Any(r => r.TokenHash == tokenHash && r.IsActive());
     }
 }

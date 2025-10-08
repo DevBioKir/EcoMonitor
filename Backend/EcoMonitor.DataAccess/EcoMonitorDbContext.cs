@@ -1,6 +1,8 @@
 ﻿using EcoMonitor.DataAccess.Configurations;
+using EcoMonitor.DataAccess.Configurations.Auth;
 using EcoMonitor.DataAccess.Configurations.Users;
 using EcoMonitor.DataAccess.Entities;
+using EcoMonitor.DataAccess.Entities.Auth;
 using EcoMonitor.DataAccess.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +15,7 @@ namespace EcoMonitor.DataAccess
         public DbSet<BinPhotoBinTypeEntity> BinPhotoBinType { get; set; } = null!;
         public DbSet<UserEntity> Users { get; set; } = null!;
         public DbSet<UserRoleEntity> UserRoles { get; set; } = null!;
+        public DbSet<RefreshTokenEntity> RefreshTokens { get; set; } = null!;
 
 
 
@@ -27,6 +30,7 @@ namespace EcoMonitor.DataAccess
             modelBuilder.ApplyConfiguration(new BinPhotoBinTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
+            modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
         }
     }
 }

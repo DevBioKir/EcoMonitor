@@ -28,6 +28,8 @@ namespace EcoMonitor.Core.ValueObjects
         {
             return hasher.VerifyPassword(plainPassword, Hash);
         }
+        
+        
 
         public override string ToString() => Hash;
     }
