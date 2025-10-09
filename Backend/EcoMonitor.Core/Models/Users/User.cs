@@ -50,6 +50,7 @@ namespace EcoMonitor.Core.Models.Users
             Role = role ?? throw new ArgumentNullException(nameof(role));
             RoleId = role.Id;
             CreatedAt = DateTime.UtcNow;
+            LastLogindAt = DateTime.UtcNow;
 
             Validate();
         }
@@ -93,12 +94,38 @@ namespace EcoMonitor.Core.Models.Users
             string firstname,
             string surname,
             string email,
-            PasswordHash passwordHash)
+            PasswordHash passwordHash,
+            UserRole? role)
         {
             var emailVO = Email.Create(email);
+            var defaultRole = role ?? UserRole.User;
 
-            return new User(firstname, surname, emailVO, passwordHash, UserRole.User);
+            return new User(firstname, surname, emailVO, passwordHash, defaultRole);
         }
+        
+        // public static User CreateAdmin(
+        //     string firstname,
+        //     string surname,
+        //     string email,
+        //     PasswordHash passwordHash,
+        //     UserRole role)
+        // {
+        //     var emailVO = Email.Create(email);
+        //
+        //     return new User(firstname, surname, emailVO, passwordHash, role);
+        // }
+        //
+        // public static User CreateManager(
+        //     string firstname,
+        //     string surname,
+        //     string email,
+        //     PasswordHash passwordHash,
+        //     )
+        // {
+        //     var emailVO = Email.Create(email);
+        //
+        //     return new User(firstname, surname, emailVO, passwordHash, UserRole.Manager);
+        // }
 
         public static User Restore(
             Guid id,
@@ -136,6 +163,12 @@ namespace EcoMonitor.Core.Models.Users
         public void UpdateFirstname(string newFirstname) => Firstname = newFirstname;
         public void UpdateSurname(string newSurname) => Surname = newSurname;
         public void UpdateEmail(string newEmail) => Email = Email.Create(newEmail);
+
+        public void ChangeRole(UserRole newRole)
+        {
+            Role = newRole;
+            RoleId = newRole.Id;
+        }
         public void UpdateRole(UserRole newRole) => Role = newRole;
         public void UpdateLastLoggedAt(DateTime newLastLoggedAt) => LastLogindAt = newLastLoggedAt;
 
@@ -161,5 +194,7 @@ namespace EcoMonitor.Core.Models.Users
         
         public bool HasValidRefreshToken(string tokenHash) 
             => _refreshTokens.Any(r => r.TokenHash == tokenHash && r.IsActive());
+        
+        
     }
 }

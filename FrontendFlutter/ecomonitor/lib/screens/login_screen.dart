@@ -1,4 +1,5 @@
 import 'package:ecomonitor/screens/map_screen.dart';
+import 'package:ecomonitor/screens/register_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -124,7 +125,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
-                    onPressed: _loading ? null : widget.onRegister,
+                    onPressed: _loading ? null : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RegisterScreen(
+                            authService: widget.authService),
+                        ),
+                      );
+                    },
                     child: const Text("Don't have an account? Sign up"),
                   ),
                 ),

@@ -7,7 +7,7 @@ using NetTopologySuite.Geometries;
 namespace EcoMonitor.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class EcoMonitorDB : Migration
+    public partial class EcoMonitorDd : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -100,7 +100,7 @@ namespace EcoMonitor.DataAccess.Migrations
                         column: x => x.RoleId,
                         principalTable: "UserRoles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

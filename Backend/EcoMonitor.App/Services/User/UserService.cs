@@ -52,11 +52,45 @@ public class UserService : IUserService
         
         _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
         
+        
+        
         var userDomain = _userFactory.Create(
                                     user.Firstname,
                                     user.Surname,
                                     user.Email,
                                     user.Password);
+        
+        await _userRepository.AddAsync(userDomain, cancellationToken);
+    }
+    
+    public async Task AddAdminUserAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
+    {
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
+                          throw new UnauthorizedAccessException("Current user not found");
+        
+        _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
+        
+        var userDomain = _userFactory.CreateAdmin(
+            user.Firstname,
+            user.Surname,
+            user.Email,
+            user.Password);
+        
+        await _userRepository.AddAsync(userDomain, cancellationToken);
+    }
+    
+    public async Task AddManagerUserAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
+    {
+        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
+                          throw new UnauthorizedAccessException("Current user not found");
+        
+        _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
+        
+        var userDomain = _userFactory.CreateManager(
+            user.Firstname,
+            user.Surname,
+            user.Email,
+            user.Password);
         
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }

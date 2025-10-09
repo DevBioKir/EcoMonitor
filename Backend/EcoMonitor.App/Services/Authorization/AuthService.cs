@@ -18,6 +18,7 @@ namespace EcoMonitor.App.Services.Authorization;
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IUserRoleRepository _userRoleRepository;
     private readonly IUserFactory _userFactory;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJWTService _jwtService;
@@ -27,6 +28,7 @@ public class AuthService : IAuthService
 
     public AuthService(
         IUserRepository userRepository,
+        IUserRoleRepository userRoleRepository,
         IUserFactory userFactory, 
         IPasswordHasher passwordHasher,
         IJWTService jwtService,
@@ -35,6 +37,7 @@ public class AuthService : IAuthService
         IRefreshTokenRepository refreshTokenRepository)
     {
         _userRepository = userRepository;
+        _userRoleRepository = userRoleRepository;
         _userFactory = userFactory;
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
@@ -72,15 +75,27 @@ public class AuthService : IAuthService
             refreshToken,
             _jwtSettings.ExpiresInMinutes * 60);
     }
-
-    public async Task<AuthResponse> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken = default)
+    
+    private async Task<AuthResponse> RegisterUserAsync(
+        RegisterUserRequest request, 
+        Func<string, string, string, string, string, Core.Models.Users.User> createUserFunc,
+        
+        CancellationToken cancellationToken = default)
     {
         var user =  await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user != null)
             throw new InvalidOperationException("User with this email already exists");
         
-        var userDomain = _userFactory.Create(request.Firstname, request.Surname, request.Email, request.Password);
-        await _userRepository.AddAsync(userDomain, cancellationToken);
+        var roleDomain = await _userRoleRepository.GetByNameASync()
+            
+        var userDomain = createUserFunc(
+            request.Firstname, 
+            request.Surname, 
+            request.Email, 
+            request.Password, 
+            request.Role);
+        
+        var userCreated = await _userRepository.AddAsync(userDomain, cancellationToken);
         
         var accessToken = _jwtService.GenerateToken(userDomain);
         var refreshToken = _jwtService.GenerateRefreshToken();
@@ -88,8 +103,8 @@ public class AuthService : IAuthService
         var refreshTokenHash = Hash(refreshToken);
         
         var refreshTokenDomain = RefreshToken.Create(
-            userDomain.Id,
-            userDomain,
+            userCreated.Id,
+            null,
             refreshTokenHash);
         
         await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain);
@@ -98,6 +113,18 @@ public class AuthService : IAuthService
             refreshToken, 
             _jwtSettings.ExpiresInMinutes * 60);
     }
+
+    public Task<AuthResponse> RegisterAsync(RegisterUserRequest request,
+        CancellationToken cancellationToken = default)
+        => RegisterUserAsync(request, _userFactory.Create, cancellationToken);
+
+    public Task<AuthResponse> RegisterAdminAsync(RegisterUserRequest request,
+        CancellationToken cancellationToken = default)
+        => RegisterUserAsync(request, _userFactory.CreateAdmin, cancellationToken);
+
+    public Task<AuthResponse> RegisterManagerAsync(RegisterUserRequest request,
+        CancellationToken cancellationToken = default)
+        => RegisterUserAsync(request, _userFactory.CreateManager, cancellationToken);
 
     public async Task<AuthResponse> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword,
         CancellationToken cancellationToken = default)

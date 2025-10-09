@@ -30,11 +30,14 @@ namespace EcoMonitor.DataAccess.Repositories.Users
             return _mapper.Map<List<User>>(entities);
         }
 
-        public async Task AddAsync(User user, CancellationToken cancellationToken = default)
+        public async Task<User> AddAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = _mapper.Map<UserEntity>(user);
             await _context.Users.AddAsync(entity, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
+            
+            var updatedUser = _mapper.Map<User>(entity);
+            return updatedUser;
         }
 
         public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)

@@ -276,7 +276,7 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.HasOne("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");

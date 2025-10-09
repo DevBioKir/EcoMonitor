@@ -180,7 +180,8 @@ namespace EcoMonitor.App.Mapper
                     src.Surname,
                     Email.Create(src.Email),
                     PasswordHash.FromHash(src.PasswordHash),
-                    UserRole.Create(
+                    UserRole.Restore(
+                        src.Role.Id,
                         src.Role.Name,
                         src.Role.Description,
                         src.Role.Permissions.Select(p => new Permission(p.Code)).ToList()),
@@ -194,7 +195,8 @@ namespace EcoMonitor.App.Mapper
             /// Mapping Entities, Domain for UserRole
             /// </summary>
             config.NewConfig<UserRoleEntity, UserRole>()
-                .ConstructUsing(src => UserRole.Create(
+                .ConstructUsing(src => UserRole.Restore(
+                    src.Id,
                     src.Name,
                     src.Description,
                     src.Permissions.Select(p => new Permission(p.Code)).ToList()

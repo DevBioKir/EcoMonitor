@@ -1,11 +1,14 @@
-﻿using EcoMonitor.App.Services;
+﻿using System.Security.Claims;
+using EcoMonitor.App.Services;
 using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcoMonitor.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class BinPhotoController : ControllerBase
@@ -27,6 +30,14 @@ namespace EcoMonitor.API.Controllers
             _logger = logger;
         }
 
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null) throw new UnauthorizedAccessException("User is not authenticated");
+            return Guid.Parse(userIdClaim.Value);
+        }
+
+        [Authorize]
         [HttpGet("GetBinPhotoById/{id}")]
         public async Task<ActionResult<BinPhotoResponse>> GetBinPhotoByIdAsync(Guid id)
         {

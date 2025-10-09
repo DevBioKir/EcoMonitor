@@ -18,25 +18,18 @@ namespace EcoMonitor.App.Services
         private readonly IImagePipeline _pipeline;
         private readonly IUserRepository _userRepository;
 
-        //private readonly IImageStorageService _storage;
-        //private readonly IGeolocationService _geo;
-
         public BinPhotoService(
             IMapper mapper,
             IBinPhotoRepository binPhotoRepository,
             ILogger<BinPhotoService> logger,
             IImagePipeline pipeline,
             IUserRepository userRepository)
-        //IImageStorageService storage,
-        //IGeolocationService geo)
         {
             _mapper = mapper;
             _binPhotoRepository = binPhotoRepository;
             _logger = logger;
             _pipeline = pipeline;
             _userRepository = userRepository;
-            //_storage = storage;
-            //_geo = geo;
         }
         public async Task<BinPhotoResponse> AddBinPhotoAsync(
             BinPhotoRequest request)

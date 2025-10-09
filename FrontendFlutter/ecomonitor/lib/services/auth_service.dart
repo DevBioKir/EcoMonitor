@@ -11,7 +11,7 @@ class AuthService {
 
   AuthService(this._apiClient);
 
-  Future<void> login(String email, String password) async {
+  Future<String> login(String email, String password) async {
     final response = await _apiClient.post('api/authorization/login', data: {
       'email' : email,
       'password' : password,
@@ -26,6 +26,8 @@ class AuthService {
     }
     await _storage.write(key: _accessToken, value: accessToken);
     await _storage.write(key: _refreshToken, value: refreshToken);
+    
+    return accessToken;
   }
 
   Future<String?> getRefreshToken() async => await _storage.read(key: _refreshToken);
@@ -36,7 +38,7 @@ class AuthService {
     await _storage.delete(key: _refreshToken);
   }
 
-  Future<void> register(RegisterUserRequest request) async {
+  Future<String> registration(RegisterUserRequest request) async {
       final response = await _apiClient.post(
         'api/authorization/register',
         data: request.toJson()
@@ -51,6 +53,27 @@ class AuthService {
 
       await _storage.write(key: _accessToken, value: accessToken);
       await _storage.write(key: _refreshToken, value: refreshToken);
+
+      return accessToken;
+  }
+
+  Future<String> registerAdmin(RegisterUserRequest request) async {
+      final response = await _apiClient.post(
+        'api/authorization/register',
+        data: request.toJson()
+      );
+
+      final accessToken = response.data['accessToken'] as String?;
+      final refreshToken = response.data['refreshToken'] as String?;
+
+      if (accessToken == null || refreshToken == null) {
+        throw Exception('Authorization tokens not found in response');
+      }
+
+      await _storage.write(key: _accessToken, value: accessToken);
+      await _storage.write(key: _refreshToken, value: refreshToken);
+
+      return accessToken;
   }
 
   Future<void> refreshToken() async {

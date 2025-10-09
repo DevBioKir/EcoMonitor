@@ -17,18 +17,18 @@ namespace EcoMonitor.Core.Models.Users
         public IReadOnlyCollection<User> Users => _users.AsReadOnly();
 
         private UserRole() {}
-        private UserRole(
-            string name, 
-            string description, 
-            IEnumerable<Permission>? permissions = null)
-        {
-            Id = Guid.NewGuid();
-            Name = name;
-            Description = description ?? string.Empty;
-
-            if (permissions != null)
-                _permissions.AddRange(permissions);
-        }
+        // private UserRole(
+        //     string name, 
+        //     string description, 
+        //     IEnumerable<Permission>? permissions = null)
+        // {
+        //     Id = Guid.NewGuid();
+        //     Name = name;
+        //     Description = description ?? string.Empty;
+        //
+        //     if (permissions != null)
+        //         _permissions.AddRange(permissions);
+        // }
         
         private UserRole(
             Guid id,
@@ -36,7 +36,7 @@ namespace EcoMonitor.Core.Models.Users
             string description, 
             IEnumerable<Permission>? permissions = null)
         {
-            Id = Guid.NewGuid();
+            Id = id;
             Name = name;
             Description = description ?? string.Empty;
 
@@ -45,6 +45,7 @@ namespace EcoMonitor.Core.Models.Users
         }
 
         public static readonly UserRole Admin = new(
+            RoleConstants.AdminId,
             "Admin",
             "Full access",
             new[]
@@ -61,6 +62,7 @@ namespace EcoMonitor.Core.Models.Users
             });
 
         public static readonly UserRole Manager = new (
+            RoleConstants.ManagerId,
             "Manager",
             "Manage photos and view/edit users",
             new[]
@@ -74,6 +76,7 @@ namespace EcoMonitor.Core.Models.Users
             });
 
         public static readonly UserRole User = new(
+            RoleConstants.UserId,
             "User",
             "Normal user access",
             new[]
@@ -83,16 +86,16 @@ namespace EcoMonitor.Core.Models.Users
                 Permission.PhotosEdit,
             });
 
-        public static UserRole Create(
-            string name, 
-            string? description = null,
-            IEnumerable<Permission> permission = null)
-        {
-            if (string.IsNullOrWhiteSpace(name)) 
-                throw new ArgumentNullException("Role name cannot be empty", nameof(name));
-
-            return new UserRole(name, description, permission);
-        }
+        // public static UserRole Create(
+        //     string name, 
+        //     string? description = null,
+        //     IEnumerable<Permission> permission = null)
+        // {
+        //     if (string.IsNullOrWhiteSpace(name)) 
+        //         throw new ArgumentNullException("Role name cannot be empty", nameof(name));
+        //
+        //     return new UserRole(name, description, permission);
+        // }
 
         public static UserRole Restore(
             Guid id,
@@ -112,6 +115,16 @@ namespace EcoMonitor.Core.Models.Users
         internal void RemoveUser(User user)
         {
             _users.Remove(user);
+        }
+
+        public static UserRole GetRole(string roleName)
+        {
+            return roleName.ToLower() switch
+            {
+                "admin" => Admin,
+                "manager" => Manager,
+                "user" or _ => User
+            };
         }
 
         public bool HasPermission(Permission permission) => _permissions.Contains(permission);

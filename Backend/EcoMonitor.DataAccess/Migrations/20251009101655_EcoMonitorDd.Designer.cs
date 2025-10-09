@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcoMonitor.DataAccess.Migrations
 {
     [DbContext(typeof(EcoMonitorDbContext))]
-    [Migration("20251008114251_EcoMonitorDB")]
-    partial class EcoMonitorDB
+    [Migration("20251009101655_EcoMonitorDd")]
+    partial class EcoMonitorDd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -279,7 +279,7 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.HasOne("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Role");

@@ -16,7 +16,7 @@ public class RefreshToken
         
     private RefreshToken(
         Guid userId,
-        User user,
+        User? user,
         string tokenHash,
         DateTime issuedAt,
         DateTime expireAt)
