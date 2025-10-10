@@ -40,12 +40,14 @@ builder.Services.AddDbContext<EcoMonitorDbContext>(options =>
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserFactory, UserFactory>();
+builder.Services.AddScoped<IUserRoleFactory, UserRoleFactory>();
 
 var serviceProvider = builder.Services.BuildServiceProvider();
 var userFactory = serviceProvider.GetRequiredService<IUserFactory>();
+var userRoleFactory = serviceProvider.GetRequiredService<IUserRoleFactory>();
 
 var config = new TypeAdapterConfig();
-config.Apply(new MappingConfig(userFactory));
+config.Apply(new MappingConfig(userFactory, userRoleFactory));
 
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();

@@ -1,4 +1,5 @@
 ﻿using EcoMonitor.App.Abstractions;
+using EcoMonitor.App.Factory.Users;
 using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Contracts.Contracts.BinPhotoBinType;
@@ -13,6 +14,8 @@ using EcoMonitor.DataAccess.Entities;
 using EcoMonitor.DataAccess.Entities.Auth;
 using EcoMonitor.DataAccess.Entities.Users;
 using Mapster;
+using MapsterMapper;
+using Microsoft.AspNetCore.SignalR;
 using NetTopologySuite.Geometries;
 
 namespace EcoMonitor.App.Mapper
@@ -20,10 +23,14 @@ namespace EcoMonitor.App.Mapper
     public class MappingConfig : IRegister
     {
         private readonly IUserFactory _userFactory;
+        private readonly IUserRoleFactory _userRoleFactory;
         
-        public MappingConfig(IUserFactory userFactory)
+        public MappingConfig(
+            IUserFactory userFactory, 
+            IUserRoleFactory userRoleFactory)
         {
             _userFactory = userFactory;
+            _userRoleFactory = userRoleFactory;
         }
 
         public void Register(TypeAdapterConfig config)
@@ -180,7 +187,7 @@ namespace EcoMonitor.App.Mapper
                     src.Surname,
                     Email.Create(src.Email),
                     PasswordHash.FromHash(src.PasswordHash),
-                    UserRole.Restore(
+                    _userRoleFactory.Restore(
                         src.Role.Id,
                         src.Role.Name,
                         src.Role.Description,
@@ -259,20 +266,31 @@ namespace EcoMonitor.App.Mapper
             /// Mapping DTOs for User
             /// </summary>
             config.NewConfig<UserRequest, User>()
-                .ConstructUsing(src => _userFactory.Create(
+                .ConstructUsing(src => _userFactory.Restore(
+                    src.Id,
                     src.Firstname,
                     src.Surname,
-                    src.Email,
-                    src.Password
-                ));
+                    Email.Create(src.Email),
+                    PasswordHash.FromHash(src.Password),
+                    _userRoleFactory.Restore(
+                        src.Role.Id,
+                        src.Role.Name,
+                        src.Role.Description,
+                        src.Role.Permissions.Select(p => new Permission(p.Code)).ToList()),
+                    src.CreatedAt,
+                    src.LastLogindAt,
+                    src.LockedUntil,
+                    src.BinPhoto.Select(bp => bp.Adapt<BinPhoto>()).ToList()));
 
-            config.NewConfig<RegisterUserRequest, User>()
-                .ConstructUsing(src => _userFactory.Create(
-                    src.Firstname,
-                    src.Surname,
-                    src.Email,
-                    src.Password
-                ));
+            // config.NewConfig<RegisterUserRequest, User>()
+            //     .ConstructUsing(src => _userFactory.Create(
+            //         src.Firstname,
+            //         src.Surname,
+            //         src.Email,
+            //         src.Password,
+            //         _userRoleFactory.Restore(
+            //             s)
+            //     ));
 
             config.NewConfig<User, UserRequest>()
                 .Map(dest => dest.Id, src => src.Id)

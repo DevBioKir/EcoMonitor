@@ -52,13 +52,12 @@ public class UserService : IUserService
         
         _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
         
-        
-        
         var userDomain = _userFactory.Create(
-                                    user.Firstname,
-                                    user.Surname,
-                                    user.Email,
-                                    user.Password);
+            user.Firstname, 
+            user.Surname,
+            user.Email,
+            user.Password,
+            "User");
         
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }
@@ -70,11 +69,12 @@ public class UserService : IUserService
         
         _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
         
-        var userDomain = _userFactory.CreateAdmin(
+        var userDomain = _userFactory.Create(
             user.Firstname,
             user.Surname,
             user.Email,
-            user.Password);
+            user.Password,
+            "Admin");
         
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }
@@ -86,11 +86,12 @@ public class UserService : IUserService
         
         _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
         
-        var userDomain = _userFactory.CreateManager(
+        var userDomain = _userFactory.Create(
             user.Firstname,
             user.Surname,
             user.Email,
-            user.Password);
+            user.Password,
+            "Manager");
         
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }

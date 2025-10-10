@@ -16,20 +16,6 @@ namespace EcoMonitor.App.Factory.Users
             return User.Create(firstname, surname, email, passwordHash, roleUser);
         }
         
-        // public User CreateAdmin(string firstname, string surname, string email, string password)
-        // {
-        //     var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);
-        //
-        //     return User.CreateAdmin(firstname, surname, email, passwordHash);
-        // }
-        //
-        // public User CreateManager(string firstname, string surname, string email, string password)
-        // {
-        //     var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);
-        //
-        //     return User.CreateManager(firstname, surname, email, passwordHash);
-        // }
-        
         public User Restore(
             Guid id,
             string firstname,

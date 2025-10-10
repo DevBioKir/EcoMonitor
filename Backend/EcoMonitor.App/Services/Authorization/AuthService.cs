@@ -5,6 +5,7 @@ using EcoMonitor.App.Abstractions;
 using EcoMonitor.Contracts.Contracts.Auth;
 using EcoMonitor.Contracts.Contracts.Users;
 using EcoMonitor.Core.Models.Auth;
+using EcoMonitor.Core.Models.Users;
 using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Repositories.Auth;
 using EcoMonitor.DataAccess.Repositories.Users;
@@ -79,21 +80,21 @@ public class AuthService : IAuthService
     private async Task<AuthResponse> RegisterUserAsync(
         RegisterUserRequest request, 
         Func<string, string, string, string, string, Core.Models.Users.User> createUserFunc,
-        
+        string roleName,
         CancellationToken cancellationToken = default)
     {
         var user =  await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user != null)
             throw new InvalidOperationException("User with this email already exists");
-        
-        var roleDomain = await _userRoleRepository.GetByNameASync()
+
+        var roleDomain = await _userRoleRepository.GetByNameASync(roleName, cancellationToken);
             
         var userDomain = createUserFunc(
             request.Firstname, 
             request.Surname, 
             request.Email, 
             request.Password, 
-            request.Role);
+            roleDomain.Name);
         
         var userCreated = await _userRepository.AddAsync(userDomain, cancellationToken);
         
@@ -116,15 +117,15 @@ public class AuthService : IAuthService
 
     public Task<AuthResponse> RegisterAsync(RegisterUserRequest request,
         CancellationToken cancellationToken = default)
-        => RegisterUserAsync(request, _userFactory.Create, cancellationToken);
+        => RegisterUserAsync(request, _userFactory.Create, "User", cancellationToken);
 
     public Task<AuthResponse> RegisterAdminAsync(RegisterUserRequest request,
         CancellationToken cancellationToken = default)
-        => RegisterUserAsync(request, _userFactory.CreateAdmin, cancellationToken);
+        => RegisterUserAsync(request, _userFactory.Create, "Admin", cancellationToken);
 
     public Task<AuthResponse> RegisterManagerAsync(RegisterUserRequest request,
         CancellationToken cancellationToken = default)
-        => RegisterUserAsync(request, _userFactory.CreateManager, cancellationToken);
+        => RegisterUserAsync(request, _userFactory.Create, "Manager", cancellationToken);
 
     public async Task<AuthResponse> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword,
         CancellationToken cancellationToken = default)

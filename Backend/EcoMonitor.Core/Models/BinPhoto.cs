@@ -18,6 +18,7 @@ namespace EcoMonitor.Core.Models
         public string Comment { get; private set; } = string.Empty;
 
         public ICollection<BinPhotoBinType> BinPhotoBinTypes { get; private set; } = new List<BinPhotoBinType>();
+        public int 
         public User UploadedBy { get; private set; } = null!;
         public Guid UploadedById { get; private set; }
 
@@ -212,5 +213,7 @@ namespace EcoMonitor.Core.Models
         {
             UploadedBy = uploadedBy ?? throw new ArgumentNullException(nameof(uploadedBy));
         }
+        
+        
     }
 }

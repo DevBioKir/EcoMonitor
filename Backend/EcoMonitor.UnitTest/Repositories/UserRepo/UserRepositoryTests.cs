@@ -12,24 +12,24 @@ namespace EcoMonitor.UnitTest.Repositories.UserRepo
         public async Task GetAllUsers_ReturnsAllUsers()
         {
             // Arrange
-            var userFactory = new UserFactory(_passwordHasher);
-
             var emailIvan = Email.Create("ivanov@mail.ry");
 
             var emailPeter = Email.Create("petrov@mail.ry");
 
             var users = new List<User>()
             {
-                userFactory.Create(
+                _userFactory.Create(
                     "Ivan",
                     "Ivanov",
                     emailIvan.Value,
-                    "23sdqfg5432"),
-                userFactory.Create(
+                    "23sdqfg5432",
+                    "User"),
+                _userFactory.Create(
                     "Peter",
                     "Petrov",
                     emailPeter.Value,
-                    "wadsaf341232sad")
+                    "wadsaf341232sad",
+                    "User")
             };
 
             var roleEntity = new UserRoleEntity
@@ -44,7 +44,6 @@ namespace EcoMonitor.UnitTest.Repositories.UserRepo
 
             await _context.UserRoles.AddAsync(roleEntity);
             await _context.SaveChangesAsync();
-
 
             var userEntities = _mapper.Map<List<UserEntity>>(users);
             foreach (var u in userEntities)
@@ -84,7 +83,8 @@ namespace EcoMonitor.UnitTest.Repositories.UserRepo
                     "Ivan",
                     "Ivanov",
                     emailIvan.Value,
-                    "23sdqfg5432");
+                    "23sdqfg5432",
+                    "User");
 
             var roleEntity = new UserRoleEntity
             {
@@ -98,7 +98,6 @@ namespace EcoMonitor.UnitTest.Repositories.UserRepo
 
             await _context.UserRoles.AddAsync(roleEntity);
             await _context.SaveChangesAsync();
-
 
             var userEntity = _mapper.Map<UserEntity>(user);
 

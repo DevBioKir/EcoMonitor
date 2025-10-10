@@ -21,6 +21,7 @@ namespace EcoMonitor.UnitTest
         protected IMapper _mapper;
         protected IPasswordHasher _passwordHasher;
         protected IUserFactory _userFactory;
+        protected IUserRoleFactory _userRoleFactory;
         protected User _user;
         protected IUserRepository _userRepository;
         protected IServiceProvider _serviceProvider; //контейнер зависимостей
@@ -42,7 +43,8 @@ namespace EcoMonitor.UnitTest
             {
                 var config = new TypeAdapterConfig();
                 var userFactory = sp.GetRequiredService<IUserFactory>();
-                new MappingConfig(userFactory).Register(config);
+                var userRoleFactory = sp.GetRequiredService<IUserRoleFactory>();
+                new MappingConfig(userFactory, userRoleFactory).Register(config);
                 return config;
             });
             services.AddScoped<IMapper>(sp =>
@@ -57,6 +59,7 @@ namespace EcoMonitor.UnitTest
             services.AddSingleton<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IUserFactory, UserFactory>();
             services.AddSingleton<IUserRepository, UserRepository>();
+            services.AddSingleton<IUserRoleFactory, UserRoleFactory>();
 
             services.AddLogging();
 
@@ -67,6 +70,7 @@ namespace EcoMonitor.UnitTest
             _passwordHasher = _serviceProvider.GetRequiredService<IPasswordHasher>();
             _userFactory = _serviceProvider.GetRequiredService<IUserFactory>();
             _userRepository = _serviceProvider.GetRequiredService<IUserRepository>();
+            _userRoleFactory =  _serviceProvider.GetRequiredService<IUserRoleFactory>();
 
             var email = Email.Create("ivanov@mail.ru");
 
@@ -93,7 +97,8 @@ namespace EcoMonitor.UnitTest
                 "Peter",
                 "Petrov",
                 email.Value,
-                "somepassword"
+                "somepassword",
+                "User"
             );
 
             // Создаем роль с разрешениями
