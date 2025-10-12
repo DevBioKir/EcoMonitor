@@ -25,7 +25,6 @@ void main() async {
 
   final apiKey = dotenv.env['YANDEX_MAP_API_KEY'];
   print('API KEY: $apiKey');
-  //final apiKey = "b435f7c5-a250-4eb7-a2f8-3fff029ceb53";
 
   if (apiKey == null) {
     throw Exception('YANDEX_MAP_API_KEY not found in .env file!');
