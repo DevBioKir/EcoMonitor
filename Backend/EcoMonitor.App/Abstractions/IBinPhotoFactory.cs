@@ -14,6 +14,7 @@ public interface IBinPhotoFactory
         double fillLevel,
         bool isOutsideBin,
         string comment,
+        int totalBins,
         User uploadedBy);
     
     Core.Models.BinPhoto Restore(
@@ -27,5 +28,6 @@ public interface IBinPhotoFactory
         double fillLevel,
         bool isOutsideBin,
         string comment,
+        int totalBins,
         User uploadedBy);
 }

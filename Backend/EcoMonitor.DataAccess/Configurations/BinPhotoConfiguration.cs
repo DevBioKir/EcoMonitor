@@ -35,6 +35,10 @@ namespace EcoMonitor.DataAccess.Configurations
                 .IsRequired()
                 .HasMaxLength(500);
 
+            builder.Property(p => p.TotalBins)
+                .IsRequired()
+                .HasDefaultValue(0);
+
             builder.HasOne(p => p.UploadedBy)
                 .WithMany(u => u.BinPhoto)
                 .HasForeignKey(p => p.UploadedById)

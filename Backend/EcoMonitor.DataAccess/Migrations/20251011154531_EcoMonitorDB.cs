@@ -4,10 +4,12 @@ using NetTopologySuite.Geometries;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace EcoMonitor.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class EcoMonitorDd : Migration
+    public partial class EcoMonitorDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -100,7 +102,7 @@ namespace EcoMonitor.DataAccess.Migrations
                         column: x => x.RoleId,
                         principalTable: "UserRoles",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -115,6 +117,7 @@ namespace EcoMonitor.DataAccess.Migrations
                     FillLevel = table.Column<double>(type: "double precision", nullable: false),
                     IsOutsideBin = table.Column<bool>(type: "boolean", nullable: false),
                     Comment = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    TotalBins = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     UploadedById = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -172,6 +175,16 @@ namespace EcoMonitor.DataAccess.Migrations
                         principalTable: "BinTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "UserRoles",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("4232bc2d-290b-4c77-8930-cde9d3d8762c"), "Manage photos and view/edit users", "Manager" },
+                    { new Guid("4278dcbc-cfdb-42e9-97be-bcf6267e9d49"), "Normal user access", "User" },
+                    { new Guid("4b6ae3fe-f942-4dbb-8466-e36cfac114ab"), "Full access", "Admin" }
                 });
 
             migrationBuilder.CreateIndex(

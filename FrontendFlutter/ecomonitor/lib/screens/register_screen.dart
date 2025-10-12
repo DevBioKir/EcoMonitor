@@ -46,7 +46,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final request = RegisterUserRequest(
         firstname: _firstnameController.text.trim(), 
-        surename: _surnameController.text.trim(), 
+        surname: _surnameController.text.trim(), 
         email: _emailController.text.trim(), 
         password: _passwordController.text,);
 

@@ -12,6 +12,7 @@ namespace EcoMonitor.Contracts.Contracts.BinPhoto
        List<Guid> BinTypeId,
        double FillLevel,
        bool IsOutsideBin,
+       int TotalBins,
        string Comment,
        UserResponse UploadedBy,
        Guid UploadedById);

@@ -79,7 +79,7 @@ public class AuthService : IAuthService
     
     private async Task<AuthResponse> RegisterUserAsync(
         RegisterUserRequest request, 
-        Func<string, string, string, string, string, Core.Models.Users.User> createUserFunc,
+        Func<string, string, string, string, UserRole, Core.Models.Users.User> createUserFunc,
         string roleName,
         CancellationToken cancellationToken = default)
     {
@@ -88,13 +88,14 @@ public class AuthService : IAuthService
             throw new InvalidOperationException("User with this email already exists");
 
         var roleDomain = await _userRoleRepository.GetByNameASync(roleName, cancellationToken);
-            
+
         var userDomain = createUserFunc(
-            request.Firstname, 
-            request.Surname, 
-            request.Email, 
-            request.Password, 
-            roleDomain.Name);
+            request.Firstname,
+            request.Surname,
+            request.Email,
+            request.Password,
+            roleDomain);
+            //roleDomain.Name);
         
         var userCreated = await _userRepository.AddAsync(userDomain, cancellationToken);
         

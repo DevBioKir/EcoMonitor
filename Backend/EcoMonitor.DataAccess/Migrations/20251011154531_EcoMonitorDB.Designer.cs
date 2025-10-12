@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcoMonitor.DataAccess.Migrations
 {
     [DbContext(typeof(EcoMonitorDbContext))]
-    [Migration("20251009101655_EcoMonitorDd")]
-    partial class EcoMonitorDd
+    [Migration("20251011154531_EcoMonitorDB")]
+    partial class EcoMonitorDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,6 +98,11 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.Property<Point>("Location")
                         .IsRequired()
                         .HasColumnType("geography (Point,4326)");
+
+                    b.Property<int>("TotalBins")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<DateTime>("UploadedAt")
                         .HasColumnType("timestamp with time zone");
@@ -216,6 +221,26 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserRoles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("4b6ae3fe-f942-4dbb-8466-e36cfac114ab"),
+                            Description = "Full access",
+                            Name = "Admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("4232bc2d-290b-4c77-8930-cde9d3d8762c"),
+                            Description = "Manage photos and view/edit users",
+                            Name = "Manager"
+                        },
+                        new
+                        {
+                            Id = new Guid("4278dcbc-cfdb-42e9-97be-bcf6267e9d49"),
+                            Description = "Normal user access",
+                            Name = "User"
+                        });
                 });
 
             modelBuilder.Entity("PermissionEntityUserRoleEntity", b =>
@@ -279,7 +304,7 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.HasOne("EcoMonitor.DataAccess.Entities.Users.UserRoleEntity", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Role");

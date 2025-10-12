@@ -18,7 +18,7 @@ namespace EcoMonitor.Core.Models
         public string Comment { get; private set; } = string.Empty;
 
         public ICollection<BinPhotoBinType> BinPhotoBinTypes { get; private set; } = new List<BinPhotoBinType>();
-        public int 
+        public int TotalBins { get; private set; }
         public User UploadedBy { get; private set; } = null!;
         public Guid UploadedById { get; private set; }
 
@@ -32,10 +32,14 @@ namespace EcoMonitor.Core.Models
             double fillLevel,
             bool isOutsideBin,
             string comment,
+            int totalBins,
             User uploadedBy)
         {
             if (uploadedBy == null)
                 throw new ArgumentNullException(nameof(uploadedBy));
+            
+            if (totalBins < 0)
+                throw new ArgumentOutOfRangeException(nameof(totalBins), "TotalBins cannot be negative");
 
             var geometryFactory = NetTopologySuite.NtsGeometryServices.Instance
                 .CreateGeometryFactory(srid: 4326);
@@ -51,6 +55,7 @@ namespace EcoMonitor.Core.Models
             FillLevel = fillLevel;
             IsOutsideBin = isOutsideBin;
             Comment = comment;
+            TotalBins = totalBins;
             UploadedBy = uploadedBy;
             UploadedById = uploadedBy.Id;
         }
@@ -66,6 +71,7 @@ namespace EcoMonitor.Core.Models
             double fillLevel,
             bool isOutsideBin,
             string comment,
+            int totalBins,
             User uploadedBy)
         {
             Id = id;
@@ -77,6 +83,7 @@ namespace EcoMonitor.Core.Models
             FillLevel = fillLevel;
             IsOutsideBin = isOutsideBin;
             Comment = comment;
+            TotalBins = totalBins;
             UploadedBy = uploadedBy;
             UploadedById = uploadedBy.Id;
         }
@@ -122,6 +129,7 @@ namespace EcoMonitor.Core.Models
             double fillLevel,
             bool isOutsideBin,
             string comment,
+            int totalBins,
             User uploadedBy)
         {
             var photo = new BinPhoto(
@@ -132,7 +140,8 @@ namespace EcoMonitor.Core.Models
                 BinTypeId, 
                 fillLevel, 
                 isOutsideBin, 
-                comment, 
+                comment,
+                totalBins,
                 uploadedBy);
 
             if (BinTypeId == null || !BinTypeId.Any())
@@ -161,6 +170,7 @@ namespace EcoMonitor.Core.Models
             double fillLevel,
             bool isOutsideBin,
             string comment,
+            int totalBins,
             User uploadedBy)
         {
             var photo = new BinPhoto(
@@ -174,6 +184,7 @@ namespace EcoMonitor.Core.Models
                 fillLevel,
                 isOutsideBin,
                 comment,
+                totalBins,
                 uploadedBy);
 
             if (BinTypeId == null || !BinTypeId.Any())

@@ -8,12 +8,12 @@ namespace EcoMonitor.App.Factory.Users
 {
     public class UserFactory(IPasswordHasher passwordHasher) : IUserFactory
     {
-        public User Create(string firstname, string surname, string email, string password, string role)
+        public User Create(string firstname, string surname, string email, string password, UserRole role)
         {
             var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);
-            var roleUser = UserRole.GetRole(role);
+            // var roleUser = UserRole.GetRole(role);
 
-            return User.Create(firstname, surname, email, passwordHash, roleUser);
+            return User.Create(firstname, surname, email, passwordHash, role);
         }
         
         public User Restore(

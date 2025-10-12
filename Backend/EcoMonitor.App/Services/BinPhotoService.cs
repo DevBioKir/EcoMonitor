@@ -50,6 +50,7 @@ namespace EcoMonitor.App.Services
                 request.FillLevel,
                 request.IsOutsideBin,
                 request.Comment,
+                request.TotalBins,
                 uploadedBy);
             
             var addBinPhoto = await _binPhotoRepository.AddBinPhotoAsync(domainBinPhoto);
@@ -100,6 +101,7 @@ namespace EcoMonitor.App.Services
                 fillLevel: request.FillLevel,
                 isOutsideBin: request.IsOutsideBin,
                 comment: request.Comment,
+                totalBins: request.TotalBins,
                 uploadedBy: user
                 );
 

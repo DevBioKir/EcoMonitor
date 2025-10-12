@@ -60,7 +60,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("http://192.168.1.255")
+            policy.AllowAnyOrigin() //replace before deployment
+            //policy.WithOrigins("http://192.168.1.255")
             //policy.WithOrigins("http://192.168.1.255:8081")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
@@ -71,6 +72,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IBinPhotoRepository, BinPhotoRepository>();
 builder.Services.AddScoped<IBinTypeRepository, BinTypeRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
 builder.Services.AddScoped<IBinPhotoService, BinPhotoService>();

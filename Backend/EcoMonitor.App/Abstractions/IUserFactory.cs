@@ -6,7 +6,7 @@ namespace EcoMonitor.App.Abstractions
 {
     public interface IUserFactory
     {
-        User Create(string firstname, string surname, string email, string password, string role);
+        User Create(string firstname, string surname, string email, string password, UserRole role);
         User Restore(Guid id,
             string firstname,
             string surname,

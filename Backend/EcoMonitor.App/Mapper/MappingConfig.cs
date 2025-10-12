@@ -66,6 +66,7 @@ namespace EcoMonitor.App.Mapper
                         src.FillLevel,
                         src.IsOutsideBin,
                         src.Comment,
+                        src.TotalBins,
                         src.UploadedBy))
                 .AfterMapping((src, dest) =>
                 {
@@ -105,6 +106,7 @@ namespace EcoMonitor.App.Mapper
                             src.FillLevel,
                             src.IsOutsideBin,
                             src.Comment,
+                            src.TotalBins,
                             _userFactory.Restore(
                                 src.UploadedBy.Id,
                                 src.UploadedBy.Firstname,

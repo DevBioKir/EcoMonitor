@@ -13,7 +13,8 @@ public class BinPhotoFactory : IBinPhotoFactory
         IEnumerable<Guid> BinTypeId,
         double fillLevel, 
         bool isOutsideBin, 
-        string comment, 
+        string comment,
+        int totalBins,
         User uploadedBy)
     {
         return Core.Models.BinPhoto.Create(
@@ -24,7 +25,8 @@ public class BinPhotoFactory : IBinPhotoFactory
             BinTypeId, 
             fillLevel, 
             isOutsideBin, 
-            comment, 
+            comment,
+            totalBins,
             uploadedBy);
     }
 
@@ -38,7 +40,8 @@ public class BinPhotoFactory : IBinPhotoFactory
         IEnumerable<Guid> BinTypeId, 
         double fillLevel, 
         bool isOutsideBin, 
-        string comment, 
+        string comment,
+        int totalBins,
         User uploadedBy)
     {
         return Core.Models.BinPhoto.Restore(
@@ -51,7 +54,8 @@ public class BinPhotoFactory : IBinPhotoFactory
             BinTypeId, 
             fillLevel, 
             isOutsideBin, 
-            comment, 
+            comment,
+            totalBins,
             uploadedBy);
     }
 }

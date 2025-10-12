@@ -14,6 +14,7 @@ public class UserService : IUserService
     private readonly IUserFactory _userFactory;
     private readonly IMapper _mapper;
     private readonly IUserRepository _userRepository;
+    private readonly IUserRoleRepository _userRoleRepository;
     private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<UserService> _logger;
 
@@ -21,12 +22,14 @@ public class UserService : IUserService
         IUserFactory userFactory,
         IMapper mapper,
         IUserRepository userRepository,
+        IUserRoleRepository userRoleRepository,
         IAuthorizationService authorizationService,
         ILogger<UserService> logger)
     {
         _userFactory = userFactory;
         _mapper = mapper;
         _userRepository = userRepository;
+        _userRoleRepository = userRoleRepository;
         _authorizationService = authorizationService;
         _logger = logger;
     }
@@ -52,49 +55,55 @@ public class UserService : IUserService
         
         _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
         
+        var role = await _userRoleRepository.GetByNameASync("User", cancellationToken);
+        if (role == null)
+        {
+            throw new InvalidOperationException($"Role {role.Name} not found");
+        }
+        
         var userDomain = _userFactory.Create(
             user.Firstname, 
             user.Surname,
             user.Email,
             user.Password,
-            "User");
+            role);
         
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }
     
-    public async Task AddAdminUserAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
-    {
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
-                          throw new UnauthorizedAccessException("Current user not found");
-        
-        _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
-        
-        var userDomain = _userFactory.Create(
-            user.Firstname,
-            user.Surname,
-            user.Email,
-            user.Password,
-            "Admin");
-        
-        await _userRepository.AddAsync(userDomain, cancellationToken);
-    }
-    
-    public async Task AddManagerUserAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
-    {
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
-                          throw new UnauthorizedAccessException("Current user not found");
-        
-        _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
-        
-        var userDomain = _userFactory.Create(
-            user.Firstname,
-            user.Surname,
-            user.Email,
-            user.Password,
-            "Manager");
-        
-        await _userRepository.AddAsync(userDomain, cancellationToken);
-    }
+    // public async Task AddAdminUserAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
+    // {
+    //     var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
+    //                       throw new UnauthorizedAccessException("Current user not found");
+    //     
+    //     _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
+    //     
+    //     var userDomain = _userFactory.Create(
+    //         user.Firstname,
+    //         user.Surname,
+    //         user.Email,
+    //         user.Password,
+    //         "Admin");
+    //     
+    //     await _userRepository.AddAsync(userDomain, cancellationToken);
+    // }
+    //
+    // public async Task AddManagerUserAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
+    // {
+    //     var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
+    //                       throw new UnauthorizedAccessException("Current user not found");
+    //     
+    //     _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
+    //     
+    //     var userDomain = _userFactory.Create(
+    //         user.Firstname,
+    //         user.Surname,
+    //         user.Email,
+    //         user.Password,
+    //         "Manager");
+    //     
+    //     await _userRepository.AddAsync(userDomain, cancellationToken);
+    // }
 
     public async Task<UserResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {

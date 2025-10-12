@@ -16,6 +16,7 @@ namespace EcoMonitor.DataAccess.Entities
         public string Comment { get; set; } = string.Empty;
 
         public ICollection<BinPhotoBinTypeEntity> BinPhotoBinTypes { get; set; } = new List<BinPhotoBinTypeEntity>();
+        public int TotalBins { get; set; }
         public UserEntity UploadedBy { get; set; }
         public Guid UploadedById { get; set; }
     }
