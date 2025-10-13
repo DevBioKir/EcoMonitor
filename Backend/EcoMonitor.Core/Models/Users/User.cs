@@ -38,7 +38,7 @@ namespace EcoMonitor.Core.Models.Users
             string surname,
             Email email,
             PasswordHash passwordHash,
-            UserRole role
+            Guid roleId
             )
         {
             Id = Guid.NewGuid();
@@ -47,8 +47,8 @@ namespace EcoMonitor.Core.Models.Users
             Email = email;
             PasswordHash = passwordHash;
             isLoginConfirmed = true;
-            Role = role ?? throw new ArgumentNullException(nameof(role));
-            RoleId = role.Id;
+            //Role = role ?? throw new ArgumentNullException(nameof(role));
+            RoleId = roleId;
             CreatedAt = DateTime.UtcNow;
             LastLogindAt = DateTime.UtcNow;
 
@@ -90,42 +90,32 @@ namespace EcoMonitor.Core.Models.Users
                 throw new ArgumentException("Surname required");
         }
 
+        // public static User Create(
+        //     string firstname,
+        //     string surname,
+        //     string email,
+        //     PasswordHash passwordHash,
+        //     UserRole? role)
+        // {
+        //     var emailVO = Email.Create(email);
+        //     var defaultRole = role ?? UserRole.User;
+        //
+        //     return new User(firstname, surname, emailVO, passwordHash, defaultRole);
+        // }
+        
         public static User Create(
             string firstname,
             string surname,
             string email,
             PasswordHash passwordHash,
-            UserRole? role)
+            Guid roleId)
         {
-            var emailVO = Email.Create(email);
-            var defaultRole = role ?? UserRole.User;
+            var emailVo = Email.Create(email);
 
-            return new User(firstname, surname, emailVO, passwordHash, defaultRole);
+            var user = new User(firstname, surname, emailVo, passwordHash, roleId);
+            return user;
+
         }
-        
-        // public static User CreateAdmin(
-        //     string firstname,
-        //     string surname,
-        //     string email,
-        //     PasswordHash passwordHash,
-        //     UserRole role)
-        // {
-        //     var emailVO = Email.Create(email);
-        //
-        //     return new User(firstname, surname, emailVO, passwordHash, role);
-        // }
-        //
-        // public static User CreateManager(
-        //     string firstname,
-        //     string surname,
-        //     string email,
-        //     PasswordHash passwordHash,
-        //     )
-        // {
-        //     var emailVO = Email.Create(email);
-        //
-        //     return new User(firstname, surname, emailVO, passwordHash, UserRole.Manager);
-        // }
 
         public static User Restore(
             Guid id,

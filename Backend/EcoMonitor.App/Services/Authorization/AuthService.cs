@@ -79,7 +79,7 @@ public class AuthService : IAuthService
     
     private async Task<AuthResponse> RegisterUserAsync(
         RegisterUserRequest request, 
-        Func<string, string, string, string, UserRole, Core.Models.Users.User> createUserFunc,
+        Func<string, string, string, string, Guid, Core.Models.Users.User> createUserFunc,
         string roleName,
         CancellationToken cancellationToken = default)
     {
@@ -94,8 +94,7 @@ public class AuthService : IAuthService
             request.Surname,
             request.Email,
             request.Password,
-            roleDomain);
-            //roleDomain.Name);
+            roleDomain.Id);
         
         var userCreated = await _userRepository.AddAsync(userDomain, cancellationToken);
         

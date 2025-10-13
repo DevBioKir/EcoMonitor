@@ -66,7 +66,7 @@ public class UserService : IUserService
             user.Surname,
             user.Email,
             user.Password,
-            role);
+            role.Id);
         
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }

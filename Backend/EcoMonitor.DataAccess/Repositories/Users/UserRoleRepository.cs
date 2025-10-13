@@ -20,7 +20,8 @@ public class UserRoleRepository : IUserRoleRepository
     
     public async Task<UserRole> GetByNameASync(string name, CancellationToken cancellationToken = default)
     {
-        var userRoleEntity = await _context.UserRoles.FirstOrDefaultAsync(r => r.Name == name, cancellationToken);
+        var userRoleEntity = await _context.UserRoles
+            .FirstOrDefaultAsync(r => r.Name == name, cancellationToken);
         return _mapper.Map<UserRole>(userRoleEntity);
     }
 

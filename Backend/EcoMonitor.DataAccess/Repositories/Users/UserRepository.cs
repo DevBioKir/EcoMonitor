@@ -33,6 +33,12 @@ namespace EcoMonitor.DataAccess.Repositories.Users
         public async Task<User> AddAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = _mapper.Map<UserEntity>(user);
+            
+            var roleEntity = new UserRoleEntity { Id = user.RoleId };
+            _context.UserRoles.Attach(roleEntity);
+
+            entity.Role = roleEntity;
+            
             await _context.Users.AddAsync(entity, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             
