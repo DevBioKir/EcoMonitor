@@ -9,7 +9,7 @@ namespace EcoMonitor.API.Controllers.User;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+//[Authorize]
 public class UserController(
     IUserService _userService,
     ILogger<UserController> logger)
@@ -118,7 +118,7 @@ public class UserController(
     }
 
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteUserAsync(Guid id, CancellationToken cancellationToken)
     {
         try
@@ -139,6 +139,30 @@ public class UserController(
         }
     }
     
-    
+    [HttpDelete("Delete")]
+    public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _userService.DeleteUserAsync(id, cancellationToken);
+            return Ok();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Access denied in DeleteUser()"); 
+            return Forbid();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
     
 }
+// {
+// "Firstname": "Kirill",
+// "Surname": "Yanichkin",
+// "Email": "devbiokir@gmail.com",
+// "Password": "123456789"
+// }

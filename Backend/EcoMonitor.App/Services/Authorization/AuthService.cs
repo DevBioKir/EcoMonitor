@@ -66,7 +66,6 @@ public class AuthService : IAuthService
         
         var refreshTokenDomain = RefreshToken.Create(
             user.Id,
-            user,
             refreshTokenHash);
         
         await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain);
@@ -98,14 +97,13 @@ public class AuthService : IAuthService
         
         var userCreated = await _userRepository.AddAsync(userDomain, cancellationToken);
         
-        var accessToken = _jwtService.GenerateToken(userDomain);
+        var accessToken = _jwtService.GenerateToken(userCreated);
         var refreshToken = _jwtService.GenerateRefreshToken();
         
         var refreshTokenHash = Hash(refreshToken);
         
         var refreshTokenDomain = RefreshToken.Create(
             userCreated.Id,
-            null,
             refreshTokenHash);
         
         await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain);
@@ -157,7 +155,6 @@ public class AuthService : IAuthService
         
         var refreshTokenDomain = RefreshToken.Create(
             user.Id,
-            user,
             refreshTokenHash);
         
         await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain);
@@ -190,7 +187,9 @@ public class AuthService : IAuthService
         var newRefreshTokenValue =  _jwtService.GenerateRefreshToken();
         var newRefreshTokenHash = Hash(newRefreshTokenValue);
         
-        var newRefreshToken = RefreshToken.Create(user.Id, user, newRefreshTokenHash);
+        var newRefreshToken = RefreshToken.Create(
+            user.Id,
+            newRefreshTokenHash);
         await _refreshTokenRepository.AddRefreshTokenAsync(newRefreshToken, cancellationToken);
 
         return new AuthResponse(

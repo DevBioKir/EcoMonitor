@@ -170,17 +170,18 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.PasswordHash, src => src.PasswordHash.Hash) // VO → string
                 .Map(dest => dest.isLoginConfirmed, src => src.isLoginConfirmed)
                 .Map(dest => dest.RoleId, src => src.RoleId)
-                .Map(dest => dest.Role, src => new UserRoleEntity
-                    {
-                        Id = src.Role.Id,
-                        Name = src.Role.Name,
-                        Description = src.Role.Description,
-                        Permissions = src.Role.Permissions.Select(p => new PermissionEntity { Code = p.Code }).ToList()
-                    })
+                // .Map(dest => dest.Role, src => new UserRoleEntity
+                //     {
+                //         Id = src.Role.Id,
+                //         Name = src.Role.Name,
+                //         Description = src.Role.Description,
+                //         Permissions = src.Role.Permissions.Select(p => new PermissionEntity { Code = p.Code }).ToList()
+                //     })
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
                 .Map(dest => dest.LastLogindAt, src => src.LastLogindAt)
                 .Map(dest => dest.LockedUntil, src => src.LockedUntil)
-                .Map(dest => dest.BinPhoto, src => src.Photos.Adapt<List<BinPhotoEntity>>());
+                .Map(dest => dest.BinPhoto, src => src.Photos.Adapt<List<BinPhotoEntity>>())
+                .Ignore(dest => dest.Role);
 
             config.NewConfig<UserEntity, User>()
                 .ConstructUsing(src => _userFactory.Restore(
@@ -330,7 +331,7 @@ namespace EcoMonitor.App.Mapper
             //         src.UploadedBy != null ? src.UploadedBy.Adapt<User>() : null));
 
             config.NewConfig<BinPhoto, BinPhotoRequest>()
-                .Map(dest => dest.Id, src => src.Id)
+                //.Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.FileName, src => src.FileName)
                 .Map(dest => dest.UrlFile, src => src.UrlFile)
                 .Map(dest => dest.Longitude, src => src.Longitude)

@@ -138,6 +138,11 @@ public class UserService : IUserService
         return _mapper.Map<UserResponse>(user);
     }
 
+    public async Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        await _userRepository.DeleteAsync(id, cancellationToken);
+    }
+    
     public async Task DeleteAsync(Guid id, Guid currentUserId, CancellationToken cancellationToken = default)
     {
         var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??

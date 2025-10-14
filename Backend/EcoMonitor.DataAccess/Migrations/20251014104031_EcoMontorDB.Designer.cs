@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EcoMonitor.DataAccess.Migrations
 {
     [DbContext(typeof(EcoMonitorDbContext))]
-    [Migration("20251011154531_EcoMonitorDB")]
-    partial class EcoMonitorDB
+    [Migration("20251014104031_EcoMontorDB")]
+    partial class EcoMontorDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -140,6 +140,44 @@ namespace EcoMonitor.DataAccess.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BinTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("6c8a0efc-5587-442e-b25f-b6af0f838b8c"),
+                            Code = "GLASS",
+                            Name = "Стекло"
+                        },
+                        new
+                        {
+                            Id = new Guid("07a43844-8379-4346-a03f-771e99e05c07"),
+                            Code = "PAPER",
+                            Name = "Бумага и картон"
+                        },
+                        new
+                        {
+                            Id = new Guid("a83dc4d0-e3dc-4869-afb0-0272a1f3f6c6"),
+                            Code = "PLASTIC",
+                            Name = "Пластик"
+                        },
+                        new
+                        {
+                            Id = new Guid("bf2a3907-fe53-4d2e-93e5-844ab19f603c"),
+                            Code = "METAL",
+                            Name = "Металл"
+                        },
+                        new
+                        {
+                            Id = new Guid("a2663621-9339-47aa-a993-61aef83f5ced"),
+                            Code = "ORGANIC",
+                            Name = "Органика и пищевые отходы"
+                        },
+                        new
+                        {
+                            Id = new Guid("08e8aaa4-1620-4605-bd5d-df80101e9020"),
+                            Code = "UNIVERSAL",
+                            Name = "Смешанные отходы"
+                        });
                 });
 
             modelBuilder.Entity("EcoMonitor.DataAccess.Entities.Users.PermissionEntity", b =>

@@ -59,5 +59,17 @@ namespace EcoMonitor.DataAccess.Repositories
 
             return _mapper.Map<BinType>(binTypeEntity);
         }
+        
+        public async Task<IReadOnlyList<BinType>> GetBinTypeByCodeAsync(IEnumerable<string> binTypeCodes)
+        {
+            var binTypesEntity = await _context.BinTypes.
+                Where(bt => binTypeCodes.Contains(bt.Code))
+                .ToListAsync();
+
+            if (binTypesEntity == null)
+                throw new NullReferenceException($"Container types with ids {binTypeCodes} not found");
+
+            return _mapper.Map<List<BinType>>(binTypesEntity);
+        }
     }
 }

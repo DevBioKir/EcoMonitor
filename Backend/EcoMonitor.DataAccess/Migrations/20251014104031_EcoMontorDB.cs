@@ -9,7 +9,7 @@ using NetTopologySuite.Geometries;
 namespace EcoMonitor.DataAccess.Migrations
 {
     /// <inheritdoc />
-    public partial class EcoMonitorDB : Migration
+    public partial class EcoMontorDB : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -175,6 +175,19 @@ namespace EcoMonitor.DataAccess.Migrations
                         principalTable: "BinTypes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "BinTypes",
+                columns: new[] { "Id", "Code", "Name" },
+                values: new object[,]
+                {
+                    { new Guid("07a43844-8379-4346-a03f-771e99e05c07"), "PAPER", "Бумага и картон" },
+                    { new Guid("08e8aaa4-1620-4605-bd5d-df80101e9020"), "UNIVERSAL", "Смешанные отходы" },
+                    { new Guid("6c8a0efc-5587-442e-b25f-b6af0f838b8c"), "GLASS", "Стекло" },
+                    { new Guid("a2663621-9339-47aa-a993-61aef83f5ced"), "ORGANIC", "Органика и пищевые отходы" },
+                    { new Guid("a83dc4d0-e3dc-4869-afb0-0272a1f3f6c6"), "PLASTIC", "Пластик" },
+                    { new Guid("bf2a3907-fe53-4d2e-93e5-844ab19f603c"), "METAL", "Металл" }
                 });
 
             migrationBuilder.InsertData(

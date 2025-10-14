@@ -69,34 +69,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
-
-// class MyApp extends StatelessWidget {
-//   const MyApp({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       home: Scaffold(
-//         appBar: AppBar(title: const Text('Минимальная Яндекс.Карта')),
-//         body: SizedBox.expand(
-//           child: YandexMap(
-//             onMapCreated: (mapWindow) async {
-//               print('Map created');
-//               final map = mapWindow.map;
-//               final center = Point(latitude: 56.838926, longitude: 60.605702);
-//               try {
-//                 map.move(CameraPosition(center, zoom: 12, azimuth: 0, tilt: 0));
-//                 map.mapObjects.addEmptyPlacemark(center);
-//                 print('Map moved and placemark added');
-//               } catch (e) {
-//                 print('Error moving map or adding placemark: $e');
-//               }
-//             },
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

@@ -6,6 +6,7 @@ namespace EcoMonitor.DataAccess.Repositories
     {
         Task<IReadOnlyList<BinType>> GetAllBinTypesAsync();
         Task<BinType> GetBinTypeByIdAsync(Guid binTypeId);
+        Task<IReadOnlyList<BinType>> GetBinTypeByCodeAsync(IEnumerable<string> binTypeCodes);
         Task<BinType> AddBinTypeAsync(BinType binType);
         Task<Guid> DeleteBinTypeAsync(Guid binTypeId);
     }

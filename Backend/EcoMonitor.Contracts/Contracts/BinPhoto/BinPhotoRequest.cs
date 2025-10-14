@@ -5,7 +5,7 @@ using NetTopologySuite.Geometries;
 namespace EcoMonitor.Contracts.Contracts.BinPhoto
 {
     public record BinPhotoRequest(
-        Guid Id,
+        //Guid Id,
         string FileName,
         string UrlFile,
         double Latitude,

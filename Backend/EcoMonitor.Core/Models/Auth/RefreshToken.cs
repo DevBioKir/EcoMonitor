@@ -16,14 +16,14 @@ public class RefreshToken
         
     private RefreshToken(
         Guid userId,
-        User? user,
+        //User? user,
         string tokenHash,
         DateTime issuedAt,
         DateTime expireAt)
     {
         Id = Guid.NewGuid();
         UserId = userId;
-        User = user;
+        //User = user;
         TokenHash = tokenHash;
         IssuedAt = issuedAt;
         ExpireAt = expireAt;
@@ -50,14 +50,14 @@ public class RefreshToken
 
     public static RefreshToken Create(
         Guid userId,
-        User user,
+        //User user,
         string tokenHash,
         int validDays = 30)
     {
         var now = DateTime.UtcNow;
         return new RefreshToken(
             userId,
-            user,
+            //user,
             tokenHash,
             now,
             now.AddDays(validDays));

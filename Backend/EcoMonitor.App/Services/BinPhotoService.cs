@@ -14,6 +14,7 @@ namespace EcoMonitor.App.Services
     {
         private readonly IMapper _mapper;
         private readonly IBinPhotoRepository _binPhotoRepository;
+        private readonly IBinTypeRepository _binTypeRepository;
         private readonly ILogger<BinPhotoService> _logger;
         private readonly IImagePipeline _pipeline;
         private readonly IUserRepository _userRepository;
@@ -21,12 +22,14 @@ namespace EcoMonitor.App.Services
         public BinPhotoService(
             IMapper mapper,
             IBinPhotoRepository binPhotoRepository,
+            IBinTypeRepository binTypeRepository,
             ILogger<BinPhotoService> logger,
             IImagePipeline pipeline,
             IUserRepository userRepository)
         {
             _mapper = mapper;
             _binPhotoRepository = binPhotoRepository;
+            _binTypeRepository = binTypeRepository;
             _logger = logger;
             _pipeline = pipeline;
             _userRepository = userRepository;
@@ -91,13 +94,15 @@ namespace EcoMonitor.App.Services
             var user = await _userRepository.GetByIdAsync(request.UploadedById);
 
             var processed = await _pipeline.ProcessAsync(request.Photo);
+            
+            var binTypes = await _binTypeRepository.GetBinTypeByCodeAsync(request.BinTypeCode);
 
             var binPhoto = BinPhoto.Create(
                 fileName: Path.GetFileName(request.Photo.FileName),
                 urlFile: processed.OriginalUrl,
                 latitude: processed.Gps?.lat ?? 0,
                 longitude: processed.Gps?.lon ?? 0,
-                BinTypeId: request.BinTypeId,
+                BinTypeId: binTypes.Select(bt => bt.Id).ToList(),
                 fillLevel: request.FillLevel,
                 isOutsideBin: request.IsOutsideBin,
                 comment: request.Comment,

@@ -33,11 +33,18 @@ namespace EcoMonitor.DataAccess.Repositories.Users
         public async Task<User> AddAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = _mapper.Map<UserEntity>(user);
-            
-            var roleEntity = new UserRoleEntity { Id = user.RoleId };
-            _context.UserRoles.Attach(roleEntity);
 
-            entity.Role = roleEntity;
+            var roleEntity = _context.UserRoles.Local.FirstOrDefault(r => r.Id == user.RoleId);
+            if (roleEntity == null)
+            {
+                roleEntity = await _context.UserRoles.FindAsync(user.RoleId);
+                if (roleEntity == null)
+                    throw new InvalidOperationException("Role not found");
+            }
+            // Attaching a role to the current context
+            // _context.UserRoles.Attach(roleEntity);
+            // Linking a user to a role
+            entity.RoleId = roleEntity.Id;
             
             await _context.Users.AddAsync(entity, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
