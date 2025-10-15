@@ -1,8 +1,11 @@
+import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
+import 'package:ecomonitor/main.dart';
 import 'package:flutter/material.dart';
 import 'package:yandex_maps_mapkit_lite/image.dart';
 import 'package:yandex_maps_mapkit_lite/mapkit.dart' as ymapkit;
 import 'package:yandex_maps_mapkit_lite/src/bindings/image/image_provider.dart' as ymapprovider;
 import 'package:yandex_maps_mapkit_lite/src/mapkit/geometry/point.dart' as ymapgeometry;
+import 'package:yandex_maps_mapkit_lite/src/mapkit/map/placemark.dart' as placemark;
 import 'dart:math' as math;
 import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
 import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
@@ -17,6 +20,14 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   bool _isMapkitActive = false;
   late ymapkit.MapWindow _mapWindow;
+
+  final List<ymapkit.Point> _points = [
+    const ymapkit.Point(latitude: 56.838926, longitude: 60.605702),
+    const ymapkit.Point(latitude: 56.839000, longitude: 60.606000),
+    const ymapkit.Point(latitude: 56.839500, longitude: 60.607000),
+  ];
+
+  List<ymapkit.PlacemarkMapObject> _placemarks = [];
 
   @override
   void initState() {
@@ -49,70 +60,162 @@ class _MapScreenState extends State<MapScreen> {
 
     final center = const ymapkit.Point(latitude: 56.838926, longitude: 60.605702);
     mapWindow.map.move(
-      ymapkit.CameraPosition(center, zoom: 12, azimuth: 0, tilt: 0),
+      ymapkit.CameraPosition(center, zoom: 15, azimuth: 0, tilt: 0),
     );
 
-    final placemark = _mapWindow.map.mapObjects.addPlacemark()
-    ..geometry = const ymapkit.Point(latitude: 56.838926, longitude: 60.605702)
-    ..setText("Special place")
-    ..setTextStyle(
-      const ymapkit.TextStyle(
-        size: 10.0,
-        color: Colors.black,
-        outlineColor: Colors.white,
-        placement: ymapkit.TextStylePlacement.Right,
-        offset: 5.0,
-      )
-    );
+    await _setPlacemarks();
+
+
+    // print("Создаём стандартный маркер...");
+
+    // final placemark = _mapWindow.map.mapObjects.addPlacemark()
+    // ..geometry = center
+    // //..geometry = const ymapkit.Point(latitude: 56.838926, longitude: 60.605702)
+    // ..setText("Special place")
+    // ..setTextStyle(
+    //   const ymapkit.TextStyle(
+    //     size: 10.0,
+    //     color: Colors.black,
+    //     outlineColor: Colors.white,
+    //     placement: ymapkit.TextStylePlacement.Right,
+    //     offset: 5.0,
+    //   )
+    // );
+
+    // print("Маркер создан: координаты ${center.latitude}, ${center.longitude}");
     
-    placemark.useCompositeIcon()
-      ..setIcon(
-        ymapprovider.ImageProvider.fromImageProvider(const AssetImage("assets/ic_dollar_pin.png")),
-        const ymapkit.IconStyle(
-          anchor: math.Point(0.5, 1.0),
-          scale: 4.0,
-        ),
-        name: "pin",
-      )
-      ..setIcon(
-        ymapprovider.ImageProvider.fromImageProvider(const AssetImage("assets/ic_circle.png")),
-        const ymapkit.IconStyle(
-          anchor: math.Point(0.5, 0.5),
-          flat: true,
-          scale: 0.2,
-        ),
-        name: "point",
-      );
+    // // placemark.useCompositeIcon()
+    // //   ..setIcon(
+    // //     ymapprovider.ImageProvider.fromImageProvider(const AssetImage("assets/ic_dollar_pin.png")),
+    // //     const ymapkit.IconStyle(
+    // //       anchor: math.Point(0.5, 1.0),
+    // //       scale: 4.0,
+    // //     ),
+    // //     name: "pin",
+    // //   )
+    // //   ..setIcon(
+    // //     ymapprovider.ImageProvider.fromImageProvider(const AssetImage("assets/ic_circle.png")),
+    // //     const ymapkit.IconStyle(
+    // //       anchor: math.Point(0.5, 0.5),
+    // //       flat: true,
+    // //       scale: 0.2,
+    // //     ),
+    // //     name: "point",
+    // //   );
 
-    // Добавляем слушатель нажатия
-    placemark.addTapListener(MapObjectTapListenerImpl(context));
+    // // Добавляем слушатель нажатия
+    // placemark.addTapListener(MapObjectTapListenerImpl(context));
+
+    // print("Слушатель нажатия добавлен");
   }
-  
+
+  Future<void> _setPlacemarks() async{
+    _mapWindow.map.mapObjects.clear();
+    _placemarks.clear();
+
+    //final center = const ymapkit.Point(latitude: 56.838926, longitude: 60.605702);
+
+    final imageProvider = ymapprovider.ImageProvider.fromImageProvider(const AssetImage('assets/ic_pin6.png'),);
+
+    final iconStyle = const ymapkit.IconStyle(
+      anchor: math.Point(0.5, 1.0),
+      scale: 2.0,
+    );
+
+    for (final point in _points) {
+      final placemark = _mapWindow.map.mapObjects.addPlacemarkWithImageStyle(
+        point,
+        imageProvider,
+        iconStyle,
+      );
+    
+    // final placemark = _mapWindow.map.mapObjects.addPlacemarkWithImageStyle(
+    //   center,
+    //   imageProvider,
+    //   iconStyle);
+
+  placemark.setText("Special place");
+  placemark.setTextStyle(
+    const ymapkit.TextStyle(
+      size: 10.0,
+      color: Colors.black,
+      outlineColor: Colors.white,
+      placement: ymapkit.TextStylePlacement.Right,
+      offset: 5.0,
+    ),
+  );
+
+  // placemark.addTapListener(MapObjectTapListenerImpl (() {
+  //   ScaffoldMessenger.of(context).showSnackBar(
+  //   SnackBar(content: Text('Маркер нажат!')),
+  //   );
+  // }));
+
+  placemark.addTapListener(MapObjectTapListenerImpl(context));
+  _placemarks.add(placemark);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Yandex Map Minimal')),
-      body: YandexMap(
-        onMapCreated: _onMapCreated,
-        platformViewType: PlatformViewType.Hybrid,
+      appBar: AppBar(title: const Text('Map')),
+      body: Builder(
+        builder: (scaffoldContext) {
+          return YandexMap(
+            onMapCreated: _onMapCreated,
+            platformViewType: PlatformViewType.Hybrid,
+            // onMapCreated: (mapWindow) async {
+            //   await _onMapCreated(mapWindow, scaffoldContext);
+            // },
+            // platformViewType: PlatformViewType.Hybrid,
+            );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push (
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddPhotoScreen()),
-          );
-          setState(() {
+          print('Button Add photo input');
+          // Navigator.push (
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => AddPhotoScreen()),
+          // );
+          // setState(() {
             
-          });
+          // });
         },
+        backgroundColor: const Color.fromARGB(255, 122, 162, 230),
         tooltip: 'Add photo',
         child: const Icon(Icons.add),
-        
         ),
-      );,
-    );
+      );
   }
+  
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   return Scaffold(
+  //     appBar: AppBar(title: const Text('Map')),
+  //     body: YandexMap(
+  //       onMapCreated: _onMapCreated,
+  //       platformViewType: PlatformViewType.Hybrid,
+  //     ),
+  //     floatingActionButton: FloatingActionButton(
+  //       onPressed: () {
+  //         print('Button Add photo input');
+  //         // Navigator.push (
+  //         //   context,
+  //         //   MaterialPageRoute(
+  //         //     builder: (context) => AddPhotoScreen()),
+  //         // );
+  //         // setState(() {
+            
+  //         // });
+  //       },
+  //       backgroundColor: const Color.fromARGB(255, 122, 162, 230),
+  //       tooltip: 'Add photo',
+  //       child: const Icon(Icons.add),
+  //       ),
+  //     );
+  // }
 }

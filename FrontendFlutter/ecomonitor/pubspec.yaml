@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   permission_handler: ^12.0.1
-  yandex_maps_mapkit_lite: ^4.22.0-beta
+  yandex_maps_mapkit_lite: ^4.24.0-beta
   dio: ^5.9.0
   flutter_dotenv: ^5.2.1
   flutter_secure_storage: ^9.2.4
@@ -62,7 +62,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/ic_pin.png
+  # - assets/ic_pin.png
+    - assets/ic_pin6.png
     - .env.development
 
   # To add assets to your application, add an assets section, like this:

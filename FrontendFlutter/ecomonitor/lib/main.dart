@@ -8,6 +8,20 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:yandex_maps_mapkit_lite/init.dart' as init;
 
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+void showSnackBar(String message) {
+  final context = navigatorKey.currentContext;
+  if (context != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  } else {
+    print('SnackBar fallback: $message');
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -20,7 +34,6 @@ void main() async {
     print('Location permission granted');
   } else {
     print('Location permission denied');
-    // Можно обработать случай отказа
   }
 
   final apiKey = dotenv.env['YANDEX_MAP_API_KEY'];
@@ -57,12 +70,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'EcoMonitor',
-      home: LoginScreen(
-        authService: authService,
-        onRegister: () {
-          print('Go to the registration screen');
-        },
-        ),
+      navigatorKey: navigatorKey,
+      home: MapScreen(),
+      // home: LoginScreen(
+      //   authService: authService,
+      //   onRegister: () {
+      //     print('Go to the registration screen');
+      //   },
+      //   ),
         routes: {
           '/map': (context) => MapScreen(),
         },
