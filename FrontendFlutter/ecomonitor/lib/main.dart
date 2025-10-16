@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:yandex_maps_mapkit_lite/init.dart' as init;
+import 'package:yandex_maps_mapkit/init.dart' as init;
 
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

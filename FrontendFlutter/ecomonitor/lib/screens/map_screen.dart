@@ -1,14 +1,33 @@
 import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
 import 'package:ecomonitor/main.dart';
-import 'package:flutter/material.dart';
-import 'package:yandex_maps_mapkit_lite/image.dart';
-import 'package:yandex_maps_mapkit_lite/mapkit.dart' as ymapkit;
-import 'package:yandex_maps_mapkit_lite/src/bindings/image/image_provider.dart' as ymapprovider;
-import 'package:yandex_maps_mapkit_lite/src/mapkit/geometry/point.dart' as ymapgeometry;
-import 'package:yandex_maps_mapkit_lite/src/mapkit/map/placemark.dart' as placemark;
+//import 'package:ecomonitor/main.dart';
+import 'package:flutter/material.dart' hide TextStyle;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:yandex_maps_mapkit/mapkit.dart' as ymapkit;
+//import 'package:yandex_maps_mapkit/init.dart' as init;
+import 'package:yandex_maps_mapkit/mapkit_factory.dart';
+import 'package:yandex_maps_mapkit/src/bindings/image/image_provider.dart' as ymapprovider;
+import 'package:yandex_maps_mapkit/yandex_map.dart' as ymap;
 import 'dart:math' as math;
-import 'package:yandex_maps_mapkit_lite/mapkit_factory.dart';
-import 'package:yandex_maps_mapkit_lite/yandex_map.dart';
+
+Future<void> openYandexTerms() async {
+  const url = 'https://yandex.ru/legal/maps_api/';
+  final uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri);
+  } else {
+    print('Не удалось открыть $url');
+  }
+}
+
+final class MapObjectTapListenerImpl implements ymapkit.MapObjectTapListener {
+
+  @override
+  bool onMapObjectTap(ymapkit.MapObject mapObject, ymapkit.Point point) {
+    showSnackBar("Tapped the placemark: Point(latitude: ${point.latitude}, longitude: ${point.longitude})");
+    return true;
+  }
+}
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -29,9 +48,14 @@ class _MapScreenState extends State<MapScreen> {
 
   List<ymapkit.PlacemarkMapObject> _placemarks = [];
 
+  //MapKit stores weak references to the Listener objects passed to it.
+  //It is necessary to store references to them in memory.
+  late final ymapkit.MapObjectTapListener _tapListener;
+
   @override
   void initState() {
     super.initState();
+    _tapListener = MapObjectTapListenerImpl();
     _startMapkit();
   }
 
@@ -115,7 +139,7 @@ class _MapScreenState extends State<MapScreen> {
 
     //final center = const ymapkit.Point(latitude: 56.838926, longitude: 60.605702);
 
-    final imageProvider = ymapprovider.ImageProvider.fromImageProvider(const AssetImage('assets/ic_pin6.png'),);
+    final imageProvider = ymapprovider.ImageProvider.fromImageProvider(const AssetImage('assets/ic_pin6.png'));
 
     final iconStyle = const ymapkit.IconStyle(
       anchor: math.Point(0.5, 1.0),
@@ -151,20 +175,32 @@ class _MapScreenState extends State<MapScreen> {
   //   );
   // }));
 
-  placemark.addTapListener(MapObjectTapListenerImpl(context));
+  placemark.addTapListener(_tapListener);
   _placemarks.add(placemark);
     }
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Map')),
+      appBar: AppBar(title: const Text('Map'),
+      actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+            tooltip: 'Условия использования Яндекс.Карт',
+            onPressed: () async {
+              await openYandexTerms();
+            },
+          ),
+        ],
+      ),
       body: Builder(
         builder: (scaffoldContext) {
-          return YandexMap(
+          return ymap.YandexMap(
             onMapCreated: _onMapCreated,
-            platformViewType: PlatformViewType.Hybrid,
+            platformViewType: ymap.PlatformViewType.Hybrid,
             // onMapCreated: (mapWindow) async {
             //   await _onMapCreated(mapWindow, scaffoldContext);
             // },
@@ -186,7 +222,7 @@ class _MapScreenState extends State<MapScreen> {
         },
         backgroundColor: const Color.fromARGB(255, 122, 162, 230),
         tooltip: 'Add photo',
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
         ),
       );
   }

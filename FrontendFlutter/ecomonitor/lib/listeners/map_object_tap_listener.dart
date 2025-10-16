@@ -1,16 +1,15 @@
-import 'package:ecomonitor/main.dart';
 import 'package:flutter/material.dart';
-import 'package:yandex_maps_mapkit_lite/mapkit.dart' as ymapkit;
+import 'package:yandex_maps_mapkit/mapkit.dart';
 
-class MapObjectTapListenerImpl extends ymapkit.MapObjectTapListener {
+
+class MapObjectTapListenerImpl extends MapObjectTapListener {
   //final VoidCallback onTap;
   final BuildContext context;
 
   //MapObjectTapListenerImpl(this.onTap);
   MapObjectTapListenerImpl(this.context);
-
   @override
-  bool onMapObjectTap(ymapkit.MapObject mapObject, ymapkit.Point point) {
+  bool onMapObjectTap(MapObject mapObject, Point point) {
     //onTap();
     print('Marker tapped!');
     ScaffoldMessenger.of(context).showSnackBar(
