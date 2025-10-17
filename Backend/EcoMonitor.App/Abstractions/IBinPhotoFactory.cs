@@ -15,7 +15,7 @@ public interface IBinPhotoFactory
         bool isOutsideBin,
         string comment,
         int totalBins,
-        User uploadedBy);
+        Guid uploadedById);
     
     Core.Models.BinPhoto Restore(
         Guid id,

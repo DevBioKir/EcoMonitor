@@ -10,37 +10,24 @@ using Microsoft.Extensions.Logging;
 
 namespace EcoMonitor.App.Services
 {
-    public class BinPhotoService : IBinPhotoService
+    public class BinPhotoService(
+        IMapper mapper,
+        IBinPhotoRepository binPhotoRepository,
+        IBinTypeRepository binTypeRepository,
+        ILogger<BinPhotoService> logger,
+        IImagePipeline pipeline,
+        IUserRepository userRepository)
+        : IBinPhotoService
     {
-        private readonly IMapper _mapper;
-        private readonly IBinPhotoRepository _binPhotoRepository;
-        private readonly IBinTypeRepository _binTypeRepository;
-        private readonly ILogger<BinPhotoService> _logger;
-        private readonly IImagePipeline _pipeline;
-        private readonly IUserRepository _userRepository;
+        private readonly ILogger<BinPhotoService> _logger = logger;
 
-        public BinPhotoService(
-            IMapper mapper,
-            IBinPhotoRepository binPhotoRepository,
-            IBinTypeRepository binTypeRepository,
-            ILogger<BinPhotoService> logger,
-            IImagePipeline pipeline,
-            IUserRepository userRepository)
-        {
-            _mapper = mapper;
-            _binPhotoRepository = binPhotoRepository;
-            _binTypeRepository = binTypeRepository;
-            _logger = logger;
-            _pipeline = pipeline;
-            _userRepository = userRepository;
-        }
         public async Task<BinPhotoResponse> AddBinPhotoAsync(
             BinPhotoRequest request)
         {
             if (request == null)
                 throw new KeyNotFoundException("Request is null");
             
-            var uploadedBy = await _userRepository.GetByIdAsync(request.UploadedById);
+            var uploadedBy = await userRepository.GetByIdAsync(request.UploadedById);
             if (uploadedBy == null)
                 throw new KeyNotFoundException("User not found");
             
@@ -54,28 +41,34 @@ namespace EcoMonitor.App.Services
                 request.IsOutsideBin,
                 request.Comment,
                 request.TotalBins,
-                uploadedBy);
+                uploadedBy.Id);
             
-            var addBinPhoto = await _binPhotoRepository.AddBinPhotoAsync(domainBinPhoto);
+            var addBinPhoto = await binPhotoRepository.AddBinPhotoAsync(domainBinPhoto);
 
-            return _mapper.Map<BinPhotoResponse>(addBinPhoto);
+            return mapper.Map<BinPhotoResponse>(addBinPhoto);
         }
-
+        
         public async Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId)
         {
-            return await _binPhotoRepository.DeleteBinPhotoAsync(binPhotoId);
+            return await binPhotoRepository.DeleteBinPhotoAsync(binPhotoId);
         }
 
         public async Task<IReadOnlyList<BinPhotoResponse>> GetAllBinPhotosAsync()
         {
-            var listBinPhotos = await _binPhotoRepository.GetAllBinPhotosAsync();
-            return _mapper.Map<List<BinPhotoResponse>>(listBinPhotos);
+            var listBinPhotos = await binPhotoRepository.GetAllBinPhotosAsync();
+            return mapper.Map<List<BinPhotoResponse>>(listBinPhotos);
+        }
+        
+        public async Task<IReadOnlyList<BinPhotoResponse>> GetAllUserPhotosAsync(Guid userId)
+        {
+            var listBinPhotos = await binPhotoRepository.GetAllUserPhotosAsync(userId);
+            return mapper.Map<List<BinPhotoResponse>>(listBinPhotos);
         }
 
         public async Task<BinPhotoResponse> GetPhotoByIdAsync(Guid photoBinId)
         {
-            var domainBinPhoto = await _binPhotoRepository.GetPhotoByIdAsync(photoBinId);
-            return _mapper.Map<BinPhotoResponse>(domainBinPhoto);
+            var domainBinPhoto = await binPhotoRepository.GetPhotoByIdAsync(photoBinId);
+            return mapper.Map<BinPhotoResponse>(domainBinPhoto);
         }
 
         public async Task<IEnumerable<BinPhotoResponse>> GetPhotosInBoundsAsync(
@@ -84,18 +77,18 @@ namespace EcoMonitor.App.Services
             double east, 
             double west)
         {
-            var photos = await _binPhotoRepository.GetPhotosInBoundsAsync(north, south, east, west);
+            var photos = await binPhotoRepository.GetPhotosInBoundsAsync(north, south, east, west);
 
-            return _mapper.Map<IEnumerable<BinPhotoResponse>>(photos);
+            return mapper.Map<IEnumerable<BinPhotoResponse>>(photos);
         }
 
         public async Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request, CancellationToken ct)
         {
-            var user = await _userRepository.GetByIdAsync(request.UploadedById);
+            var user = await userRepository.GetByIdAsync(request.UploadedById);
 
-            var processed = await _pipeline.ProcessAsync(request.Photo);
+            var processed = await pipeline.ProcessAsync(request.Photo);
             
-            var binTypes = await _binTypeRepository.GetBinTypeByCodeAsync(request.BinTypeCode);
+            var binTypes = await binTypeRepository.GetBinTypeByCodeAsync(request.BinTypeCode);
 
             var binPhoto = BinPhoto.Create(
                 fileName: Path.GetFileName(request.Photo.FileName),
@@ -107,12 +100,12 @@ namespace EcoMonitor.App.Services
                 isOutsideBin: request.IsOutsideBin,
                 comment: request.Comment,
                 totalBins: request.TotalBins,
-                uploadedBy: user
+                uploadedById: user.Id
                 );
 
-            await _binPhotoRepository.AddBinPhotoAsync(binPhoto);
+            await binPhotoRepository.AddBinPhotoAsync(binPhoto);
 
-            return _mapper.Map<BinPhotoResponse>(binPhoto);
+            return mapper.Map<BinPhotoResponse>(binPhoto);
         }
     }
 }

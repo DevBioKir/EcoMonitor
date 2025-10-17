@@ -2,6 +2,7 @@ using EcoMonitor.Core.Models.Auth;
 using EcoMonitor.DataAccess.Entities.Auth;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using NetTopologySuite.IO;
 
 namespace EcoMonitor.DataAccess.Repositories.Auth;
 
@@ -64,5 +65,19 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         _context.RefreshTokens.Update(tokenEntity);
         
         await _context.SaveChangesAsync(cancellationToken);
+    }
+    
+    public async Task<RefreshToken?> GetValidRefreshTokenByUserIdAsync(
+        Guid userId, 
+        CancellationToken cancellationToken = default)
+    {
+        var now =  DateTime.UtcNow;
+
+        var token = await _context.RefreshTokens
+            .Where(rt => rt.UserId == userId && rt.ExpireAt > now && !rt.Revoked)
+            .OrderByDescending(rt => rt.IssuedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        
+        return _mapper.Map<RefreshToken>(token);
     }
 }

@@ -56,25 +56,25 @@ namespace EcoMonitor.App.Mapper
             /// <summary>
             /// Mapping Entities, Domain for BinPhoto
             /// </summary>
-            config.NewConfig<BinPhoto, BinPhoto>()
-                .ConstructUsing(src => BinPhoto.Create(
-                        src.FileName,
-                        src.UrlFile,
-                        src.Longitude,  // longitude
-                        src.Latitude, // latitude
-                        src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
-                        src.FillLevel,
-                        src.IsOutsideBin,
-                        src.Comment,
-                        src.TotalBins,
-                        src.UploadedBy))
-                .AfterMapping((src, dest) =>
-                {
-                    foreach (var bbt in src.BinPhotoBinTypes)
-                    {
-                        dest.AddBinType(bbt.BinTypeId);
-                    }
-                });
+            // config.NewConfig<BinPhoto, BinPhoto>()
+            //     .ConstructUsing(src => BinPhoto.Create(
+            //             src.FileName,
+            //             src.UrlFile,
+            //             src.Longitude,  // longitude
+            //             src.Latitude, // latitude
+            //             src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
+            //             src.FillLevel,
+            //             src.IsOutsideBin,
+            //             src.Comment,
+            //             src.TotalBins,
+            //             src.UploadedBy))
+            //     .AfterMapping((src, dest) =>
+            //     {
+            //         foreach (var bbt in src.BinPhotoBinTypes)
+            //         {
+            //             dest.AddBinType(bbt.BinTypeId);
+            //         }
+            //     });
 
             config.NewConfig<Point, Point>()
                 .MapWith(src => src == null ? null : new Point(new Coordinate(src.X, src.Y)) { SRID = 4326 });
@@ -355,7 +355,7 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
                 .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
                 .Map(dest => dest.Comment, src => src.Comment)
-                .Map(dest => dest.UploadedBy, src => src.UploadedBy)
+                //.Map(dest => dest.UploadedBy, src => src.UploadedBy)
                 .Map(dest => dest.UploadedById, src => src.UploadedById);
 
             /// <summary>

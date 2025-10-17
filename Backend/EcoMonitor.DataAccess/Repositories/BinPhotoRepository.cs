@@ -5,22 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EcoMonitor.DataAccess.Repositories
 {
-    public class BinPhotoRepository : IBinPhotoRepository
+    public class BinPhotoRepository(
+        EcoMonitorDbContext context,
+        IMapper mapper) : IBinPhotoRepository
     {
-        private readonly EcoMonitorDbContext _context;
-        private readonly IMapper _mapper; 
-
-        public BinPhotoRepository(
-            EcoMonitorDbContext context,
-            IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
-
         public async Task<IReadOnlyList<BinPhoto>> GetAllBinPhotosAsync()
         {
-            var binPhotosEntity = await _context.BinPhotos
+            var binPhotosEntity = await context.BinPhotos
                 .Include(bp => bp.BinPhotoBinTypes)
                     .ThenInclude(bbt => bbt.BinType)
                 .Include(bp => bp.UploadedBy)
@@ -29,7 +20,7 @@ namespace EcoMonitor.DataAccess.Repositories
                 //.AsNoTracking()
                 .ToListAsync();
 
-            var binPhotos = _mapper.Map<List<BinPhoto>>(binPhotosEntity);
+            var binPhotos = mapper.Map<List<BinPhoto>>(binPhotosEntity);
 
             return binPhotos;
         }
@@ -40,7 +31,7 @@ namespace EcoMonitor.DataAccess.Repositories
             double east,
             double west)
         {
-            var photos = await _context.BinPhotos
+            var photos = await context.BinPhotos
                 .Where(b => b.Location.Y <= north && b.Location.Y >= south
                 && b.Location.X >= west && b.Location.X <= east)
                 .Select(b => new
@@ -51,23 +42,39 @@ namespace EcoMonitor.DataAccess.Repositories
                     b.FillLevel
                 }).ToListAsync();
 
-            return _mapper.Map<List<BinPhoto>>(photos);
+            return mapper.Map<List<BinPhoto>>(photos);
+        }
+        
+        public async Task<IReadOnlyList<BinPhoto>> GetAllUserPhotosAsync(Guid userId)
+        {
+            var photos = await context.BinPhotos
+                .Include(bp => bp.BinPhotoBinTypes)
+                    .ThenInclude(bbt => bbt.BinType)
+                .Include(bp => bp.UploadedBy)
+                    .ThenInclude(u => u.Role)
+                    .ThenInclude(r => r.Permissions)
+                .Where(bp => bp.UploadedBy.Id == userId)
+                .ToListAsync();
+            
+            var binPhotos = mapper.Map<List<BinPhoto>>(photos);
+            
+            return binPhotos;
         }
 
         public async Task<BinPhoto> AddBinPhotoAsync(
             BinPhoto binPhoto)
         {
-            var binPhotoEntity = _mapper.Map<BinPhotoEntity>(binPhoto);
+            var binPhotoEntity = mapper.Map<BinPhotoEntity>(binPhoto);
 
-            await _context.BinPhotos.AddAsync(binPhotoEntity);
-            await _context.SaveChangesAsync();
+            await context.BinPhotos.AddAsync(binPhotoEntity);
+            await context.SaveChangesAsync();
 
             return binPhoto;
         }
 
         public async Task<BinPhoto> GetPhotoByIdAsync(Guid photoBinId)
         {
-            var entityBinPhoto = await _context.BinPhotos
+            var entityBinPhoto = await context.BinPhotos
                 .Include(bp => bp.BinPhotoBinTypes)
                     .ThenInclude(bbt => bbt.BinType)
                 .Include(bp => bp.UploadedBy)
@@ -78,19 +85,19 @@ namespace EcoMonitor.DataAccess.Repositories
             if (entityBinPhoto == null)
                 throw new NullReferenceException($"Container photo with ID {photoBinId} not found");
 
-            return _mapper.Map<BinPhoto>(entityBinPhoto);
+            return mapper.Map<BinPhoto>(entityBinPhoto);
         }
 
         public async Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId)
         {
-                var binPhotoEntity = await _context.BinPhotos
+                var binPhotoEntity = await context.BinPhotos
                 .FirstOrDefaultAsync(b => b.Id == binPhotoId);
 
                 if (binPhotoEntity == null)
                     throw new NullReferenceException($"Container photo with ID {binPhotoId} not found");
 
-                _context.BinPhotos.Remove(binPhotoEntity);
-                await _context.SaveChangesAsync();
+                context.BinPhotos.Remove(binPhotoEntity);
+                await context.SaveChangesAsync();
 
                 //var deletedBinPhoto = await _context.BinPhotos
                 //        .Where(b => b.Id == binPhotoId)

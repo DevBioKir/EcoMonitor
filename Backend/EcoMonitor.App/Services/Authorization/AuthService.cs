@@ -30,7 +30,7 @@ public class AuthService : IAuthService
     public AuthService(
         IUserRepository userRepository,
         IUserRoleRepository userRoleRepository,
-        IUserFactory userFactory, 
+        IUserFactory userFactory,
         IPasswordHasher passwordHasher,
         IJWTService jwtService,
         IOptions<JwtSettings> options,

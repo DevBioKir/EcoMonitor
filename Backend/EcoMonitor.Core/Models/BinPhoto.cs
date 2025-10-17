@@ -33,10 +33,12 @@ namespace EcoMonitor.Core.Models
             bool isOutsideBin,
             string comment,
             int totalBins,
-            User uploadedBy)
+            Guid uploadedById
+            //User uploadedBy
+            )
         {
-            if (uploadedBy == null)
-                throw new ArgumentNullException(nameof(uploadedBy));
+            if (uploadedById == null)
+                throw new ArgumentNullException(nameof(uploadedById));
             
             if (totalBins < 0)
                 throw new ArgumentOutOfRangeException(nameof(totalBins), "TotalBins cannot be negative");
@@ -56,8 +58,8 @@ namespace EcoMonitor.Core.Models
             IsOutsideBin = isOutsideBin;
             Comment = comment;
             TotalBins = totalBins;
-            UploadedBy = uploadedBy;
-            UploadedById = uploadedBy.Id;
+            //UploadedBy = uploadedBy;
+            UploadedById = uploadedById;
         }
 
         private BinPhoto(
@@ -130,7 +132,7 @@ namespace EcoMonitor.Core.Models
             bool isOutsideBin,
             string comment,
             int totalBins,
-            User uploadedBy)
+            Guid uploadedById)
         {
             var photo = new BinPhoto(
                 fileName, 
@@ -142,7 +144,7 @@ namespace EcoMonitor.Core.Models
                 isOutsideBin, 
                 comment,
                 totalBins,
-                uploadedBy);
+                uploadedById);
 
             if (BinTypeId == null || !BinTypeId.Any())
             {

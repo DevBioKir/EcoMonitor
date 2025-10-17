@@ -14,6 +14,6 @@ namespace EcoMonitor.Contracts.Contracts.BinPhoto
        bool IsOutsideBin,
        int TotalBins,
        string Comment,
-       UserResponse UploadedBy,
+       //UserResponse UploadedBy,
        Guid UploadedById);
 }

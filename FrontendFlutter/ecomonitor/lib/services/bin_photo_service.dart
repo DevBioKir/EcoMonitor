@@ -7,9 +7,9 @@ class BinPhotoService {
   BinPhotoService(this._apiClient);
 
   Future<List<BinPhotoResponse>> getAllBinPhoto() async {
-    final response = await _apiClient.get('api/binphoto/GetAllPhoto');
+    final response = await _apiClient.get('api/binphoto/GetAllPhotos');
     return response.data;
   }
 
-  f
+  Future<>
 }

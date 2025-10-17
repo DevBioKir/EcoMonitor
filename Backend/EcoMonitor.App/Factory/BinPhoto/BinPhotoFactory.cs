@@ -15,7 +15,7 @@ public class BinPhotoFactory : IBinPhotoFactory
         bool isOutsideBin, 
         string comment,
         int totalBins,
-        User uploadedBy)
+        Guid uploadedById)
     {
         return Core.Models.BinPhoto.Create(
             fileName, 
@@ -27,7 +27,7 @@ public class BinPhotoFactory : IBinPhotoFactory
             isOutsideBin, 
             comment,
             totalBins,
-            uploadedBy);
+            uploadedById);
     }
 
     public Core.Models.BinPhoto Restore(

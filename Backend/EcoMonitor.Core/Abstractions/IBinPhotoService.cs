@@ -7,6 +7,7 @@ namespace EcoMonitor.App.Services
     {
         Task<IReadOnlyList<BinPhotoResponse>> GetAllBinPhotosAsync();
         Task<BinPhotoResponse> GetPhotoByIdAsync(Guid photoBinId);
+        Task<IReadOnlyList<BinPhotoResponse>> GetAllUserPhotosAsync(Guid userId);
         Task<BinPhotoResponse> AddBinPhotoAsync(BinPhotoRequest requestBinPhoto);
         Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId);
         Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request, CancellationToken ct);

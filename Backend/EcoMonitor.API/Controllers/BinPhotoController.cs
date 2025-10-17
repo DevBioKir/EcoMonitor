@@ -37,8 +37,8 @@ namespace EcoMonitor.API.Controllers
             return Guid.Parse(userIdClaim.Value);
         }
 
-        [Authorize]
-        [HttpGet("GetBinPhotoById/{id}")]
+        //[Authorize]
+        [HttpGet("GetBinPhotoById")]
         public async Task<ActionResult<BinPhotoResponse>> GetBinPhotoByIdAsync(Guid id)
         {
             try
@@ -79,6 +79,14 @@ namespace EcoMonitor.API.Controllers
             var responseBinPhotos = _mapper.Map<List<BinPhotoResponse>>(binPhotos);
 
             return Ok(responseBinPhotos);
+        }
+        
+        [HttpGet("user/{userId}")]
+        public async Task<ActionResult<List<BinPhotoResponse>>> GetUserPhotos(Guid userId)
+        {
+            var user = GetCurrentUserId();
+            var photos = await _binPhotoService.GetAllUserPhotosAsync(userId);
+            return Ok(photos);
         }
 
         [HttpPost]
