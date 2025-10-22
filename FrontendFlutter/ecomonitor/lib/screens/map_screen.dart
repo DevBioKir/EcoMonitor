@@ -1,5 +1,6 @@
 import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
 import 'package:ecomonitor/main.dart';
+import 'package:ecomonitor/screens/add_photo_screen.dart';
 //import 'package:ecomonitor/main.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:url_launcher/url_launcher.dart';
@@ -180,8 +181,6 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,15 +209,10 @@ class _MapScreenState extends State<MapScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print('Button Add photo input');
-          // Navigator.push (
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => AddPhotoScreen()),
-          // );
-          // setState(() {
-            
-          // });
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddPhotoScreen()),
+          );
         },
         backgroundColor: const Color.fromARGB(255, 122, 162, 230),
         tooltip: 'Add photo',
