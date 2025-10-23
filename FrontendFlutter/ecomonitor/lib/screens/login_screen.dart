@@ -33,8 +33,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
   
-  Future<void> _handleLogin() async {
-    if(!_formKey.currentState!.validate()) return;
+  Future<bool> _handleLogin() async {
+    if(!_formKey.currentState!.validate()) return false;
     setState(() {
       _loading = true;
       _error = null;
@@ -48,7 +48,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (token.isNotEmpty) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => MapScreen()));
+          MaterialPageRoute(builder: (context) => 
+                      MapScreen(authService: widget.authService))
+          );
+          return true;
       } else {
         throw Exception('Token is empty');
       } 
@@ -56,6 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _error = e.toString();
       });
+      return false;
     } finally {
       setState(() => _loading = false);
     }

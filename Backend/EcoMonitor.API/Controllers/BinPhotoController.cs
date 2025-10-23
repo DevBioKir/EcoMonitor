@@ -37,7 +37,7 @@ namespace EcoMonitor.API.Controllers
             return Guid.Parse(userIdClaim.Value);
         }
 
-        //[Authorize]
+        [Authorize]
         [HttpGet("GetBinPhotoById")]
         public async Task<ActionResult<BinPhotoResponse>> GetBinPhotoByIdAsync(Guid id)
         {
@@ -52,7 +52,8 @@ namespace EcoMonitor.API.Controllers
                 return StatusCode(500, "Ошибка при поиске фото в базе.");
             }
         }
-
+        
+        [Authorize]
         [HttpGet("GetPhotosInBounds")]
         public async Task<ActionResult<IEnumerable<BinPhotoResponse>>> GetPhotosInBoundsAsync(
             double north,
@@ -71,7 +72,8 @@ namespace EcoMonitor.API.Controllers
                 return StatusCode(500, "Ошибка при поиске фотографий в базе.");
             }
         }
-
+        
+        [Authorize]
         [HttpGet("GetAllPhotos")]
         public async Task<ActionResult<IReadOnlyList<BinPhotoResponse>>> GetAllBinPhotosAsync()
         {
@@ -81,6 +83,7 @@ namespace EcoMonitor.API.Controllers
             return Ok(responseBinPhotos);
         }
         
+        [Authorize]
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<List<BinPhotoResponse>>> GetUserPhotos(Guid userId)
         {
@@ -88,7 +91,8 @@ namespace EcoMonitor.API.Controllers
             var photos = await _binPhotoService.GetAllUserPhotosAsync(userId);
             return Ok(photos);
         }
-
+        
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult<BinPhotoResponse>> AddBinPhotoAsync([FromBody] BinPhotoRequest request)
         {
@@ -96,7 +100,8 @@ namespace EcoMonitor.API.Controllers
 
             return CreatedAtAction(nameof(AddBinPhotoAsync), new { id = binPhoto.Id }, binPhoto);
         }
-
+        
+        [Authorize]
         [HttpPost("UploadWithMetadata")]
         public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata([FromForm] BinPhotoUploadRequest request, CancellationToken ct)
         {
@@ -134,7 +139,8 @@ namespace EcoMonitor.API.Controllers
                 return StatusCode(500, "Ошибка при обработке изображения.");
             }
         }
-
+        
+        [Authorize]
         [HttpDelete("Delete")]
         public async Task<ActionResult<Guid>> DeleteBinPhotoAsync(Guid binPhotoId)
         {

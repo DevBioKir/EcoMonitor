@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'EcoMonitor',
       navigatorKey: navigatorKey,
-      home: MapScreen(),
+      home: MapScreen(authService: authService),
       // home: LoginScreen(
       //   authService: authService,
       //   onRegister: () {
@@ -79,7 +79,7 @@ class MyApp extends StatelessWidget {
       //   },
       //   ),
         routes: {
-          '/map': (context) => MapScreen(),
+          '/map': (context) => MapScreen(authService: authService),
         },
     );
   }

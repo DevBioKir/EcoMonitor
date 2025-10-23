@@ -1,0 +1,15 @@
+import 'package:ecomonitor/core/network/api_client.dart';
+import 'package:ecomonitor/models/bin_type/bin_type_response.dart';
+import 'package:ecomonitor/services/bin_photo_service.dart';
+
+class BinTypeService {
+  final ApiClient _apiClient;
+
+  BinTypeService(this._apiClient);
+
+  Future<List<BinTypeResponse>> getAllType() async {
+    final response = await _apiClient.get('api/bintype/GetAllBinTypes');
+    return (response.data as List)
+                  .map((item) => BinTypeResponse.fromJson(item)).toList();
+  }
+}

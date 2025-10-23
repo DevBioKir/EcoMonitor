@@ -38,6 +38,11 @@ class AuthService {
     await _storage.delete(key: _refreshToken);
   }
 
+  Future<bool> isLoggedIn() async {
+    final token = await _storage.read(key: _accessToken);
+    return token != null && token.isNotEmpty;
+  }
+
   Future<String> registration(RegisterUserRequest request) async {
       final response = await _apiClient.post(
         'api/authorization/register',

@@ -1,6 +1,8 @@
 import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
 import 'package:ecomonitor/main.dart';
 import 'package:ecomonitor/screens/add_photo_screen.dart';
+import 'package:ecomonitor/screens/login_screen.dart';
+import 'package:ecomonitor/services/auth_service.dart';
 //import 'package:ecomonitor/main.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:url_launcher/url_launcher.dart';
@@ -22,7 +24,6 @@ Future<void> openYandexTerms() async {
 }
 
 final class MapObjectTapListenerImpl implements ymapkit.MapObjectTapListener {
-
   @override
   bool onMapObjectTap(ymapkit.MapObject mapObject, ymapkit.Point point) {
     showSnackBar("Tapped the placemark: Point(latitude: ${point.latitude}, longitude: ${point.longitude})");
@@ -31,7 +32,12 @@ final class MapObjectTapListenerImpl implements ymapkit.MapObjectTapListener {
 }
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final AuthService authService;
+
+  const MapScreen({
+    super.key, 
+    required this.authService});
+  
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -208,16 +214,29 @@ class _MapScreenState extends State<MapScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddPhotoScreen()),
-          );
+        onPressed: () async {
+          final isLoggedIn = await widget.authService.isLoggedIn();
+          if (isLoggedIn) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddPhotoScreen()),
+            );
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => LoginScreen(
+                authService: widget.authService,
+                onRegister: () {
+                  // Навигации на регистрацию
+                },
+              )),
+            );
+          }
         },
         backgroundColor: const Color.fromARGB(255, 122, 162, 230),
         tooltip: 'Add photo',
         child: Icon(Icons.add),
-        ),
+      ),
       );
   }
   

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:ecomonitor/models/bin_type/bin_type_response.dart';
 
 class BinPhotoUploadRequest {
   final File photo;
@@ -9,7 +10,6 @@ class BinPhotoUploadRequest {
   final bool isOutsideBin;
   final String comment;
   final int totalBins;
-  final String uploadedById;
 
   BinPhotoUploadRequest({
     required this.photo,
@@ -18,7 +18,6 @@ class BinPhotoUploadRequest {
     required this.isOutsideBin,
     required this.comment,
     required this.totalBins,
-    required this.uploadedById,
   });
 
   Map<String, dynamic> toFormData() => {
@@ -28,7 +27,6 @@ class BinPhotoUploadRequest {
     'IsOutsideBin': isOutsideBin,
     'Comment': comment,
     'TotalBins': totalBins,
-    'UploadedById': uploadedById,
   };
 }
 

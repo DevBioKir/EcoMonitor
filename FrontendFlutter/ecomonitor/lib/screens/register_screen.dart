@@ -55,8 +55,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (token.isNotEmpty) {
           Navigator.pushReplacement(
             context, 
-            MaterialPageRoute(builder: (context) => MapScreen()),
-            );
+            MaterialPageRoute(
+              builder: (context) => MapScreen(authService: widget.authService)
+            ),
+          );
         } else {
           setState(() {
             _error = 'Token is empty';
