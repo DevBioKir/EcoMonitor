@@ -58,6 +58,12 @@ public class AuthService : IAuthService
         // not tracked by context
         //update loggedAt
         await _userRepository.UpdateLastLoggedAtAsync(user, DateTime.UtcNow, cancellationToken);
+        
+        var activeTokens = await _refreshTokenRepository.GetAllByUserIdAsync(user.Id, cancellationToken);
+        foreach (var token in activeTokens)
+        {
+            await _refreshTokenRepository.RevokeAsync(token, cancellationToken);
+        }
 
         var accessToken = _jwtService.GenerateToken(user);
         var refreshToken = _jwtService.GenerateRefreshToken();

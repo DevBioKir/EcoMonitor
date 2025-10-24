@@ -15,6 +15,9 @@
 //             var emailIvan = Email.Create("ivanov@mail.ry");
 //
 //             var emailPeter = Email.Create("petrov@mail.ry");
+//             
+//             var userRoleId = Guid.NewGuid();
+//             var userRoleId1 = Guid.NewGuid();
 //
 //             var users = new List<User>()
 //             {
@@ -23,13 +26,13 @@
 //                     "Ivanov",
 //                     emailIvan.Value,
 //                     "23sdqfg5432",
-//                     "User"),
+//                     userRoleId),
 //                 _userFactory.Create(
 //                     "Peter",
 //                     "Petrov",
 //                     emailPeter.Value,
 //                     "wadsaf341232sad",
-//                     "User")
+//                     userRoleId1)
 //             };
 //
 //             var roleEntity = new UserRoleEntity
@@ -78,13 +81,15 @@
 //             //var userFactory = new UserFactory(_passwordHasher);
 //
 //             var emailIvan = Email.Create("ivanov@mail.ry");
-//
+//             
+//             var userRoleId = Guid.NewGuid();
+//             
 //             var user = _userFactory.Create(
 //                     "Ivan",
 //                     "Ivanov",
 //                     emailIvan.Value,
 //                     "23sdqfg5432",
-//                     "User");
+//                     userRoleId);
 //
 //             var roleEntity = new UserRoleEntity
 //             {

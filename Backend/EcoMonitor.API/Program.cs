@@ -27,7 +27,6 @@ var env = builder.Environment;
 
 builder.Services.AddControllers();
 
-//��� Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -42,12 +41,15 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserFactory, UserFactory>();
 builder.Services.AddScoped<IUserRoleFactory, UserRoleFactory>();
 
+builder.Services.AddLogging();
+
 var serviceProvider = builder.Services.BuildServiceProvider();
 var userFactory = serviceProvider.GetRequiredService<IUserFactory>();
 var userRoleFactory = serviceProvider.GetRequiredService<IUserRoleFactory>();
+var logger = serviceProvider.GetRequiredService<ILogger<MappingConfig>>();
 
 var config = new TypeAdapterConfig();
-config.Apply(new MappingConfig(userFactory, userRoleFactory));
+config.Apply(new MappingConfig(userFactory, userRoleFactory, logger));
 
 builder.Services.AddSingleton(config);
 builder.Services.AddScoped<IMapper, ServiceMapper>();
@@ -65,7 +67,7 @@ builder.Services.AddCors(options =>
             //policy.WithOrigins("http://192.168.1.255:8081")
                   .AllowAnyHeader()
                   .AllowAnyMethod();
-                  //.AllowCredentials(); ��� ����
+                  //.AllowCredentials();
         });
 });
 
@@ -98,7 +100,6 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    // �������� Swagger � Development
     app.UseSwagger();
     app.UseSwaggerUI();
 }

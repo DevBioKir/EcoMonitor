@@ -16,6 +16,7 @@ using EcoMonitor.DataAccess.Entities.Users;
 using Mapster;
 using MapsterMapper;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 
 namespace EcoMonitor.App.Mapper
@@ -24,17 +25,21 @@ namespace EcoMonitor.App.Mapper
     {
         private readonly IUserFactory _userFactory;
         private readonly IUserRoleFactory _userRoleFactory;
+        private readonly ILogger<MappingConfig> _logger;
         
         public MappingConfig(
             IUserFactory userFactory, 
-            IUserRoleFactory userRoleFactory)
+            IUserRoleFactory userRoleFactory,
+            ILogger<MappingConfig> logger)
         {
             _userFactory = userFactory;
             _userRoleFactory = userRoleFactory;
+            _logger = logger;
         }
 
         public void Register(TypeAdapterConfig config)
         {
+            _logger.LogInformation("MappingConfig.Register called - Mapster configuration starting");
             /// <summary>
             /// Mapping VO, string for Email
             /// </summary>

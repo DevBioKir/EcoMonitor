@@ -215,13 +215,13 @@ class _MapScreenState extends State<MapScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          final isLoggedIn = await widget.authService.isLoggedIn();
-          if (isLoggedIn) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddPhotoScreen()),
-            );
-          } else {
+          // final isLoggedIn = await widget.authService.isLoggedIn();
+          // if (isLoggedIn) {
+          //   Navigator.push(
+          //     context,
+          //     MaterialPageRoute(builder: (context) => AddPhotoScreen()),
+          //   );
+          // } else {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => LoginScreen(
@@ -231,7 +231,7 @@ class _MapScreenState extends State<MapScreen> {
                 },
               )),
             );
-          }
+          //}
         },
         backgroundColor: const Color.fromARGB(255, 122, 162, 230),
         tooltip: 'Add photo',
