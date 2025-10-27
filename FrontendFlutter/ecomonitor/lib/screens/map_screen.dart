@@ -2,6 +2,7 @@ import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
 import 'package:ecomonitor/main.dart';
 import 'package:ecomonitor/screens/add_photo_screen.dart';
 import 'package:ecomonitor/screens/login_screen.dart';
+import 'package:ecomonitor/screens/profile_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
 //import 'package:ecomonitor/main.dart';
 import 'package:flutter/material.dart' hide TextStyle;
@@ -188,83 +189,82 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Map'),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Map'),
       actions: [
+        IconButton(
+          icon: const Icon(Icons.info_outline),
+          tooltip: 'Условия использования Яндекс.Карт',
+          onPressed: () async {
+            await openYandexTerms();
+          },
+        ),
+      ],
+    ),
+    body: Builder(
+      builder: (scaffoldContext) {
+        return ymap.YandexMap(
+          onMapCreated: _onMapCreated,
+          platformViewType: ymap.PlatformViewType.Hybrid,
+        );
+      },
+    ),
+    floatingActionButton: FloatingActionButton(
+      onPressed: () async {
+        final isLoggedIn = await widget.authService.isLoggedIn();
+        if (isLoggedIn) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AddPhotoScreen()),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen(
+              authService: widget.authService,
+              onRegister: () {
+                // Навигация на регистрацию
+              },
+            )),
+          );
+        }
+      },
+      backgroundColor: const Color.fromARGB(255, 122, 162, 230),
+      tooltip: 'Add photo',
+      child: Icon(Icons.add),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    bottomNavigationBar: BottomAppBar(
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 8.0,
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
           IconButton(
-            icon: const Icon(Icons.info_outline),
-            tooltip: 'Условия использования Яндекс.Карт',
+            icon: Icon(Icons.account_circle_outlined),
+            tooltip: 'Личный кабинет',
+            onPressed: () {
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(builder: (context) => ProfileScreen(
+              //     user: /* текущий пользователь */, // нужно передать user сюда
+              //   )),
+              // );
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.info_outline),
+            tooltip: 'Условия использования',
             onPressed: () async {
               await openYandexTerms();
             },
           ),
         ],
       ),
-      body: Builder(
-        builder: (scaffoldContext) {
-          return ymap.YandexMap(
-            onMapCreated: _onMapCreated,
-            platformViewType: ymap.PlatformViewType.Hybrid,
-            // onMapCreated: (mapWindow) async {
-            //   await _onMapCreated(mapWindow, scaffoldContext);
-            // },
-            // platformViewType: PlatformViewType.Hybrid,
-            );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          // final isLoggedIn = await widget.authService.isLoggedIn();
-          // if (isLoggedIn) {
-          //   Navigator.push(
-          //     context,
-          //     MaterialPageRoute(builder: (context) => AddPhotoScreen()),
-          //   );
-          // } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => LoginScreen(
-                authService: widget.authService,
-                onRegister: () {
-                  // Навигации на регистрацию
-                },
-              )),
-            );
-          //}
-        },
-        backgroundColor: const Color.fromARGB(255, 122, 162, 230),
-        tooltip: 'Add photo',
-        child: Icon(Icons.add),
-      ),
-      );
-  }
-  
-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return Scaffold(
-  //     appBar: AppBar(title: const Text('Map')),
-  //     body: YandexMap(
-  //       onMapCreated: _onMapCreated,
-  //       platformViewType: PlatformViewType.Hybrid,
-  //     ),
-  //     floatingActionButton: FloatingActionButton(
-  //       onPressed: () {
-  //         print('Button Add photo input');
-  //         // Navigator.push (
-  //         //   context,
-  //         //   MaterialPageRoute(
-  //         //     builder: (context) => AddPhotoScreen()),
-  //         // );
-  //         // setState(() {
-            
-  //         // });
-  //       },
-  //       backgroundColor: const Color.fromARGB(255, 122, 162, 230),
-  //       tooltip: 'Add photo',
-  //       child: const Icon(Icons.add),
-  //       ),
-  //     );
-  // }
+    ),
+  );
+}
 }

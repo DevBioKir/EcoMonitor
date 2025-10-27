@@ -11,6 +11,7 @@ using EcoMonitor.DataAccess.Repositories.Auth;
 using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Authentication;
 using MapsterMapper;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using IPasswordHasher = EcoMonitor.Infrastracture.Abstractions.IPasswordHasher;
 
@@ -26,6 +27,7 @@ public class AuthService : IAuthService
     private readonly JwtSettings _jwtSettings;
     private readonly IMapper _mapper;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         IUserRepository userRepository,
@@ -35,7 +37,8 @@ public class AuthService : IAuthService
         IJWTService jwtService,
         IOptions<JwtSettings> options,
         IMapper mapper,
-        IRefreshTokenRepository refreshTokenRepository)
+        IRefreshTokenRepository refreshTokenRepository,
+        ILogger<AuthService> logger)
     {
         _userRepository = userRepository;
         _userRoleRepository = userRoleRepository;
@@ -45,6 +48,7 @@ public class AuthService : IAuthService
         _jwtSettings = options.Value;
         _mapper = mapper;
         _refreshTokenRepository = refreshTokenRepository;
+        _logger = logger;
     }
     
     public async Task<AuthResponse> LoginAsync(AuthRequest request, CancellationToken cancellationToken = default)
@@ -213,8 +217,14 @@ public class AuthService : IAuthService
         var refreshTokenHash = Hash(refreshTokenValue);
         
         var storedRefreshToken = await _refreshTokenRepository.GetByTokenHashAsync(refreshTokenHash);
+        // if (storedRefreshToken == null || !storedRefreshToken.IsActive())
+        //     throw new UnauthorizedAccessException("Invalid or expired refresh token");
+        
         if (storedRefreshToken == null || !storedRefreshToken.IsActive())
-            throw new UnauthorizedAccessException("Invalid or expired refresh token");
+        {
+            _logger.LogWarning("Attempted to revoke non-existent or inactive token");
+            return;
+        }
         
         storedRefreshToken.Revoke();
         

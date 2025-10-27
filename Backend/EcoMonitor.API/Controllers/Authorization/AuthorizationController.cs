@@ -238,7 +238,7 @@ public class AuthorizationController : ControllerBase
     //     }
     // }
 
-    [Authorize]
+    //[Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> LogoutAsync([FromBody] RefreshTokenRequest request,
         CancellationToken cancellationToken = default)
@@ -246,7 +246,15 @@ public class AuthorizationController : ControllerBase
         if (string.IsNullOrEmpty(request.RefreshToken))
             return BadRequest(new { message = "Refresh token is required for logout" });
         
-        await _authService.RevokeRefreshTokenAsync(request.RefreshToken, cancellationToken);
-        return NoContent();
+        try
+        {
+            await _authService.RevokeRefreshTokenAsync(request.RefreshToken, cancellationToken);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Logout failed: {Message}", ex.Message);
+            return Unauthorized(new { message = ex.Message });
+        }
     }
 }

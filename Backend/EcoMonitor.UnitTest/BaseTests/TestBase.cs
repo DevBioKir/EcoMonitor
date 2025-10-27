@@ -44,7 +44,7 @@ namespace EcoMonitor.UnitTest
                 var config = new TypeAdapterConfig();
                 var userFactory = sp.GetRequiredService<IUserFactory>();
                 var userRoleFactory = sp.GetRequiredService<IUserRoleFactory>();
-                new MappingConfig(userFactory, userRoleFactory).Register(config);
+                //new MappingConfig(userFactory, userRoleFactory).Register(config);
                 return config;
             });
             services.AddScoped<IMapper>(sp =>

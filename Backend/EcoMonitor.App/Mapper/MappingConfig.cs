@@ -36,6 +36,13 @@ namespace EcoMonitor.App.Mapper
             _userRoleFactory = userRoleFactory;
             _logger = logger;
         }
+        
+        private static IEnumerable<Guid> EnsureBinTypeId(BinPhotoEntity src)
+        {
+            if (src.BinPhotoBinTypes == null || !src.BinPhotoBinTypes.Any())
+                throw new Exception("BinPhotoEntity.Id=" + src.Id + " has no BinTypeId");
+            return src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId);
+        }
 
         public void Register(TypeAdapterConfig config)
         {
@@ -107,7 +114,7 @@ namespace EcoMonitor.App.Mapper
                             src.Location.Y,
                             src.Location.X,
                             src.UploadedAt,
-                            src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId),
+                            EnsureBinTypeId(src),
                             src.FillLevel,
                             src.IsOutsideBin,
                             src.Comment,
@@ -239,23 +246,25 @@ namespace EcoMonitor.App.Mapper
                 .ConstructUsing(src => RefreshToken.Restore(
                     src.Id,
                     src.UserId,
-                    _userFactory.Restore(
-                        src.User.Id,
-                        src.User.Firstname,
-                        src.User.Surname,
-                        Email.Create(src.User.Email),
-                        PasswordHash.FromHash(src.User.PasswordHash),
-                        UserRole.Restore(
-                            src.User.Role.Id,
-                            src.User.Role.Name,
-                            src.User.Role.Description,
-                            src.User.Role.Permissions.Select(p => new Permission(p.Code)).ToList()
-                        ),
-                        src.User.CreatedAt,
-                        src.User.LastLogindAt,
-                        src.User.LockedUntil,
-                        new List<BinPhoto>()
-                        ),
+                    src.User != null
+                        ? _userFactory.Restore(
+                            src.User.Id,
+                            src.User.Firstname,
+                            src.User.Surname,
+                            Email.Create(src.User.Email),
+                            PasswordHash.FromHash(src.User.PasswordHash),
+                            src.User.Role != null
+                                ? UserRole.Restore(
+                                    src.User.Role.Id,
+                                    src.User.Role.Name,
+                                    src.User.Role.Description,
+                                    src.User.Role.Permissions.Select(p => new Permission(p.Code)).ToList() ?? new List<Permission>())
+                                : null,
+                            src.User.CreatedAt,
+                            src.User.LastLogindAt,
+                            src.User.LockedUntil,
+                            new List<BinPhoto>())
+                        : null,
                     src.TokenHash,
                     src.IssuedAt,
                     src.ExpireAt,

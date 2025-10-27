@@ -70,6 +70,7 @@ namespace EcoMonitor.DataAccess.Repositories.Users
                 .Include(u => u.Role)
                 .ThenInclude(r => r.Permissions)
                 .Include(u => u.BinPhoto)
+                .ThenInclude(bp => bp.BinPhotoBinTypes)
                 .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 
             return _mapper.Map<User>(entity);

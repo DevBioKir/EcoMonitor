@@ -40,19 +40,21 @@ builder.Services.AddDbContext<EcoMonitorDbContext>(options =>
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserFactory, UserFactory>();
 builder.Services.AddScoped<IUserRoleFactory, UserRoleFactory>();
-
 builder.Services.AddLogging();
 
-var serviceProvider = builder.Services.BuildServiceProvider();
-var userFactory = serviceProvider.GetRequiredService<IUserFactory>();
-var userRoleFactory = serviceProvider.GetRequiredService<IUserRoleFactory>();
-var logger = serviceProvider.GetRequiredService<ILogger<MappingConfig>>();
-
-var config = new TypeAdapterConfig();
-config.Apply(new MappingConfig(userFactory, userRoleFactory, logger));
-
-builder.Services.AddSingleton(config);
+builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings); // глобальный Mapster config
 builder.Services.AddScoped<IMapper, ServiceMapper>();
+
+// var serviceProvider = builder.Services.BuildServiceProvider();
+// var userFactory = serviceProvider.GetRequiredService<IUserFactory>();
+// var userRoleFactory = serviceProvider.GetRequiredService<IUserRoleFactory>();
+// var logger = serviceProvider.GetRequiredService<ILogger<MappingConfig>>();
+//
+// var config = new TypeAdapterConfig();
+// config.Apply(new MappingConfig(userFactory, userRoleFactory, logger));
+//
+// builder.Services.AddSingleton(config);
+// builder.Services.AddScoped<IMapper, ServiceMapper>();
 
 builder.Services.AddSingleton(env.WebRootPath);
 builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
@@ -91,11 +93,22 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 builder.Services.AddScoped<IJWTService, JWTService>();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+if (jwtSettings == null)
+    throw new InvalidOperationException("JwtSettings config section missing or misconfigured.");
 ApiExtensions.AddApiAuthentication(builder.Services, Options.Create(jwtSettings));
 
 builder.WebHost.UseUrls("http://0.0.0.0:5198");
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var config = scope.ServiceProvider.GetRequiredService<TypeAdapterConfig>();
+    var userFactory = scope.ServiceProvider.GetRequiredService<IUserFactory>();
+    var userRoleFactory = scope.ServiceProvider.GetRequiredService<IUserRoleFactory>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<MappingConfig>>();
+    config.Apply(new MappingConfig(userFactory, userRoleFactory, logger));
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
