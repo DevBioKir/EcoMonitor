@@ -3,9 +3,12 @@ import 'package:ecomonitor/main.dart';
 import 'package:ecomonitor/screens/add_photo_screen.dart';
 import 'package:ecomonitor/screens/login_screen.dart';
 import 'package:ecomonitor/screens/profile_screen.dart';
+import 'package:ecomonitor/screens/register_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
+import 'package:ecomonitor/services/user_service.dart';
 //import 'package:ecomonitor/main.dart';
 import 'package:flutter/material.dart' hide TextStyle;
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart' as ymapkit;
 //import 'package:yandex_maps_mapkit/init.dart' as init;
@@ -33,11 +36,12 @@ final class MapObjectTapListenerImpl implements ymapkit.MapObjectTapListener {
 }
 
 class MapScreen extends StatefulWidget {
-  final AuthService authService;
+  //final AuthService authService;
 
   const MapScreen({
     super.key, 
-    required this.authService});
+    //required this.authService
+    });
   
 
   @override
@@ -188,21 +192,68 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  @override
+  void _onRegisterPressed() {
+  final authService = Provider.of<AuthService>(context, listen: false);
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => RegisterScreen(authService: authService),
+    ),
+  );
+}
+
+  Future<void> _onProfilePressed() async {
+  final userService = Provider.of<UserService>(context, listen: false);
+  final authService = Provider.of<AuthService>(context, listen: false);
+
+  final user = await userService.getCurrentUser();
+
+  if (!mounted) return; // Защита от использования context после await
+
+  if (user != null) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProfileScreen(user: user)),
+    );
+  } else {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(
+          authService: authService,
+          onRegister: _onRegisterPressed,
+        ),
+      ),
+    );
+  }
+  }
+
+  Future<void> _onAddPhotoPressed() async {
+  final authService = Provider.of<AuthService>(context, listen: false);
+  final isLoggedIn = await authService.checkLoginStatus();
+
+  print('Проверка статуса логина: isLoggedIn = $isLoggedIn');
+
+  if (!mounted) return;
+
+  if (isLoggedIn) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen()));
+  } else {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(
+          authService: authService,
+          onRegister: _onRegisterPressed,
+        ),
+      ),
+    );
+  }
+}
+
+@override
 Widget build(BuildContext context) {
   return Scaffold(
-    appBar: AppBar(
-      title: const Text('Map'),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.info_outline),
-          tooltip: 'Условия использования Яндекс.Карт',
-          onPressed: () async {
-            await openYandexTerms();
-          },
-        ),
-      ],
-    ),
     body: Builder(
       builder: (scaffoldContext) {
         return ymap.YandexMap(
@@ -212,59 +263,34 @@ Widget build(BuildContext context) {
       },
     ),
     floatingActionButton: FloatingActionButton(
-      onPressed: () async {
-        final isLoggedIn = await widget.authService.isLoggedIn();
-        if (isLoggedIn) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AddPhotoScreen()),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen(
-              authService: widget.authService,
-              onRegister: () {
-                // Навигация на регистрацию
-              },
-            )),
-          );
-        }
-      },
-      backgroundColor: const Color.fromARGB(255, 122, 162, 230),
-      tooltip: 'Add photo',
-      child: Icon(Icons.add),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-    bottomNavigationBar: BottomAppBar(
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8.0,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          IconButton(
-            icon: Icon(Icons.account_circle_outlined),
-            tooltip: 'Личный кабинет',
-            onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => ProfileScreen(
-              //     user: /* текущий пользователь */, // нужно передать user сюда
-              //   )),
-              // );
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.info_outline),
-            tooltip: 'Условия использования',
-            onPressed: () async {
-              await openYandexTerms();
-            },
-          ),
-        ],
+        onPressed: _onAddPhotoPressed,
+        backgroundColor: const Color.fromARGB(255, 122, 162, 230),
+        tooltip: 'Add photo',
+        child: const Icon(Icons.add),
       ),
-    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            IconButton(
+              icon: const Icon(Icons.account_circle_outlined),
+              tooltip: 'Личный кабинет',
+              onPressed: _onProfilePressed,
+            ),
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              tooltip: 'Условия использования',
+              onPressed: () async {
+                await openYandexTerms();
+              },
+            ),
+          ],
+        ),
+      ),
   );
 }
 }

@@ -2,10 +2,12 @@ import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/screens/login_screen.dart';
 import 'package:ecomonitor/screens/map_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
+import 'package:ecomonitor/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:yandex_maps_mapkit/init.dart' as init;
 
 
@@ -57,30 +59,41 @@ void main() async {
   // final apiClient = ApiClient(
   //  "http://10.0.2.2:5198/", () async => await storage.read(key: 'auth_token') ?? '');
   final authService = AuthService(apiClient);
+  final userService = UserService(apiClient);
 
-  runApp(MyApp(authService: authService));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthService>(
+          create: (_) => authService,
+        ),
+        Provider<UserService>(
+          create: (_) => userService,
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
-  final AuthService authService;
-
-  const MyApp({super.key, required this.authService});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'EcoMonitor',
       navigatorKey: navigatorKey,
-      home: MapScreen(authService: authService),
-      // home: LoginScreen(
-      //   authService: authService,
-      //   onRegister: () {
-      //     print('Go to the registration screen');
-      //   },
-      //   ),
-        routes: {
-          '/map': (context) => MapScreen(authService: authService),
+      home: Consumer<AuthService>(
+        builder: (context, authService, _) {
+          return MapScreen();
         },
+      ),
+      routes: {
+        '/map': (context) => Consumer<AuthService>(
+          builder: (context, authService, _) => MapScreen(),
+        ),
+      },
     );
   }
 }

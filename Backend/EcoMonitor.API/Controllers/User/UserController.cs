@@ -17,8 +17,21 @@ public class UserController(
 {
     private readonly ILogger<UserController> _logger = logger;
 
-    private Guid CurrentUser() => Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-    
+    private Guid CurrentUser()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim == null)
+        {
+            throw new UnauthorizedAccessException("User ID claim not found");
+        }
+        return Guid.Parse(userIdClaim.Value);
+    }
+
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<ActionResult<UserResponse>> GetCurrentUser() 
+        => await _userService.GetByIdAsync(CurrentUser(), CancellationToken.None);
+
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAllUsersAsync(CancellationToken cancellationToken)

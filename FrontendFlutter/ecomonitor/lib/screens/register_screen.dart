@@ -56,7 +56,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Navigator.pushReplacement(
             context, 
             MaterialPageRoute(
-              builder: (context) => MapScreen(authService: widget.authService)
+              builder: (context) => MapScreen()
             ),
           );
         } else {

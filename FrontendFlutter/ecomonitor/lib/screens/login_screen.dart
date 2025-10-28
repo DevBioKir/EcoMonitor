@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => 
-                      MapScreen(authService: widget.authService))
+                      MapScreen())
           );
           return true;
       } else {
