@@ -1,4 +1,5 @@
 import 'package:ecomonitor/core/network/api_client.dart';
+import 'package:ecomonitor/models/auth/login_response.dart';
 import 'package:ecomonitor/models/auth/register_user_request.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -22,24 +23,31 @@ class AuthService extends ChangeNotifier{
     return _isLoggedIn;
   }
   
-  Future<String> login(String email, String password) async {
+  Future<LoginResponse> login(String email, String password) async {
     final response = await _apiClient.post('api/authorization/login', data: {
       'email' : email,
       'password' : password,
     });
 
-    final accessToken = response.data['accessToken'] as String?;
-    final refreshToken = response.data['refreshToken'] as String?;
-    final expires = response.data['expires'] as int?;
-
-    if (accessToken == null || refreshToken == null){
-      throw Exception('Authorization token not found in response');
-    }
-    await _storage.write(key: _accessToken, value: accessToken);
-    await _storage.write(key: _refreshToken, value: refreshToken);
+    final loginResponse = LoginResponse.fromJson(response.data);
     
-    return accessToken;
-  }
+    // final accessToken = response.data['accessToken'] as String?;
+    // final refreshToken = response.data['refreshToken'] as String?;
+    // final expires = response.data['expires'] as int?;
+
+    // if (accessToken == null || refreshToken == null){
+    //   throw Exception('Authorization token not found in response');
+    // }
+
+    print('Получен accessToken: ${loginResponse.accessToken}');
+    print('Получен refreshToken: ${loginResponse.refreshToken}');
+    print('Время действия токена (секунды): ${loginResponse.expires}');
+
+    await _storage.write(key: _accessToken, value: loginResponse.accessToken);
+    await _storage.write(key: _refreshToken, value: loginResponse.refreshToken);
+
+    return loginResponse;
+}
 
   Future<String?> getRefreshToken() async => await _storage.read(key: _refreshToken);
   Future<String?> getAccessToken() async => await _storage.read(key: _accessToken);

@@ -53,13 +53,15 @@ namespace EcoMonitor.DataAccess.Repositories.Users
             return updatedUser;
         }
 
-        public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+        public async Task<User> GetByIdAsync(Guid? id, CancellationToken cancellationToken = default)
         {
-            var entity = await _context.Users
+            var entityQuery = _context.Users
                 .Include(u => u.Role)
-                .ThenInclude(r => r.Permissions)
+                    .ThenInclude(r => r.Permissions)
                 .Include(u => u.BinPhoto)
-                .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+                    .ThenInclude(bp => bp.BinPhotoBinTypes);
+            
+            var entity = await entityQuery.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
 
             return _mapper.Map<User>(entity);
         }

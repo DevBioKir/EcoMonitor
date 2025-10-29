@@ -15,7 +15,10 @@ class ApiClient{
         onRequest: (options, handler) async {
           final token = await tokenProvider();
           if (token != null && token.isNotEmpty) {
-            options.headers['Authorization'] = 'Basic $token';
+            options.headers['Authorization'] = 'Bearer $token';
+            print('Отправка запроса с токеном Authorization: Bearer $token');
+          } else {
+            print('Отправка запроса без токена Authorization');
           }
           handler.next(options);
         },

@@ -203,29 +203,33 @@ class _MapScreenState extends State<MapScreen> {
 }
 
   Future<void> _onProfilePressed() async {
-  final userService = Provider.of<UserService>(context, listen: false);
-  final authService = Provider.of<AuthService>(context, listen: false);
+    print('Нажали на профиль');
+    final userService = Provider.of<UserService>(context, listen: false);
+    final authService = Provider.of<AuthService>(context, listen: false);
 
-  final user = await userService.getCurrentUser();
+    print('Выполняем запрос к текущему пользователю');
+    final user = await userService.getCurrentUser();
 
-  if (!mounted) return; // Защита от использования context после await
+    if (!mounted) return; // Защита от использования context после await
 
-  if (user != null) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => ProfileScreen(user: user)),
-    );
-  } else {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => LoginScreen(
-          authService: authService,
-          onRegister: _onRegisterPressed,
+    if (user != null) {
+      print('Переход в Profile Screen');
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => ProfileScreen(user: user)),
+      );
+    } else {
+      print('Переход на LoginScreen');
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => LoginScreen(
+            authService: authService,
+            onRegister: _onRegisterPressed,
+          ),
         ),
-      ),
-    );
-  }
+      );
+    }
   }
 
   Future<void> _onAddPhotoPressed() async {

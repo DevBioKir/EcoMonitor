@@ -9,7 +9,7 @@ namespace EcoMonitor.API.Controllers.User;
 
 [ApiController]
 [Route("api/[controller]")]
-//[Authorize]
+[Authorize]
 public class UserController(
     IUserService _userService,
     ILogger<UserController> logger)
@@ -17,20 +17,27 @@ public class UserController(
 {
     private readonly ILogger<UserController> _logger = logger;
 
-    private Guid CurrentUser()
+    private Guid? CurrentUser()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
         {
-            throw new UnauthorizedAccessException("User ID claim not found");
+            return null;
+            //throw new UnauthorizedAccessException("User ID claim not found");
         }
         return Guid.Parse(userIdClaim.Value);
     }
 
     [HttpGet("me")]
-    [Authorize]
-    public async Task<ActionResult<UserResponse>> GetCurrentUser() 
-        => await _userService.GetByIdAsync(CurrentUser(), CancellationToken.None);
+    public async Task<ActionResult<UserResponse>> GetCurrentUser()
+    {
+        var userId = CurrentUser();
+        if (userId == null) 
+        {
+            return Unauthorized("User is not authenticated");
+        }
+        return await _userService.GetByIdAsync(userId.Value, CancellationToken.None);
+    }
 
     [HttpGet]
     [Authorize(Roles = "Admin")]
@@ -173,9 +180,3 @@ public class UserController(
     }
     
 }
-// {
-// "Firstname": "Kirill",
-// "Surname": "Yanichkin",
-// "Email": "devbiokir@gmail.com",
-// "Password": "123456789"
-// }

@@ -34,6 +34,16 @@ public class ApiExtensions
             {
                 policy.RequireClaim("role", "admin");
             });
+            
+            options.AddPolicy("UserPolicy", policy =>
+            {
+                policy.RequireClaim("role", "user");
+            });
+            
+            options.AddPolicy("ManagerPolicy", policy =>
+            {
+                policy.RequireClaim("role", "manager");
+            });
         });
     }
 }

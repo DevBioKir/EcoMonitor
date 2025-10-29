@@ -40,12 +40,12 @@ class _LoginScreenState extends State<LoginScreen> {
       _error = null;
     });
     try{
-      final token = await widget.authService.login(
+      final loginResponse = await widget.authService.login(
       _emailController.text.trim(),
       _passwordController.text.trim(),
       );
 
-      if (token.isNotEmpty) {
+      if (loginResponse.accessToken.isNotEmpty) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => 

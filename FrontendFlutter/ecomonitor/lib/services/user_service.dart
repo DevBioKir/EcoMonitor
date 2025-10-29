@@ -10,8 +10,8 @@ class UserService {
 
   Future<UserResponse?> getCurrentUser() async {
     try {
-    final response = await _apiClient.get('/api/user/me'); // пример пути
-    return UserResponse.fromJson(response.data);
+      final response = await _apiClient.get('/api/user/me');
+      return UserResponse.fromJson(response.data);
     } on DioException catch (e) {
       print('Ошибка при получении текущего пользователя: ${e.response?.statusCode} - ${e.message}');
       if (e.response != null) {

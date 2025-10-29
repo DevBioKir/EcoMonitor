@@ -34,8 +34,7 @@ public class UserService : IUserService
         _logger = logger;
     }
     
-    public async Task<IReadOnlyList<UserResponse>> GetAllAsync(
-        Guid currentUserId, 
+    public async Task<IReadOnlyList<UserResponse>> GetAllAsync(Guid? currentUserId,
         CancellationToken cancellationToken = default)
     {
         var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
@@ -48,7 +47,7 @@ public class UserService : IUserService
         return _mapper.Map<IReadOnlyList<UserResponse>>(users);
     }
 
-    public async Task AddAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task AddAsync(UserRequest user, Guid? currentUserId, CancellationToken cancellationToken = default)
     {
         var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
             throw new UnauthorizedAccessException("Current user not found");
@@ -119,7 +118,8 @@ public class UserService : IUserService
         return _mapper.Map<UserResponse>(userEmail);
     }
 
-    public async Task<UserResponse> UpdateAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task<UserResponse> UpdateAsync(UserRequest user, Guid? currentUserId,
+        CancellationToken cancellationToken = default)
     {
         var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
             throw new UnauthorizedAccessException("Current user not found");
@@ -143,7 +143,7 @@ public class UserService : IUserService
         await _userRepository.DeleteAsync(id, cancellationToken);
     }
     
-    public async Task DeleteAsync(Guid id, Guid currentUserId, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Guid id, Guid? currentUserId, CancellationToken cancellationToken = default)
     {
         var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
             throw new UnauthorizedAccessException("Current user not found");

@@ -1,5 +1,4 @@
 import 'package:ecomonitor/core/network/api_client.dart';
-import 'package:ecomonitor/screens/login_screen.dart';
 import 'package:ecomonitor/screens/map_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
 import 'package:ecomonitor/services/user_service.dart';
@@ -55,9 +54,9 @@ void main() async {
 
   final storage = const FlutterSecureStorage();
   final apiClient = ApiClient(
-    "http://localhost:5198/", () async => await storage.read(key: 'auth_token') ?? '');
+    "http://localhost:5198/", () async => await storage.read(key: 'access_token') ?? '');
   // final apiClient = ApiClient(
-  //  "http://10.0.2.2:5198/", () async => await storage.read(key: 'auth_token') ?? '');
+  //  "http://10.0.2.2:5198/", () async => await storage.read(key: 'access_token') ?? '');
   final authService = AuthService(apiClient);
   final userService = UserService(apiClient);
 
