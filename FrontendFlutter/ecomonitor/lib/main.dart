@@ -1,6 +1,7 @@
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/screens/map_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
+import 'package:ecomonitor/services/bin_photo_service.dart';
 import 'package:ecomonitor/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -57,8 +58,10 @@ void main() async {
     "http://localhost:5198/", () async => await storage.read(key: 'access_token') ?? '');
   // final apiClient = ApiClient(
   //  "http://10.0.2.2:5198/", () async => await storage.read(key: 'access_token') ?? '');
+
   final authService = AuthService(apiClient);
   final userService = UserService(apiClient);
+  final binPhotoService = BinPhotoService(apiClient);
 
   runApp(
     MultiProvider(
@@ -68,6 +71,9 @@ void main() async {
         ),
         Provider<UserService>(
           create: (_) => userService,
+        ),
+        Provider<BinPhotoService>(
+          create: (_) => binPhotoService,
         ),
       ],
       child: const MyApp(),

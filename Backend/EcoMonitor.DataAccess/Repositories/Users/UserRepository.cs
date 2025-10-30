@@ -56,12 +56,23 @@ namespace EcoMonitor.DataAccess.Repositories.Users
         public async Task<User> GetByIdAsync(Guid? id, CancellationToken cancellationToken = default)
         {
             var entityQuery = _context.Users
+                .AsSplitQuery()
                 .Include(u => u.Role)
                     .ThenInclude(r => r.Permissions)
                 .Include(u => u.BinPhoto)
                     .ThenInclude(bp => bp.BinPhotoBinTypes);
-            
+    
             var entity = await entityQuery.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+    
+            // Логирование для проверки
+            Console.WriteLine($"BinPhoto count: {entity?.BinPhoto?.Count ?? 0}");
+            if (entity?.BinPhoto != null)
+            {
+                foreach (var photo in entity.BinPhoto)
+                {
+                    Console.WriteLine($"Photo ID: {photo.Id}, FileName: {photo.FileName}");
+                }
+            }
 
             return _mapper.Map<User>(entity);
         }

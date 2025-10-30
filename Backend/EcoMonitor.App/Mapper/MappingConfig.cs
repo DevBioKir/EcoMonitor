@@ -210,7 +210,7 @@ namespace EcoMonitor.App.Mapper
                     src.CreatedAt,
                     src.LastLogindAt,
                     src.LockedUntil,
-                    src.BinPhoto.Select(bp => bp.Adapt<BinPhoto>()).ToList()
+                    src.BinPhoto.Select(bp => bp.Adapt<BinPhoto>()).ToList() ?? new List<BinPhoto>()
                 ));
 
             /// <summary>
@@ -322,6 +322,12 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.LastLogindAt, src => src.LastLogindAt)
                 .Map(dest => dest.LockedUntil, src => src.LockedUntil)
                 .Map(dest => dest.BinPhoto, src => src.Photos.Adapt<List<BinPhotoEntity>>());
+            
+            config.NewConfig<User, UserResponse>()
+                .Map(dest => dest.Firstname, src => src.Firstname)
+                .Map(dest => dest.Surname, src => src.Surname)
+                .Map(dest => dest.Email, src => src.Email.Value)          // VO → string
+                .Map(dest => dest.BinPhoto, src => src.Photos.Select(p => p.Adapt<BinPhotoResponse>()).ToList());
 
             config.NewConfig<User, RegisterUserRequest>()
                 .Map(dest => dest.Firstname, src => src.Firstname)

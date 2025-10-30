@@ -3,7 +3,7 @@
 namespace EcoMonitor.Contracts.Contracts.User
 {
     public record UserResponse(
-        //Guid Id,
+        Guid Id,
         string Firstname,
         string Surname,
         string Email,

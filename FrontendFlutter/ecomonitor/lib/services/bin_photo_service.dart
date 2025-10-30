@@ -20,9 +20,18 @@ class BinPhotoService {
   }
 
   Future<List<BinPhotoResponse>> getUserPhotos(String userId) async {
-    final response = await _apiClient.get('api/binphoto/user/$userId');
-    return (response.data as List)
-                    .map((item) => BinPhotoResponse.fromJson(item)).toList();
+    try {
+      final response = await _apiClient.get('api/binphoto/user/$userId');
+      return (response.data as List)
+          .map((item) => BinPhotoResponse.fromJson(item as Map<String, dynamic>))
+          .toList();
+    } on DioException catch (e) {
+      print('Ошибка при загрузке фотографий: ${e.response?.statusCode} - ${e.message}');
+      if (e.response != null) {
+        print('Response data: ${e.response?.data}');
+      }
+      rethrow;
+    }
   }
 
   // Future<BinPhotoResponse> addBinPhoto(BinPhotoRequest request) async {

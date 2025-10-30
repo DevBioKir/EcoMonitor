@@ -1,5 +1,3 @@
-import 'package:ecomonitor/models/user/user_response.dart';
-
 class BinPhotoResponse {
   final String id;
   final String fileName;
@@ -12,7 +10,6 @@ class BinPhotoResponse {
   final bool isOutsideBin;
   final int totalBins;
   final String comment;
-  final UserResponse uploadedBy;
   final String uploadedById;
 
   BinPhotoResponse({
@@ -27,42 +24,39 @@ class BinPhotoResponse {
     required this.isOutsideBin,
     required this.totalBins,
     required this.comment,
-    required this.uploadedBy,
     required this.uploadedById,
   });
 
   factory BinPhotoResponse.fromJson(Map<String, dynamic> json) {
     return BinPhotoResponse(
-      id: json['Id'], 
-      fileName: json['FileName'], 
-      urlFile: json['UrlFile'], 
-      longitude: (json['Longitude'] as num).toDouble(),
-      latitude: (json['Latitude'] as num).toDouble(),
-      uploadedAt: DateTime.parse(json['UploadedAt']), 
-      binTypeId: List<String>.from(json['binTypeId']), 
-      fillLevel: (json['FillLevel'] as num).toDouble(),
-      isOutsideBin: json['IsOutsideBin'], 
-      totalBins: json['TotalBins'], 
-      comment: json['Comment'], 
-      uploadedBy: UserResponse.fromJson(json['UploadedBy']), 
-      uploadedById: json['uploadedById']);
+      id: json['id'] as String,
+      fileName: json['fileName'] as String,
+      urlFile: json['urlFile'] as String,
+      longitude: (json['longitude'] as num).toDouble(),
+      latitude: (json['latitude'] as num).toDouble(),
+      uploadedAt: DateTime.parse(json['uploadedAt'] as String),
+      binTypeId: List<String>.from(json['binTypeId']),
+      fillLevel: (json['fillLevel'] as num).toDouble(),
+      isOutsideBin: json['isOutsideBin'] as bool,
+      totalBins: json['totalBins'] as int,
+      comment: json['comment'] as String,
+      uploadedById: json['uploadedById'] as String,
+    );
   }
 
   Map<String, dynamic> toJson() => {
-    'Id' : id,
-    'FileName' : fileName,
-    'UrlFile' : urlFile,
-    'Longitude' : longitude,
-    'Latitude' : latitude,
-    'UploadedAt' : uploadedAt.toIso8601String(),
-    'BinTypeId' : binTypeId.map((e) => e).toList(),
-    'FillLevel' : fillLevel,
-    'IsOutsideBin' : isOutsideBin,
-    'TotalBins' : totalBins,
-    'Comment' : comment,
-    'UploadedBy' : uploadedBy.toJson(),
-    'UploadedById' : uploadedById,
+    'id': id,
+    'fileName': fileName,
+    'urlFile': urlFile,
+    'longitude': longitude,
+    'latitude': latitude,
+    'uploadedAt': uploadedAt.toIso8601String(),
+    'binTypeId': binTypeId,
+    'fillLevel': fillLevel,
+    'isOutsideBin': isOutsideBin,
+    'totalBins': totalBins,
+    'comment': comment,
+    'uploadedById': uploadedById,
   };
-
 }
 
