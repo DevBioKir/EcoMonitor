@@ -1,4 +1,5 @@
-﻿using EcoMonitor.Contracts.Contracts.BinPhoto;
+﻿using EcoMonitor.Contracts.Contracts;
+using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Repositories;
@@ -59,9 +60,11 @@ namespace EcoMonitor.App.Services
             return mapper.Map<List<BinPhotoResponse>>(listBinPhotos);
         }
         
-        public async Task<IReadOnlyList<BinPhotoResponse>> GetAllUserPhotosAsync(Guid userId)
+        public async Task<PagedResult<BinPhotoResponse>> GetAllUserPhotosAsync(
+            Guid userId,
+            PhotoFilter filters)
         {
-            var listBinPhotos = await binPhotoRepository.GetAllUserPhotosAsync(userId);
+            var query = await userRepository.GetByIdAsync(userId);
             return mapper.Map<List<BinPhotoResponse>>(listBinPhotos);
         }
 
@@ -107,5 +110,7 @@ namespace EcoMonitor.App.Services
 
             return mapper.Map<BinPhotoResponse>(binPhoto);
         }
+        
+        
     }
 }

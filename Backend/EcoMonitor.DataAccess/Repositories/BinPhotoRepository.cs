@@ -1,4 +1,5 @@
-﻿using EcoMonitor.Core.Models;
+﻿using EcoMonitor.Contracts.Contracts;
+using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
@@ -47,16 +48,18 @@ namespace EcoMonitor.DataAccess.Repositories
         
         public async Task<IReadOnlyList<BinPhoto>> GetAllUserPhotosAsync(Guid userId)
         {
-            var photos = await context.BinPhotos
-                .Include(bp => bp.BinPhotoBinTypes)
-                    .ThenInclude(bbt => bbt.BinType)
-                .Include(bp => bp.UploadedBy)
-                    .ThenInclude(u => u.Role)
-                    .ThenInclude(r => r.Permissions)
-                .Where(bp => bp.UploadedBy.Id == userId)
-                .ToListAsync();
             
-            var binPhotos = mapper.Map<List<BinPhoto>>(photos);
+            
+            // var photos = await context.BinPhotos
+            //     .Include(bp => bp.BinPhotoBinTypes)
+            //         .ThenInclude(bbt => bbt.BinType)
+            //     .Include(bp => bp.UploadedBy)
+            //         .ThenInclude(u => u.Role)
+            //         .ThenInclude(r => r.Permissions)
+            //     .Where(bp => bp.UploadedBy.Id == userId)
+            //     .ToListAsync();
+            //
+            // var binPhotos = mapper.Map<List<BinPhoto>>(photos);
             
             return binPhotos;
         }
@@ -107,6 +110,38 @@ namespace EcoMonitor.DataAccess.Repositories
                 //    throw new NullReferenceException($"Container photo with ID {binPhotoId} not found");
 
                 return binPhotoId;
+        }
+        
+        private IQueryable<BinPhotoEntity> ApplyFilters(
+            IQueryable<BinPhotoEntity> query,
+            PhotoFilter filters)
+        {
+            if (filters.OnlyOutsideBin.HasValue && filters.OnlyOutsideBin.Value)
+            {
+                query = query.Where(p => p.IsOutsideBin);
+            }
+
+            if (filters.MinFillLevel.HasValue)
+            {
+                query = query.Where(p => p.FillLevel >= filters.MinFillLevel.Value);
+            }
+
+            if (filters.MaxFillLevel.HasValue)
+            {
+                query = query.Where(p => p.FillLevel <= filters.MaxFillLevel.Value);
+            }
+
+            if (filters.FromDate.HasValue)
+            {
+                query = query.Where(p => p.UploadedAt >= filters.FromDate.Value);
+            }
+
+            if (filters.ToDate.HasValue)
+            {
+                query = query.Where(p => p.UploadedAt <= filters.ToDate.Value);
+            }
+            
+            return query;
         }
     }
 }
