@@ -1,6 +1,8 @@
-﻿using EcoMonitor.Contracts.Contracts;
+﻿using EcoMonitor.App.Models.Queries;
+using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
+
 
 namespace EcoMonitor.App.Services
 {
@@ -8,7 +10,11 @@ namespace EcoMonitor.App.Services
     {
         Task<IReadOnlyList<BinPhotoResponse>> GetAllBinPhotosAsync();
         Task<BinPhotoResponse> GetPhotoByIdAsync(Guid photoBinId);
-        Task<PagedResult<BinPhotoResponse>> GetAllUserPhotosAsync(Guid userId, PhotoFilter photoFilter);
+
+        Task<PagedResult<BinPhotoResponse>> GetUserPhotosAsync(
+            Guid userId,
+            PhotoQuery query,
+            CancellationToken cancellationToken = default);
         Task<BinPhotoResponse> AddBinPhotoAsync(BinPhotoRequest requestBinPhoto);
         Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId);
         Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request, CancellationToken ct);

@@ -1,4 +1,5 @@
-﻿using EcoMonitor.Core.Models;
+﻿using EcoMonitor.Contracts.Models;
+using EcoMonitor.Core.Models;
 
 namespace EcoMonitor.DataAccess.Repositories
 {
@@ -6,7 +7,10 @@ namespace EcoMonitor.DataAccess.Repositories
     {
         Task<IReadOnlyList<BinPhoto>> GetAllBinPhotosAsync();
         Task<BinPhoto> GetPhotoByIdAsync(Guid photoBinId);
-        Task<IReadOnlyList<BinPhoto>> GetAllUserPhotosAsync(Guid userId);
+        Task<PagedResult<BinPhoto>> GetUserPhotosAsync(
+            Guid userId,
+            PhotoQuery query,
+            CancellationToken cancellationToken = default);
         Task<BinPhoto> AddBinPhotoAsync(BinPhoto binPhoto);
         Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId);
         Task<IReadOnlyList<BinPhoto>> GetPhotosInBoundsAsync(

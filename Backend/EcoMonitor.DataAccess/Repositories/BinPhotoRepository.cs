@@ -1,4 +1,5 @@
 ﻿using EcoMonitor.Contracts.Contracts;
+using EcoMonitor.Contracts.Models;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using MapsterMapper;
@@ -46,10 +47,11 @@ namespace EcoMonitor.DataAccess.Repositories
             return mapper.Map<List<BinPhoto>>(photos);
         }
         
-        public async Task<IReadOnlyList<BinPhoto>> GetAllUserPhotosAsync(Guid userId)
+        Task<Contracts.Models.PagedResult<BinPhoto>> GetUserPhotosAsync(
+            Guid userId,
+            PhotoQuery query,
+            CancellationToken cancellationToken = default)
         {
-            
-            
             // var photos = await context.BinPhotos
             //     .Include(bp => bp.BinPhotoBinTypes)
             //         .ThenInclude(bbt => bbt.BinType)
@@ -60,6 +62,10 @@ namespace EcoMonitor.DataAccess.Repositories
             //     .ToListAsync();
             //
             // var binPhotos = mapper.Map<List<BinPhoto>>(photos);
+
+            var query = context.BinPhotos
+                .Where(bp => bp.Id == userId);
+            query = ApplyFilters(query, userId);
             
             return binPhotos;
         }
