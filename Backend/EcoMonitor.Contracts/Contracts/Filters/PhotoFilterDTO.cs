@@ -1,9 +1,6 @@
-﻿namespace EcoMonitor.App.Models.Queries;
+namespace EcoMonitor.Contracts.Contracts;
 
-/// <summary>
-/// Объект запроса для фильтрации фотографий
-/// </summary>
-public record PhotoQueryDTO
+public record PhotoFilterDTO
 {
     public int Page { get; init; } = 1;
     public int PageSize { get; init; } = 20;

@@ -1,7 +1,9 @@
 ﻿using System.Security.Claims;
 using EcoMonitor.App.Services;
+using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
+using EcoMonitor.Contracts.Models;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -84,12 +86,28 @@ namespace EcoMonitor.API.Controllers
         }
         
         [Authorize]
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<List<BinPhotoResponse>>> GetUserPhotos(Guid userId)
+        [HttpGet("userUploadedPhotos")]
+        public async Task<ActionResult<PagedResultDTO<BinPhotoResponse>>> GetUserPhotos(
+            [FromQuery] PhotoFilterDTO filterDto,
+            CancellationToken cancellationToken)
         {
-            var user = GetCurrentUserId();
-            var photos = await _binPhotoService.GetAllUserPhotosAsync(userId);
-            return Ok(photos);
+            try
+            {
+                var user = GetCurrentUserId();
+                
+                var query = _mapper.Map<PhotoQuery>(filterDto);
+
+                var photos = await _binPhotoService.GetUserPhotosAsync(
+                    user,
+                    query,
+                    cancellationToken);
+
+                return Ok(photos);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
         }
         
         [Authorize]

@@ -4,12 +4,14 @@ using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace EcoMonitor.DataAccess.Repositories
 {
     public class BinPhotoRepository(
         EcoMonitorDbContext context,
-        IMapper mapper) : IBinPhotoRepository
+        IMapper mapper,
+        ILogger<BinPhotoRepository> _logger) : IBinPhotoRepository
     {
         public async Task<IReadOnlyList<BinPhoto>> GetAllBinPhotosAsync()
         {
@@ -46,12 +48,52 @@ namespace EcoMonitor.DataAccess.Repositories
 
             return mapper.Map<List<BinPhoto>>(photos);
         }
-        
-        Task<Contracts.Models.PagedResult<BinPhoto>> GetUserPhotosAsync(
+
+        public async Task<Contracts.Models.PagedResult<BinPhoto>> GetUserPhotosAsync(
             Guid userId,
             PhotoQuery query,
             CancellationToken cancellationToken = default)
         {
+            var dbQuery = context.BinPhotos
+                .AsNoTracking()
+                .Where(bp => bp.UploadedBy.Id == userId);
+
+            dbQuery = ApplyFilters(dbQuery, query);
+            
+            var totalCount = await dbQuery.CountAsync(cancellationToken);
+            if (totalCount == 0)
+            {
+                return new Contracts.Models.PagedResult<BinPhoto>
+                {
+                    Items = new List<BinPhoto>(),
+                    TotalCount = 0,
+                    Page = query.Page,
+                    PageSize = query.PageSize
+                };
+            }
+            
+            dbQuery = ApplyFilters(dbQuery, query);
+            
+            // Pagination
+            var entityItems = await dbQuery
+                .Skip((query.Page - 1) * query.PageSize)
+                .Take(query.PageSize)
+                .ToListAsync(cancellationToken);
+            
+            var items = mapper.Map<List<BinPhoto>>(entityItems);
+            
+            _logger.LogInformation(
+                "Loaded {Count} photos for user {UserId}, page {Page}/{TotalPages}",
+                items.Count, userId, query.Page, Math.Ceiling(totalCount / (double)query.PageSize));
+
+            return new Contracts.Models.PagedResult<BinPhoto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = query.Page,
+                PageSize = query.PageSize,
+            };
+            
             // var photos = await context.BinPhotos
             //     .Include(bp => bp.BinPhotoBinTypes)
             //         .ThenInclude(bbt => bbt.BinType)
@@ -62,12 +104,7 @@ namespace EcoMonitor.DataAccess.Repositories
             //     .ToListAsync();
             //
             // var binPhotos = mapper.Map<List<BinPhoto>>(photos);
-
-            var query = context.BinPhotos
-                .Where(bp => bp.Id == userId);
-            query = ApplyFilters(query, userId);
-            
-            return binPhotos;
+            // return binPhotos;
         }
 
         public async Task<BinPhoto> AddBinPhotoAsync(
@@ -118,9 +155,9 @@ namespace EcoMonitor.DataAccess.Repositories
                 return binPhotoId;
         }
         
-        private IQueryable<BinPhotoEntity> ApplyFilters(
+        private static IQueryable<BinPhotoEntity> ApplyFilters(
             IQueryable<BinPhotoEntity> query,
-            PhotoFilter filters)
+            PhotoQuery filters)
         {
             if (filters.OnlyOutsideBin.HasValue && filters.OnlyOutsideBin.Value)
             {
@@ -148,6 +185,24 @@ namespace EcoMonitor.DataAccess.Repositories
             }
             
             return query;
+        }
+
+        private static IQueryable<BinPhotoEntity> ApplySorting(
+            IQueryable<BinPhotoEntity> query, 
+            string sortBy)
+        {
+            return sortBy switch
+            {
+                "dateAsc" => query.OrderBy(bp => bp.UploadedAt),
+                "dateDesc" => query.OrderByDescending(bp => bp.UploadedAt),
+                "fillLevelAsc" => query.OrderBy(bp => bp.FillLevel)
+                    .ThenByDescending(bp => bp.UploadedAt),
+                "fillLevelDesc" => query.OrderByDescending(bp => bp.FillLevel)
+                    .ThenByDescending(bp => bp.UploadedAt),
+                "totalBinsDesc" => query.OrderByDescending(bp => bp.TotalBins)
+                    .ThenByDescending(bp => bp.UploadedAt),
+                _ => query.OrderByDescending(bp => bp.TotalBins)
+            };
         }
     }
 }

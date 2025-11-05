@@ -1,7 +1,7 @@
-﻿using EcoMonitor.App.Models.Queries;
-using EcoMonitor.Contracts.Contracts;
+﻿using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
+using EcoMonitor.Contracts.Models;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Repositories;
 using EcoMonitor.DataAccess.Repositories.Users;
@@ -61,13 +61,28 @@ namespace EcoMonitor.App.Services
             return mapper.Map<List<BinPhotoResponse>>(listBinPhotos);
         }
         
-        public async Task<PagedResult<BinPhotoResponse>> GetUserPhotosAsync(
+        public async Task<PagedResultDTO<BinPhotoResponse>> GetUserPhotosAsync(
             Guid userId,
             PhotoQuery query,
             CancellationToken cancellationToken = default)
         {
-            var query = await userRepository.GetByIdAsync(userId);
-            return mapper.Map<List<BinPhotoResponse>>(listBinPhotos);
+            if (!query.IsValid(out var error))
+            {
+                throw new ArgumentException(error);
+            }
+            var result = await binPhotoRepository.GetUserPhotosAsync(userId, query);
+            
+            var items = mapper.Map<List<BinPhotoResponse>>(result);
+            
+            return new PagedResultDTO<BinPhotoResponse>
+            {
+                Items = items,
+                TotalCount = result.TotalCount,
+                Page = result.Page,
+                PageSize = result.PageSize
+            };
+            // var result = await userRepository.GetByIdAsync(userId);
+            // return mapper.Map<List<BinPhotoResponse>>(listBinPhotos);
         }
 
         public async Task<BinPhotoResponse> GetPhotoByIdAsync(Guid photoBinId)

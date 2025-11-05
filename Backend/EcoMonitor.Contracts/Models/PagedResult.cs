@@ -1,6 +1,6 @@
 ﻿namespace EcoMonitor.Contracts.Models;
 
-public record PagedResult<T>
+public sealed record PagedResult<T>
 {
     public List<T> Items { get; init; } = new();
     public int TotalCount { get; init; }

@@ -6,6 +6,7 @@ using EcoMonitor.Contracts.Contracts.BinPhotoBinType;
 using EcoMonitor.Contracts.Contracts.BinType;
 using EcoMonitor.Contracts.Contracts.User;
 using EcoMonitor.Contracts.Contracts.Users;
+using EcoMonitor.Contracts.Models;
 using EcoMonitor.Core.Models;
 using EcoMonitor.Core.Models.Auth;
 using EcoMonitor.Core.Models.Users;
@@ -412,7 +413,18 @@ namespace EcoMonitor.App.Mapper
             .Map(dest => dest.FillLevel, src => src.FillLevel)
             .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
             .Map(dest => dest.Comment, src => src.Comment)
-            .Map(dest => dest.BinTypes, src => src.BinPhotoBinTypes.Select(b => b.BinType.Adapt<BinTypeResponse>()).ToList());
+            .Map(dest => dest.BinTypes, src 
+                => src.BinPhotoBinTypes.Select(b => b.BinType.Adapt<BinTypeResponse>()).ToList());
+
+            config.NewConfig<PhotoFilterDTO, PhotoQuery>()
+                .Map(dest => dest.Page, src => src.Page)
+                .Map(dest => dest.PageSize, src => src.PageSize)
+                .Map(dest => dest.SortBy, src => src.SortBy)
+                .Map(dest => dest.OnlyOutsideBin, src => src.OnlyOutsideBin)
+                .Map(dest => dest.MinFillLevel, src => src.MinFillLevel)
+                .Map(dest => dest.MaxFillLevel, src => src.MaxFillLevel)
+                .Map(dest => dest.FromDate, src => src.FromDate)
+                .Map(dest => dest.ToDate, src => src.ToDate);
         }
     }
 }
