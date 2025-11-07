@@ -41,7 +41,8 @@ namespace EcoMonitor.App.Mapper
         private static IEnumerable<Guid> EnsureBinTypeId(BinPhotoEntity src)
         {
             if (src.BinPhotoBinTypes == null || !src.BinPhotoBinTypes.Any())
-                throw new Exception("BinPhotoEntity.Id=" + src.Id + " has no BinTypeId");
+                return Enumerable.Empty<Guid>();
+                //throw new Exception("BinPhotoEntity.Id=" + src.Id + " has no BinTypeId");
             return src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId);
         }
 
@@ -105,40 +106,77 @@ namespace EcoMonitor.App.Mapper
                 src.BinPhotoBinTypes.Select(bbt => bbt.Adapt<BinPhotoBinTypeEntity>()).ToList())
                 .Map(dest => dest.UploadedBy, src => src.UploadedBy);
                 //.Ignore(dest => dest.BinPhotoBinTypes);
-
+                
                 config.NewConfig<BinPhotoEntity, BinPhoto>()
                     .MapWith(src =>
                         BinPhoto.Restore(
                             src.Id,
-                            src.FileName,
-                            src.UrlFile,
-                            src.Location.Y,
-                            src.Location.X,
+                            src.FileName ?? string.Empty,
+                            src.UrlFile ?? string.Empty,
+                            src.Location != null ? src.Location.Y : 0.0,  // <-- проверка null
+                            src.Location != null ? src.Location.X : 0.0,  // <-- проверка null
                             src.UploadedAt,
-                            EnsureBinTypeId(src),
+                            src.BinPhotoBinTypes != null && src.BinPhotoBinTypes.Any()
+                                ? src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId)
+                                : Enumerable.Empty<Guid>(), // <-- обработка пустой коллекции
                             src.FillLevel,
                             src.IsOutsideBin,
-                            src.Comment,
+                            src.Comment ?? string.Empty,
                             src.TotalBins,
-                            _userFactory.Restore(
-                                src.UploadedBy.Id,
-                                src.UploadedBy.Firstname,
-                                src.UploadedBy.Surname,
-                                Email.Create(src.UploadedBy.Email),
-                                PasswordHash.FromHash(src.UploadedBy.PasswordHash),
-                                UserRole.Restore(
-                                    src.UploadedBy.Role.Id,
-                                    src.UploadedBy.Role.Name,
-                                    src.UploadedBy.Role.Description,
-                                    src.UploadedBy.Role.Permissions.Select(p => new Permission(p.Code)).ToList()
-                                ),
-                                src.UploadedBy.CreatedAt,
-                                src.UploadedBy.LastLogindAt,
-                                src.UploadedBy.LockedUntil,
-                                new List<BinPhoto>()
-                            )
+                            src.UploadedBy != null
+                                ? _userFactory.Restore(
+                                    src.UploadedBy.Id,
+                                    src.UploadedBy.Firstname,
+                                    src.UploadedBy.Surname,
+                                    Email.Create(src.UploadedBy.Email),
+                                    PasswordHash.FromHash(src.UploadedBy.PasswordHash),
+                                    src.UploadedBy.Role != null
+                                        ? UserRole.Restore(
+                                            src.UploadedBy.Role.Id,
+                                            src.UploadedBy.Role.Name,
+                                            src.UploadedBy.Role.Description,
+                                            src.UploadedBy.Role.Permissions.Select(p => new Permission(p.Code)).ToList() ?? new List<Permission>())
+                                        : null,
+                                    src.UploadedBy.CreatedAt,
+                                    src.UploadedBy.LastLogindAt,
+                                    src.UploadedBy.LockedUntil,
+                                    new List<BinPhoto>())
+                                : null
                         )
                     );
+                // config.NewConfig<BinPhotoEntity, BinPhoto>()
+                //     .MapWith(src =>
+                //         BinPhoto.Restore(
+                //             src.Id,
+                //             src.FileName,
+                //             src.UrlFile,
+                //             src.Location != null ? src.Location.Y : 0.0,
+                //             src.Location != null ? src.Location.X : 0.0,
+                //             src.UploadedAt,
+                //             EnsureBinTypeId(src),
+                //             src.FillLevel,
+                //             src.IsOutsideBin,
+                //             src.Comment,
+                //             src.TotalBins,
+                //             _userFactory.Restore(
+                //                 src.UploadedBy.Id,
+                //                 src.UploadedBy.Firstname,
+                //                 src.UploadedBy.Surname,
+                //                 Email.Create(src.UploadedBy.Email),
+                //                 PasswordHash.FromHash(src.UploadedBy.PasswordHash),
+                //                 UserRole.Restore(
+                //                     src.UploadedBy.Role.Id,
+                //                     src.UploadedBy.Role.Name,
+                //                     src.UploadedBy.Role.Description,
+                //                     src.UploadedBy.Role.Permissions.Select(p => new Permission(p.Code)).ToList()
+                //                 ),
+                //                 src.UploadedBy.CreatedAt,
+                //                 src.UploadedBy.LastLogindAt,
+                //                 src.UploadedBy.LockedUntil,
+                //                 new List<BinPhoto>()
+                //             )
+                //         )
+                //     );
 
             /// <summary>
             /// Mapping Entities, Domain for BinType

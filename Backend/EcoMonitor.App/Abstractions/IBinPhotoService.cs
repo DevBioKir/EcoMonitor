@@ -8,7 +8,6 @@ namespace EcoMonitor.App.Services
     {
         Task<IReadOnlyList<BinPhotoResponse>> GetAllBinPhotosAsync();
         Task<BinPhotoResponse> GetPhotoByIdAsync(Guid photoBinId);
-
         Task<PagedResultDTO<BinPhotoResponse>> GetUserPhotosAsync(
             Guid userId,
             PhotoQuery query,
