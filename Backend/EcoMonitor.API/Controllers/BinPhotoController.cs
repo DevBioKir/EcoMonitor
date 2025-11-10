@@ -75,7 +75,7 @@ namespace EcoMonitor.API.Controllers
             }
         }
         
-        [Authorize]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("GetAllPhotos")]
         public async Task<ActionResult<IReadOnlyList<BinPhotoResponse>>> GetAllBinPhotosAsync()
         {
@@ -158,7 +158,7 @@ namespace EcoMonitor.API.Controllers
             }
         }
         
-        [Authorize]
+        [Authorize(Policy = "AdminPolicy")]
         [HttpDelete("Delete")]
         public async Task<ActionResult<Guid>> DeleteBinPhotoAsync(Guid binPhotoId)
         {

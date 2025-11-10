@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using EcoMonitor.Infrastracture.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,7 +25,8 @@ public class ApiExtensions
                     ValidIssuer = jwtSettings.Value.Issuer,
                     ValidAudience = jwtSettings.Value.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.Key)),
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
+                    RoleClaimType = ClaimTypes.Role
                 };
             });
         
@@ -32,17 +34,17 @@ public class ApiExtensions
         {
             options.AddPolicy("AdminPolicy", policy =>
             {
-                policy.RequireClaim("role", "admin");
+                policy.RequireClaim(ClaimTypes.Role, "Admin");
             });
             
             options.AddPolicy("UserPolicy", policy =>
             {
-                policy.RequireClaim("role", "user");
+                policy.RequireClaim(ClaimTypes.Role, "User");
             });
             
             options.AddPolicy("ManagerPolicy", policy =>
             {
-                policy.RequireClaim("role", "manager");
+                policy.RequireClaim(ClaimTypes.Role, "Manager");
             });
         });
     }

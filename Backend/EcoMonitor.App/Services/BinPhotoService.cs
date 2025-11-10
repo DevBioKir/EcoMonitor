@@ -70,9 +70,14 @@ namespace EcoMonitor.App.Services
             {
                 throw new ArgumentException(error);
             }
-            var result = await binPhotoRepository.GetUserPhotosAsync(userId, query);
+            var result = await binPhotoRepository.GetUserPhotosAsync(userId, query, cancellationToken);
             
-            var items = mapper.Map<List<BinPhotoResponse>>(result);
+            var items = mapper.Map<List<BinPhotoResponse>>(result.Items);
+
+            foreach (var item in items)
+            {
+                _logger.LogInformation("PHOTO DEBUG: {Json}", System.Text.Json.JsonSerializer.Serialize(item));
+            }
             
             return new PagedResultDTO<BinPhotoResponse>
             {

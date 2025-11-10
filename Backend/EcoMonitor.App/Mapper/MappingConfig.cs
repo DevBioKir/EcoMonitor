@@ -113,12 +113,12 @@ namespace EcoMonitor.App.Mapper
                             src.Id,
                             src.FileName ?? string.Empty,
                             src.UrlFile ?? string.Empty,
-                            src.Location != null ? src.Location.Y : 0.0,  // <-- проверка null
-                            src.Location != null ? src.Location.X : 0.0,  // <-- проверка null
+                            src.Location != null ? src.Location.Y : 0.0,
+                            src.Location != null ? src.Location.X : 0.0,
                             src.UploadedAt,
                             src.BinPhotoBinTypes != null && src.BinPhotoBinTypes.Any()
                                 ? src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId)
-                                : Enumerable.Empty<Guid>(), // <-- обработка пустой коллекции
+                                : Enumerable.Empty<Guid>(),
                             src.FillLevel,
                             src.IsOutsideBin,
                             src.Comment ?? string.Empty,
@@ -414,7 +414,6 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.FillLevel, src => src.FillLevel)
                 .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
                 .Map(dest => dest.Comment, src => src.Comment)
-                //.Map(dest => dest.UploadedBy, src => src.UploadedBy)
                 .Map(dest => dest.UploadedById, src => src.UploadedById);
 
             /// <summary>

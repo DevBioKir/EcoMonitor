@@ -78,26 +78,26 @@ public class AuthorizationController : ControllerBase
         }
     }
     
-    [Authorize(Roles = "admin")]
-    [HttpPost("register-admin")]
-    public async Task<IActionResult> RegisterAdminAsync([FromBody] RegisterUserRequest request, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var response = await _authService.RegisterAdminAsync(request, cancellationToken);
-            return Ok(response);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning(ex, "Failed registration attempt for user: {Email}", request.Email);
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during registration for user: {Email}", request.Email);
-            return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
-        }
-    }
+    // [Authorize(Roles = "admin")]
+    // [HttpPost("register-admin")]
+    // public async Task<IActionResult> RegisterAdminAsync([FromBody] RegisterUserRequest request, CancellationToken cancellationToken = default)
+    // {
+    //     try
+    //     {
+    //         var response = await _authService.RegisterAdminAsync(request, cancellationToken);
+    //         return Ok(response);
+    //     }
+    //     catch (InvalidOperationException ex)
+    //     {
+    //         _logger.LogWarning(ex, "Failed registration attempt for user: {Email}", request.Email);
+    //         return BadRequest(new { message = ex.Message });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error during registration for user: {Email}", request.Email);
+    //         return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
+    //     }
+    // }
     
     //[Authorize(Roles = "user")]
     //[Authorize(Roles = "admin, manager")]

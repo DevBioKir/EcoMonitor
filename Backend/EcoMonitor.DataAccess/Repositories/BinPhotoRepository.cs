@@ -95,10 +95,10 @@ namespace EcoMonitor.DataAccess.Repositories
                 var items = mapper.Map<List<BinPhoto>>(entityItems);
                 _logger.LogInformation("Mapped items count: {Count}", items.Count);
                 
-                foreach (var item in items)
-                {
-                    _logger.LogInformation("PHOTO DEBUG: {Json}", System.Text.Json.JsonSerializer.Serialize(item));
-                }
+                // foreach (var item in items)
+                // {
+                //     _logger.LogInformation("PHOTO DEBUG: {Json}", System.Text.Json.JsonSerializer.Serialize(item));
+                // }
 
                 return new PagedResult<BinPhoto>(items, totalCount, query.Page, query.PageSize);
             }
