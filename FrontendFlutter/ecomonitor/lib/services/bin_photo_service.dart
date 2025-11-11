@@ -21,7 +21,7 @@ class BinPhotoService {
 
   Future<List<BinPhotoResponse>> getUserPhotos(String userId) async {
     try {
-      final response = await _apiClient.get('api/binphoto/user/$userId');
+      final response = await _apiClient.get('/api/binphoto/userUploadedPhotos');
       return (response.data as List)
           .map((item) => BinPhotoResponse.fromJson(item as Map<String, dynamic>))
           .toList();

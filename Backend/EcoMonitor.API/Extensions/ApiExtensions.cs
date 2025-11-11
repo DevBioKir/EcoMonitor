@@ -34,17 +34,21 @@ public class ApiExtensions
         {
             options.AddPolicy("AdminPolicy", policy =>
             {
-                policy.RequireClaim(ClaimTypes.Role, "Admin");
+                policy.RequireAssertion(context => 
+                    context.User.HasClaim(c => 
+                        c.Type == ClaimTypes.Role && 
+                        string.Equals(c.Value, "Admin", StringComparison.OrdinalIgnoreCase)));
+                //policy.RequireClaim(ClaimTypes.Role, "admin");
             });
             
             options.AddPolicy("UserPolicy", policy =>
             {
-                policy.RequireClaim(ClaimTypes.Role, "User");
+                policy.RequireClaim(ClaimTypes.Role, "user");
             });
             
             options.AddPolicy("ManagerPolicy", policy =>
             {
-                policy.RequireClaim(ClaimTypes.Role, "Manager");
+                policy.RequireClaim(ClaimTypes.Role, "manager");
             });
         });
     }

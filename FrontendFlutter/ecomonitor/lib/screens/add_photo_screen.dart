@@ -116,7 +116,12 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
             TextField(
               controller: _fillLevelController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Уровень заполнения (число)'),
+              decoration: InputDecoration(labelText: 'Уровень заполнения (от 0 до 1)'),
+            ),
+            TextField(
+              controller: _totalBins,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: 'Количество баков'),
             ),
             SizedBox(height: 10),
             Row(
