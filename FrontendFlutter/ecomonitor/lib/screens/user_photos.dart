@@ -1,4 +1,5 @@
 import 'package:ecomonitor/models/bin_photo/bin_photo_response.dart';
+import 'package:ecomonitor/models/photo_filter.dart';
 import 'package:ecomonitor/services/bin_photo_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +17,16 @@ class UserPhotosScreen extends StatefulWidget {
 }
 
 class _UserPhotosScreenState extends State<UserPhotosScreen> {
+  int _currentPage = 1;
+  int _pageSize = 20;
+  int _totalPages = 1;
+
+  bool? _onlyOutsideBin;
+  double? _minFillLevel;
+  double? _maxFillLevel;
+  DateTime? _fromDate;
+  DateTime? _toDate;
+
   List<BinPhotoResponse>? _photos;
   bool _isLoading = true;
   String? _error;
@@ -37,12 +48,23 @@ class _UserPhotosScreenState extends State<UserPhotosScreen> {
       
       final photoService = Provider.of<BinPhotoService>(context, listen: false);
       print('PhotoService получен');
+
+      final filter = PhotoFilter(
+        page: _currentPage,
+        pageSize: _pageSize,
+        onlyOutsideBin: _onlyOutsideBin,
+        minFillLevel: _minFillLevel,
+        maxFillLevel: _maxFillLevel,
+        fromDate: _fromDate,
+        toDate: _toDate,
+      );
       
-      final photos = await photoService.getUserPhotos(widget.userId);
-      print('Фотографии загружены, количество: ${photos.length}');
+      final pagedResult = await photoService.getUserPhotos(filter);
+      print('Фотографии загружены, количество: ${pagedResult.totalCount}');
 
       setState(() {
-        _photos = photos;
+        _photos = pagedResult.items;
+        _totalPages = pagedResult.totalPages;
         _isLoading = false;
       });
     } catch (e, stackTrace) {
@@ -53,6 +75,24 @@ class _UserPhotosScreenState extends State<UserPhotosScreen> {
         _error = "Не удалось загрузить фотографии: $e"; // Покажите конкретную ошибку
         _isLoading = false;
       });
+    }
+  }
+
+  void _goToPreviousPage() {
+    if (_currentPage > 1) {
+      setState(() {
+        _currentPage--;
+      });
+      _loadPhotos();
+    }
+  }
+
+  void _goToNextPage() {
+    if (_currentPage < _totalPages) {
+      setState(() {
+        _currentPage++;
+      });
+      _loadPhotos();
     }
   }
 
@@ -68,7 +108,14 @@ class _UserPhotosScreenState extends State<UserPhotosScreen> {
             ),
         ],
       ),
-      body: _buildBody(),
+      body: Column(
+        children: [
+          _buildFilters(),
+          Expanded(child: _buildBody()),
+          if (!_isLoading && _photos != null && _photos!.isNotEmpty)
+            _buildPaginationControls(),
+        ],
+      ),
     );
   }
 
@@ -116,10 +163,28 @@ class _UserPhotosScreenState extends State<UserPhotosScreen> {
     return ListView.builder(
       padding: const EdgeInsets.all(8),
       itemCount: _photos!.length,
-      itemBuilder: (context, index) {
-        final photo = _photos![index];
-        return _buildPhotoCard(photo);
-      },
+      itemBuilder: (context, index) 
+        => _buildPhotoCard(_photos![index]),
+    );
+  }
+
+  Widget _buildPaginationControls() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: _currentPage > 1 ? _goToPreviousPage : null,
+          ),
+          Text('Страница $_currentPage из $_totalPages'),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward),
+            onPressed: _currentPage < _totalPages ? _goToNextPage : null,
+          ),
+        ],
+      ),
     );
   }
 
@@ -156,7 +221,6 @@ class _UserPhotosScreenState extends State<UserPhotosScreen> {
                 },
               ),
             ),
-            
             // Информация о фото
             Padding(
               padding: const EdgeInsets.all(12),
@@ -240,9 +304,7 @@ class _UserPhotosScreenState extends State<UserPhotosScreen> {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}.${date.month}.${date.year}';
-  }
+  String _formatDate(DateTime date) => '${date.day}.${date.month}.${date.year}';
 
   void _showPhotoDetails(BinPhotoResponse photo) {
     showModalBottomSheet(
@@ -317,6 +379,68 @@ class _UserPhotosScreenState extends State<UserPhotosScreen> {
       ),
     );
   }
+
+  Widget _buildFilters() {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      children: [
+        Row(
+          children: [
+            Checkbox(
+              value: _onlyOutsideBin ?? false,
+              onChanged: (val) {
+                setState(() {
+                  _onlyOutsideBin = val;
+                  _currentPage = 1;
+                });
+                _loadPhotos();
+              },
+            ),
+            const Text('Только вне контейнера'),
+          ],
+        ),
+        Row(
+          children: [
+            Text('Мин. заполнение:'),
+            SizedBox(
+              width: 60,
+              child: TextField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: '%'),
+                onSubmitted: (val) {
+                  final v = double.tryParse(val);
+                  setState(() {
+                    _minFillLevel = v != null ? v / 100 : null;
+                    _currentPage = 1;
+                  });
+                  _loadPhotos();
+                },
+              ),
+            ),
+            const SizedBox(width: 16),
+            Text('Макс. заполнение:'),
+            SizedBox(
+              width: 60,
+              child: TextField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: '%'),
+                onSubmitted: (val) {
+                  final v = double.tryParse(val);
+                  setState(() {
+                    _maxFillLevel = v != null ? v / 100 : null;
+                    _currentPage = 1;
+                  });
+                  _loadPhotos();
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(

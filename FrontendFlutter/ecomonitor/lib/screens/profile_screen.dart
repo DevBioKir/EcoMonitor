@@ -1,6 +1,6 @@
 import 'package:ecomonitor/models/user/user_response.dart';
 import 'package:ecomonitor/services/auth_service.dart';
-import 'package:ecomonitor/services/user_photos.dart';
+import 'package:ecomonitor/screens/user_photos.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

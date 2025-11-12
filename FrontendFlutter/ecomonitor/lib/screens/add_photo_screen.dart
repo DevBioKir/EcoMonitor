@@ -75,7 +75,7 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
       fillLevel: double.parse(_fillLevelController.text),
       isOutsideBin: _isOutsideBin,
       comment: _commentController.text,
-      totalBins: int.tryParse(_totalBins.text) ?? 1, // или возьмите из поля // подставьте текущий Guid пользователя
+      totalBins: int.tryParse(_totalBins.text) ?? 1,
     );
 
     final response = await _binPhotoService.uploadWithMetadata(request);
@@ -83,7 +83,7 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Фото успешно добавлено!')),
     );
-    Navigator.pop(context, response); // верните результат на предыдущий экран
+    Navigator.pop(context, response);
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Ошибка при загрузке: $e')),

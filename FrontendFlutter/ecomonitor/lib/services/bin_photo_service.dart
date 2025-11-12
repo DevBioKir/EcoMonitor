@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_response.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_upload_request.dart';
+import 'package:ecomonitor/models/paged_result.dart';
+import 'package:ecomonitor/models/photo_filter.dart';
 
 class BinPhotoService {
   final ApiClient _apiClient;
@@ -19,12 +21,36 @@ class BinPhotoService {
     return BinPhotoResponse.fromJson(response.data);
   }
 
-  Future<List<BinPhotoResponse>> getUserPhotos(String userId) async {
+  Future<PagedResult<BinPhotoResponse>> getUserPhotos(PhotoFilter filter) async {
     try {
-      final response = await _apiClient.get('/api/binphoto/userUploadedPhotos');
-      return (response.data as List)
-          .map((item) => BinPhotoResponse.fromJson(item as Map<String, dynamic>))
-          .toList();
+      final queryParameters = {
+        'page' : filter.page.toString(),
+        'pageSize' : filter.pageSize.toString(),
+        'sortBy' : filter.sortBy,
+
+        if (filter.onlyOutsideBin != null)
+        'onlyOutsideBin' : filter.onlyOutsideBin.toString(),
+
+        if (filter.minFillLevel != null) 
+        'minFillLevel' : filter.minFillLevel.toString(),
+
+        if (filter.maxFillLevel != null)
+        'maxFillLevel' : filter.maxFillLevel.toString(),
+
+        if (filter.fromDate != null)
+        'fromData' : filter.fromDate!.toIso8601String(),
+
+        if (filter.toDate != null)
+        'toDate' : filter.toDate!.toIso8601String(),
+      };
+      
+      final response = await _apiClient.get('/api/binphoto/userUploadedPhotos',
+      queryParameters: queryParameters);
+
+      return PagedResult<BinPhotoResponse>.fromJson(
+        response.data, 
+        (json) => BinPhotoResponse.fromJson(json),
+      );
     } on DioException catch (e) {
       print('Ошибка при загрузке фотографий: ${e.response?.statusCode} - ${e.message}');
       if (e.response != null) {
