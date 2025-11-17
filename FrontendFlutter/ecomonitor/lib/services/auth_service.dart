@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/models/auth/login_response.dart';
 import 'package:ecomonitor/models/auth/register_user_request.dart';
@@ -16,37 +17,46 @@ class AuthService extends ChangeNotifier{
 
   AuthService(this._apiClient);
 
-  Future<bool> checkLoginStatus() async {
-    final accessToken = await _storage.read(key: _accessToken);
-    _isLoggedIn = accessToken != null;
-    notifyListeners();
-    return _isLoggedIn;
-  }
+  // Future<bool> checkLoginStatus() async {
+  //   final accessToken = await _storage.read(key: _accessToken);
+  //   _isLoggedIn = accessToken != null;
+  //   notifyListeners();
+  //   return _isLoggedIn;
+  // }
   
   Future<LoginResponse> login(String email, String password) async {
-    final response = await _apiClient.post('api/authorization/login', data: {
-      'email' : email,
-      'password' : password,
-    });
+    try{
+      final response = await _apiClient.post('api/authorization/login', data: {
+        'email' : email,
+        'password' : password,
+      });
 
-    final loginResponse = LoginResponse.fromJson(response.data);
-    
-    // final accessToken = response.data['accessToken'] as String?;
-    // final refreshToken = response.data['refreshToken'] as String?;
-    // final expires = response.data['expires'] as int?;
+      final loginResponse = LoginResponse.fromJson(response.data);
+      
+      // final accessToken = response.data['accessToken'] as String?;
+      // final refreshToken = response.data['refreshToken'] as String?;
+      // final expires = response.data['expires'] as int?;
 
-    // if (accessToken == null || refreshToken == null){
-    //   throw Exception('Authorization token not found in response');
-    // }
+      // if (accessToken == null || refreshToken == null){
+      //   throw Exception('Authorization token not found in response');
+      // }
 
-    print('Получен accessToken: ${loginResponse.accessToken}');
-    print('Получен refreshToken: ${loginResponse.refreshToken}');
-    print('Время действия токена (секунды): ${loginResponse.expires}');
+      print('Получен accessToken: ${loginResponse.accessToken}');
+      print('Получен refreshToken: ${loginResponse.refreshToken}');
+      print('Время действия токена (секунды): ${loginResponse.expires}');
 
-    await _storage.write(key: _accessToken, value: loginResponse.accessToken);
-    await _storage.write(key: _refreshToken, value: loginResponse.refreshToken);
+      await _storage.write(key: _accessToken, value: loginResponse.accessToken);
+      await _storage.write(key: _refreshToken, value: loginResponse.refreshToken);
 
-    return loginResponse;
+      return loginResponse;
+    } on DioException catch (e) {
+      if (e.response != null) {
+        final errorMessage = e.response?.data['message'] ?? 'Ошибка при входе';
+        throw Exception(errorMessage);
+      } else {
+        throw Exception('Ошибка сети или сервера');
+      }
+    }
 }
 
   Future<String?> getRefreshToken() async => await _storage.read(key: _refreshToken);
@@ -116,5 +126,17 @@ class AuthService extends ChangeNotifier{
 
     await _storage.write(key: _accessToken, value: newAccessToken);
     await _storage.write(key: _refreshToken, value: newRefreshToken);
+  }
+
+  Future<bool> ValidateToken() async {
+    final accessToken = getAccessToken();
+    final response = await _apiClient.post(
+      'api/authorization/Validate',
+      headers: {
+      'Authorization' : 'Bearer $accessToken'
+      },
+    );
+    return response.statusCode == 200;
+
   }
 }

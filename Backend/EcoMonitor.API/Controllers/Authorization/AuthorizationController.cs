@@ -36,6 +36,10 @@ public class AuthorizationController : ControllerBase
     //     
     //     return Guid.Parse(userIdClaim.Value);
     // }
+    
+    [Authorize]
+    [HttpPost("Validate")]
+    public IActionResult ValidateToken() => Ok(new {message = "Token is valid"});
 
     [HttpPost("login")]
     public async Task<IActionResult> LoginAsync([FromBody] AuthRequest request,
@@ -46,9 +50,31 @@ public class AuthorizationController : ControllerBase
             var response = await _authService.LoginAsync(request, cancellationToken);
             return Ok(response);
         }
+        // catch (Exception ex)
+        // {
+        //     if (ex is UnauthorizedAccessException || 
+        //         ex.InnerException is UnauthorizedAccessException)
+        //     {
+        //         _logger.LogWarning(ex, "Unauthorized login attempt for user: {Email}", request.Email);
+        //
+        //         return Unauthorized(new { message = ex.Message });
+        //     }
+        //
+        //     _logger.LogError(ex, "Error during login for user: {Email}", request.Email);
+        //     return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
+        // }
         catch (UnauthorizedAccessException ex)
         {
             _logger.LogWarning(ex, "Failed to login attempt for user: {Email}", request.Email);
+            
+            if (ex.Message.Contains("пользователь не найден", StringComparison.OrdinalIgnoreCase))
+            { 
+                return NotFound(new 
+                { 
+                    message = "Пользователь не найден. Необходимо зарегистрироваться"
+                });
+            }
+                    
             return Unauthorized(new { message = ex.Message });
         }
         catch (Exception ex)

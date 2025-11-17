@@ -5,6 +5,7 @@ namespace EcoMonitor.DataAccess.Repositories
 {
     public interface IBinPhotoRepository
     {
+        Task<IReadOnlyList<PhotoMarker>> GetMarkersAsync(CancellationToken cancellationToken = default);
         Task<IReadOnlyList<BinPhoto>> GetAllBinPhotosAsync();
         Task<BinPhoto> GetPhotoByIdAsync(Guid photoBinId);
         Task<PagedResult<BinPhoto>> GetUserPhotosAsync(

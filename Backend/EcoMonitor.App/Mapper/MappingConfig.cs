@@ -124,7 +124,7 @@ namespace EcoMonitor.App.Mapper
                             src.Comment ?? string.Empty,
                             src.TotalBins,
                             src.UploadedBy != null
-                                ? _userFactory.Restore(
+                                ? _userFactory.RestoreBasic(
                                     src.UploadedBy.Id,
                                     src.UploadedBy.Firstname,
                                     src.UploadedBy.Surname,
@@ -139,8 +139,7 @@ namespace EcoMonitor.App.Mapper
                                         : null,
                                     src.UploadedBy.CreatedAt,
                                     src.UploadedBy.LastLogindAt,
-                                    src.UploadedBy.LockedUntil,
-                                    new List<BinPhoto>())
+                                    src.UploadedBy.LockedUntil)
                                 : null
                         )
                     );
@@ -178,6 +177,19 @@ namespace EcoMonitor.App.Mapper
                 //         )
                 //     );
 
+                config.NewConfig<BinPhotoEntity, BinPhotoWithoutUser>()
+                    .Map(dest => dest.Id, src => src.Id)
+                    .Map(dest => dest.FileName, src => src.FileName)
+                    .Map(dest => dest.UrlFile, src => src.UrlFile)
+                    .Map(dest => dest.Latitude, src => src.Location != null ? src.Location.Y : 0.0)
+                    .Map(dest => dest.Longitude, src => src.Location != null ? src.Location.X : 0.0)
+                    .Map(dest => dest.UploadedAt, src => src.UploadedAt)
+                    .Map(dest => dest.BinTypeId, src => src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId))
+                    .Map(dest => dest.FillLevel, src => src.FillLevel)
+                    .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
+                    .Map(dest => dest.Comment, src => src.Comment)
+                    .Map(dest => dest.TotalBins, src => src.TotalBins);
+                
             /// <summary>
             /// Mapping Entities, Domain for BinType
             /// </summary>
@@ -207,7 +219,8 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.BinTypeId, src => src.BinTypeId);
 
             config.NewConfig<BinPhotoBinTypeEntity, BinPhotoBinType>()
-                .ConstructUsing(src => new BinPhotoBinType(src.BinTypeId, src.BinPhotoId));
+                .ConstructUsing(src => new BinPhotoBinType(src.BinPhotoId, src.BinTypeId))
+                .Ignore(dest => dest.BinType);
 
             /// <summary>
             /// Mapping Entities, Domain for User
@@ -373,7 +386,7 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Surname, src => src.Surname)
                 .Map(dest => dest.Email, src => src.Email.Value)
                 .Map(dest => dest.Password, src => src.PasswordHash.Hash);
-
+ 
             /// <summary>
             /// Mapping DTOs for BinPhoto
             /// </summary>
@@ -462,6 +475,15 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.MaxFillLevel, src => src.MaxFillLevel)
                 .Map(dest => dest.FromDate, src => src.FromDate)
                 .Map(dest => dest.ToDate, src => src.ToDate);
+
+            config.NewConfig<PhotoMarker, PhotoMarkerDTO>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.Latitude, src => src.Latitude)
+                .Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.PhotoUrl, src => src.PhotoUrl)
+                .TwoWays();
+            
+            
         }
     }
 }

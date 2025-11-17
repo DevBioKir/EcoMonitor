@@ -55,6 +55,12 @@ namespace EcoMonitor.App.Services
             return await binPhotoRepository.DeleteBinPhotoAsync(binPhotoId);
         }
 
+        public async Task <IReadOnlyList<PhotoMarkerDTO>> GetMarkersAsync()
+        {
+            var markers = await binPhotoRepository.GetMarkersAsync();
+            return mapper.Map<IReadOnlyList<PhotoMarkerDTO>>(markers);
+        }
+
         public async Task<IReadOnlyList<BinPhotoResponse>> GetAllBinPhotosAsync()
         {
             var listBinPhotos = await binPhotoRepository.GetAllBinPhotosAsync();
@@ -107,17 +113,30 @@ namespace EcoMonitor.App.Services
             return mapper.Map<IEnumerable<BinPhotoResponse>>(photos);
         }
 
-        public async Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request, CancellationToken ct)
+        public async Task<BinPhotoResponse> UploadImage(
+            BinPhotoUploadRequest request, 
+            Guid userId,
+            CancellationToken ct = default)
         {
-            var user = await userRepository.GetByIdAsync(request.UploadedById);
+            if (request.Photo == null)
+                throw new ArgumentNullException(nameof(request.Photo), "Photo is required");
+            
+            var user = await userRepository.GetByIdAsync(userId);
+            if (user == null)
+                throw new InvalidOperationException($"User with ID {userId} not found");
 
             var processed = await pipeline.ProcessAsync(request.Photo);
+            if (processed == null)
+                throw new InvalidOperationException("Image processing failed");
             
             var binTypes = await binTypeRepository.GetBinTypeByCodeAsync(request.BinTypeCode);
+            if (binTypes == null || !binTypes.Any())
+                throw new InvalidOperationException($"No bin types found for code {request.BinTypeCode}");
 
             var binPhoto = BinPhoto.Create(
                 fileName: Path.GetFileName(request.Photo.FileName),
-                urlFile: processed.OriginalUrl,
+                urlFile: processed.OriginalUrl ?? 
+                         throw new InvalidOperationException("Processed image URL is null"),
                 latitude: processed.Gps?.lat ?? 0,
                 longitude: processed.Gps?.lon ?? 0,
                 BinTypeId: binTypes.Select(bt => bt.Id).ToList(),
@@ -132,7 +151,5 @@ namespace EcoMonitor.App.Services
 
             return mapper.Map<BinPhotoResponse>(binPhoto);
         }
-        
-        
     }
 }

@@ -6,6 +6,7 @@ namespace EcoMonitor.App.Services
 {
     public interface IBinPhotoService
     {
+        Task<IReadOnlyList<PhotoMarkerDTO>> GetMarkersAsync();
         Task<IReadOnlyList<BinPhotoResponse>> GetAllBinPhotosAsync();
         Task<BinPhotoResponse> GetPhotoByIdAsync(Guid photoBinId);
         Task<PagedResultDTO<BinPhotoResponse>> GetUserPhotosAsync(
@@ -14,7 +15,10 @@ namespace EcoMonitor.App.Services
             CancellationToken cancellationToken = default);
         Task<BinPhotoResponse> AddBinPhotoAsync(BinPhotoRequest requestBinPhoto);
         Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId);
-        Task<BinPhotoResponse> UploadImage(BinPhotoUploadRequest request, CancellationToken ct);
+        Task<BinPhotoResponse> UploadImage(
+            BinPhotoUploadRequest request,
+            Guid userId,
+            CancellationToken ct = default);
         Task<IEnumerable<BinPhotoResponse>> GetPhotosInBoundsAsync(
             double north,
             double south,

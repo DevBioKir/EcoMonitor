@@ -55,7 +55,7 @@ public class AuthService : IAuthService
     {
         var user = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user == null || !user.CheckPassword(request.Password, _passwordHasher))
-            throw new InvalidOperationException("Invalid credentials");
+            throw new UnauthorizedAccessException("Неверный логин или пароль");
         
         //user.UpdateLastLoggedAt(DateTime.UtcNow);
         

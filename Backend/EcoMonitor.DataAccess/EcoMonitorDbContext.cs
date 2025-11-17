@@ -29,6 +29,7 @@ namespace EcoMonitor.DataAccess
             modelBuilder.ApplyConfiguration(new UserConfiguration());
             modelBuilder.ApplyConfiguration(new UserRoleConfiguration());
             modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
+            modelBuilder.ApplyConfiguration(new PhotoMarkerConfiguration());
         }
     }
 }

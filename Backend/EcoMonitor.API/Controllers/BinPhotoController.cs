@@ -121,10 +121,14 @@ namespace EcoMonitor.API.Controllers
         
         [Authorize]
         [HttpPost("UploadWithMetadata")]
-        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata([FromForm] BinPhotoUploadRequest request, CancellationToken ct)
+        public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata(
+            [FromForm] BinPhotoUploadRequest request,
+            CancellationToken ct = default)
         {
             _logger.LogInformation("UploadWithMetadata вызван");
 
+            var currentUserId = GetCurrentUserId();
+            
             if (request == null)
             {
                 _logger.LogWarning("Request model пустая (null)");
@@ -145,7 +149,7 @@ namespace EcoMonitor.API.Controllers
 
             try
             {
-                var binPhoto = await _binPhotoService.UploadImage(request, ct);
+                var binPhoto = await _binPhotoService.UploadImage(request, currentUserId, ct);
                 _logger.LogInformation("Фото успешно загружено, Id={Id}", binPhoto.Id);
 
                 return Ok(binPhoto);
@@ -171,6 +175,25 @@ namespace EcoMonitor.API.Controllers
             {
                 _logger.LogError(ex, "Ошибка при удалении фото из базы");
                 return StatusCode(500, "Ошибка при удалении фотографии.");
+            }
+        }
+        
+        [HttpPost("Markers")]
+        public async Task<ActionResult<IReadOnlyList<PhotoMarkerDTO>>> GetMarkersAsync()
+        {
+            try
+            {
+                var markers = await _binPhotoService.GetMarkersAsync();
+                foreach (var marker in markers)
+                {
+                    _logger.LogInformation("Фото успешно загружено, Id={Id}", marker.Id);
+                }
+                return Ok(markers);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
             }
         }
     }

@@ -1,11 +1,11 @@
-﻿services:
+services:
     postgres:
         container_name: postgresql
         image: postgis/postgis:17-3.4
         environment:
             POSTGRES_DB: "EcoMonitorDB"
             POSTGRES_USER: "postgres"
-            POSTGRES_PASSWORD: "postgres"
+            POSTGRES_PASSWORD: "BioYan124578"
         volumes:
             - postgres-data:/var/lib/postgresql/data
         ports:

@@ -26,9 +26,33 @@ namespace EcoMonitor.App.Factory.Users
             DateTime createdAt,
             DateTime lastLogindAt,
             DateTime lockedUntil,
-            List<EcoMonitor.Core.Models.BinPhoto> photos)
+            List<Core.Models.BinPhoto> photos)
         {
             return User.Restore(id, firstname, surname, email, passwordHash, role, createdAt, lastLogindAt, lockedUntil, photos);
+        }
+        
+        public User RestoreBasic(
+            Guid id,
+            string firstname,
+            string surname,
+            Email email,
+            PasswordHash passwordHash,
+            UserRole role,
+            DateTime createdAt,
+            DateTime lastLogindAt,
+            DateTime lockedUntil)
+        {
+            return User.Restore(
+                id, 
+                firstname, 
+                surname, 
+                email, 
+                passwordHash, 
+                role, 
+                createdAt, 
+                lastLogindAt, 
+                lockedUntil, 
+                new List<Core.Models.BinPhoto>());
         }
     }
 }

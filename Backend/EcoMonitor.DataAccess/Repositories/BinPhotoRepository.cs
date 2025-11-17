@@ -1,5 +1,4 @@
-﻿using EcoMonitor.Contracts.Contracts;
-using EcoMonitor.Contracts.Models;
+﻿using EcoMonitor.Contracts.Models;
 using EcoMonitor.Core.Models;
 using EcoMonitor.DataAccess.Entities;
 using MapsterMapper;
@@ -13,6 +12,33 @@ namespace EcoMonitor.DataAccess.Repositories
         IMapper mapper,
         ILogger<BinPhotoRepository> _logger) : IBinPhotoRepository
     {
+        public async Task<IReadOnlyList<PhotoMarker>> GetMarkersAsync(CancellationToken cancellationToken = default)
+        {
+            const string sql = @"
+            SELECT 
+                ""Id"", 
+                ST_Y(ST_Force2D(""Location""::geometry)) AS ""Latitude"", 
+                ST_X(ST_Force2D(""Location""::geometry)) AS ""Longitude"", 
+                ""UrlFile"" AS ""PhotoUrl""
+            FROM ""BinPhotos""
+        ";
+
+            return await context.Set<PhotoMarker>()
+                .FromSqlRaw(sql)
+                .ToListAsync(cancellationToken);
+            // return await context.BinPhotos
+            //     .Select(bp => new PhotoMarker
+            //     {
+            //         Id = bp.Id,
+            //         Latitude = EF.Functions.ST_Y(EF.Functions.ST_Force2D(bp.Location)),
+            //         Longitude = EF.Functions.ST_X(EF.Functions.ST_Force2D(bp.Location)),
+            //         // Latitude = bp.Location.Y,
+            //         // Longitude = bp.Location.X,
+            //         PhotoUrl = bp.UrlFile
+            //     })
+            //     .ToListAsync();
+        }
+
         public async Task<IReadOnlyList<BinPhoto>> GetAllBinPhotosAsync()
         {
             var binPhotosEntity = await context.BinPhotos
@@ -180,16 +206,16 @@ namespace EcoMonitor.DataAccess.Repositories
         //     // return binPhotos;
         // }
 
-        public async Task<BinPhoto> AddBinPhotoAsync(
-            BinPhoto binPhoto)
-        {
-            var binPhotoEntity = mapper.Map<BinPhotoEntity>(binPhoto);
+            public async Task<BinPhoto> AddBinPhotoAsync(
+                BinPhoto binPhoto)
+            {
+                var binPhotoEntity = mapper.Map<BinPhotoEntity>(binPhoto);
 
-            await context.BinPhotos.AddAsync(binPhotoEntity);
-            await context.SaveChangesAsync();
+                await context.BinPhotos.AddAsync(binPhotoEntity);
+                await context.SaveChangesAsync();
 
-            return binPhoto;
-        }
+                return binPhoto;
+            }
 
         public async Task<BinPhoto> GetPhotoByIdAsync(Guid photoBinId)
         {

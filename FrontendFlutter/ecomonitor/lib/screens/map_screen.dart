@@ -7,6 +7,7 @@ import 'package:ecomonitor/screens/register_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
 import 'package:ecomonitor/services/user_service.dart';
 import 'package:flutter/material.dart' hide TextStyle;
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart' as ymapkit;
@@ -143,6 +144,24 @@ class _MapScreenState extends State<MapScreen> {
     // print("Слушатель нажатия добавлен");
   }
 
+//   Future<void> _initLocationLayer() async {
+//    final locationPermissionIsGranted =
+//        await Permission.location.request().isGranted;
+
+
+//    if (locationPermissionIsGranted) {
+//      await ymapkit.toggleUserLayer(visible: true);
+//    } else {
+//      WidgetsBinding.instance.addPostFrameCallback((_) {
+//        ScaffoldMessenger.of(context).showSnackBar(
+//          const SnackBar(
+//            content: Text('Нет доступа к местоположению пользователя'),
+//          ),
+//        );
+//      });
+//    }
+//  }
+
   Future<void> _setPlacemarks() async{
     _mapWindow.map.mapObjects.clear();
     _placemarks.clear();
@@ -232,13 +251,14 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _onAddPhotoPressed() async {
   final authService = Provider.of<AuthService>(context, listen: false);
-  final isLoggedIn = await authService.checkLoginStatus();
+  print('перед проверкой на валидацию токена');
+  final isTokenValid = await authService.ValidateToken();
 
-  print('Проверка статуса логина: isLoggedIn = $isLoggedIn');
+  print('Проверка статуса логина: isLoggedIn = $isTokenValid');
 
   if (!mounted) return;
 
-  if (isLoggedIn) {
+  if (isTokenValid) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen()));
   } else {
     Navigator.push(
