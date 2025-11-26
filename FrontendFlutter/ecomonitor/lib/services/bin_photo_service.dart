@@ -1,11 +1,12 @@
 import 'package:dio/dio.dart';
+import 'package:ecomonitor/abstractions/ibin_photo_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_response.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_upload_request.dart';
 import 'package:ecomonitor/models/paged_result.dart';
 import 'package:ecomonitor/models/photo_filter.dart';
 
-class BinPhotoService {
+class BinPhotoService implements IBinPhotoService {
   final ApiClient _apiClient;
 
   BinPhotoService(this._apiClient);

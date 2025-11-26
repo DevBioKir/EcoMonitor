@@ -128,15 +128,22 @@ class AuthService extends ChangeNotifier{
     await _storage.write(key: _refreshToken, value: newRefreshToken);
   }
 
-  Future<bool> ValidateToken() async {
-    final accessToken = getAccessToken();
+ Future<bool> ValidateToken() async {
+  final accessToken = getAccessToken();
+  if (accessToken == null) {
+    return false;
+  }
+  try {
     final response = await _apiClient.post(
       'api/authorization/Validate',
       headers: {
-      'Authorization' : 'Bearer $accessToken'
+        'Authorization' : 'Bearer $accessToken'
       },
     );
     return response.statusCode == 200;
-
+  } catch (e) {
+    return false;
   }
+}
+
 }

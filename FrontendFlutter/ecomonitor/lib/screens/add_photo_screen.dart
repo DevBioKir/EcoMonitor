@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:ecomonitor/abstractions/ibin_photo_service.dart';
+import 'package:ecomonitor/abstractions/ibin_type_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_upload_request.dart';
 import 'package:ecomonitor/models/bin_type/bin_type_response.dart';
@@ -9,15 +11,23 @@ import 'package:image_picker/image_picker.dart';
 
 
 class AddPhotoScreen extends StatefulWidget {
+  final IBinPhotoService binPhotoService;
+  final IBinTypeService binTypeService;
+
+  AddPhotoScreen({
+    required this.binPhotoService,
+    required this.binTypeService,
+  });
+
   @override
   State<AddPhotoScreen> createState() => _AddPhotoScreenState();
 }
 
-final BinPhotoService _binPhotoService = BinPhotoService(
-  ApiClient("http://localhost:5198/", () async => 'token'));
+// final BinPhotoService _binPhotoService = BinPhotoService(
+//   ApiClient("http://localhost:5198/", () async => 'token'));
 
-final BinTypeService _binTypeService = BinTypeService(
-  ApiClient("http://localhost:5198/", () async => 'token'));
+// final BinTypeService _binTypeService = BinTypeService(
+//   ApiClient("http://localhost:5198/", () async => 'token'));
 
 class _AddPhotoScreenState extends State<AddPhotoScreen> {
   File? _selectedPhoto;
@@ -38,7 +48,7 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
 
   void _loadBinTypes() async {
     try {
-      _binTypes = await _binTypeService.getAllType();
+      _binTypes = await widget.binTypeService.getAllType();
       setState(() {});
     } catch (e) {
       print('Ошибка загрузки типов контейнеров: $e');
@@ -78,7 +88,7 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
       totalBins: int.tryParse(_totalBins.text) ?? 1,
     );
 
-    final response = await _binPhotoService.uploadWithMetadata(request);
+    final response = await widget.binPhotoService.uploadWithMetadata(request);
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Фото успешно добавлено!')),

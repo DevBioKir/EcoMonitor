@@ -1,3 +1,4 @@
+import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
 import 'package:ecomonitor/main.dart';
 import 'package:ecomonitor/screens/add_photo_screen.dart';
@@ -5,6 +6,7 @@ import 'package:ecomonitor/screens/login_screen.dart';
 import 'package:ecomonitor/screens/profile_screen.dart';
 import 'package:ecomonitor/screens/register_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
+import 'package:ecomonitor/services/bin_photo_service.dart';
 import 'package:ecomonitor/services/user_service.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:permission_handler/permission_handler.dart';
@@ -35,12 +37,12 @@ final class MapObjectTapListenerImpl implements ymapkit.MapObjectTapListener {
 }
 
 class MapScreen extends StatefulWidget {
+  final ApiClient apiClient;
   //final AuthService authService;
 
-  const MapScreen({
-    super.key, 
-    //required this.authService
-    });
+  MapScreen({Key? key})
+      : apiClient = ApiClient("http://localhost:5198/", () async => 'token'),
+        super(key: key);
   
 
   @override
@@ -66,6 +68,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
+    _binPhotoService = BinPhotoService(widget.apiClient);
     _tapListener = MapObjectTapListenerImpl();
     _startMapkit();
   }
@@ -235,19 +238,25 @@ class _MapScreenState extends State<MapScreen> {
         context,
         MaterialPageRoute(builder: (_) => ProfileScreen(user: user)),
       );
-    } else {
-      print('Переход на LoginScreen');
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => LoginScreen(
-            authService: authService,
-            onRegister: _onRegisterPressed,
-          ),
+      } else {
+    final loginSuccess = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LoginScreen(
+          authService: authService,
+          onRegister: _onRegisterPressed,
+          onLoginSuccess: () async {
+            final loggedInUser = await userService.getCurrentUser();
+            if (!mounted) return;
+            if (loggedInUser != null) {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => ProfileScreen(user: loggedInUser)));
+            }
+          },
         ),
-      );
-    }
+      ),
+    );
   }
+}
 
   Future<void> _onAddPhotoPressed() async {
   final authService = Provider.of<AuthService>(context, listen: false);
@@ -261,15 +270,22 @@ class _MapScreenState extends State<MapScreen> {
   if (isTokenValid) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen()));
   } else {
-    Navigator.push(
+    final loginSuccess = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => LoginScreen(
           authService: authService,
           onRegister: _onRegisterPressed,
+          onLoginSuccess: () {
+            Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen()));
+          },
         ),
       ),
     );
+
+    if (loginSuccess != true) {
+      // обработка неудачного логина, если нужно
+    }
   }
 }
 

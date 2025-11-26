@@ -8,11 +8,13 @@ class LoginScreen extends StatefulWidget{
   //final Future<void> Function(String login, String password) onLogin;
   final VoidCallback onRegister;
   final AuthService authService;
+  final VoidCallback? onLoginSuccess;
 
   const LoginScreen({
     super.key,
     required this.onRegister,
-    required this.authService});
+    required this.authService,
+    required this.onLoginSuccess});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -46,12 +48,15 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (loginResponse.accessToken.isNotEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => 
-                      MapScreen())
-          );
-          return true;
+        widget.onLoginSuccess?.call();
+        Navigator.pop(context, true);
+        return true;
+        // Navigator.pushReplacement(
+        //   context,
+        //   MaterialPageRoute(builder: (context) => 
+        //               MapScreen())
+        //   );
+        //   return true;
       } else {
         throw Exception('Token is empty');
       } 
