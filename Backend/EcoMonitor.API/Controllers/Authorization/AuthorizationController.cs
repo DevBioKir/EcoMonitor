@@ -4,6 +4,7 @@ using EcoMonitor.Contracts.Contracts.Auth;
 using EcoMonitor.Contracts.Contracts.Users;
 using EcoMonitor.Core.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -50,19 +51,6 @@ public class AuthorizationController : ControllerBase
             var response = await _authService.LoginAsync(request, cancellationToken);
             return Ok(response);
         }
-        // catch (Exception ex)
-        // {
-        //     if (ex is UnauthorizedAccessException || 
-        //         ex.InnerException is UnauthorizedAccessException)
-        //     {
-        //         _logger.LogWarning(ex, "Unauthorized login attempt for user: {Email}", request.Email);
-        //
-        //         return Unauthorized(new { message = ex.Message });
-        //     }
-        //
-        //     _logger.LogError(ex, "Error during login for user: {Email}", request.Email);
-        //     return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
-        // }
         catch (UnauthorizedAccessException ex)
         {
             _logger.LogWarning(ex, "Failed to login attempt for user: {Email}", request.Email);
@@ -217,6 +205,44 @@ public class AuthorizationController : ControllerBase
             return StatusCode(500, new { message = "Internal server error" });
         }
     }
+    
+    [AllowAnonymous]
+    [HttpPost("admin-login")]
+    public async Task<IActionResult> AdminLoginAsync([FromBody] AuthRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(request.Password) && string.IsNullOrWhiteSpace(request.Email))
+        {
+            _logger.LogWarning("login and password must not be empty");
+            return BadRequest(new { message = "Current and new passwords are required" });
+        }
+        
+        try
+        {
+            var response = await _authService.LoginAsync(request, cancellationToken);
+            return Ok(response);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Failed to login attempt for user: {Email}", request.Email);
+            
+            if (ex.Message.Contains("пользователь не найден", StringComparison.OrdinalIgnoreCase))
+            { 
+                return NotFound(new 
+                { 
+                    message = "Пользователь не найден. Необходимо зарегистрироваться"
+                });
+            }
+                    
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during login for user: {Email}", request.Email);
+            return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
+        }
+    }
+
     
     // [Authorize]
     // [HttpPost("change-password")]

@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EcoMonitor.Core\EcoMonitor.Core.csproj" />
+    <ProjectReference Include="..\EcoMonitor.Infrastracture\EcoMonitor.Infrastracture.csproj" />
   </ItemGroup>
 
 </Project>

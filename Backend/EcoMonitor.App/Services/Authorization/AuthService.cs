@@ -127,13 +127,9 @@ public class AuthService : IAuthService
         CancellationToken cancellationToken = default)
         => RegisterUserAsync(request, _userFactory.Create, "User", cancellationToken);
 
-    // public Task<AuthResponse> RegisterAdminAsync(RegisterUserRequest request,
-    //     CancellationToken cancellationToken = default)
-    //     => RegisterUserAsync(request, _userFactory.Create, "Admin", cancellationToken);
-
-    public Task<AuthResponse> RegisterManagerAsync(RegisterUserRequest request,
+    public async Task<AuthResponse> RegisterManagerAsync(RegisterUserRequest request,
         CancellationToken cancellationToken = default)
-        => RegisterUserAsync(request, _userFactory.Create, "Manager", cancellationToken);
+        => await RegisterUserAsync(request, _userFactory.Create, "Manager", cancellationToken);
 
     public async Task<AuthResponse> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword,
         CancellationToken cancellationToken = default)

@@ -1,3 +1,5 @@
+import 'package:ecomonitor/abstractions/ibin_photo_service.dart';
+import 'package:ecomonitor/abstractions/ibin_type_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
 import 'package:ecomonitor/main.dart';
@@ -7,6 +9,7 @@ import 'package:ecomonitor/screens/profile_screen.dart';
 import 'package:ecomonitor/screens/register_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
 import 'package:ecomonitor/services/bin_photo_service.dart';
+import 'package:ecomonitor/services/bin_type_service.dart';
 import 'package:ecomonitor/services/user_service.dart';
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:permission_handler/permission_handler.dart';
@@ -52,6 +55,8 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   bool _isMapkitActive = false;
   late ymapkit.MapWindow _mapWindow;
+  late IBinPhotoService _binPhotoService;
+  late IBinTypeService _binTypeService;
 
   final List<ymapkit.Point> _points = [
     const ymapkit.Point(latitude: 56.838926, longitude: 60.605702),
@@ -69,6 +74,7 @@ class _MapScreenState extends State<MapScreen> {
   void initState() {
     super.initState();
     _binPhotoService = BinPhotoService(widget.apiClient);
+    _binTypeService = BinTypeService(widget.apiClient);
     _tapListener = MapObjectTapListenerImpl();
     _startMapkit();
   }
@@ -268,7 +274,9 @@ class _MapScreenState extends State<MapScreen> {
   if (!mounted) return;
 
   if (isTokenValid) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen()));
+    Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen(
+      binPhotoService: _binPhotoService,
+      binTypeService: _binTypeService)));
   } else {
     final loginSuccess = await Navigator.push<bool>(
       context,
@@ -277,7 +285,9 @@ class _MapScreenState extends State<MapScreen> {
           authService: authService,
           onRegister: _onRegisterPressed,
           onLoginSuccess: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen()));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen(
+              binPhotoService: _binPhotoService,
+              binTypeService: _binTypeService)));
           },
         ),
       ),

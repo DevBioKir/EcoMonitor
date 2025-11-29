@@ -57,7 +57,7 @@ class AuthService extends ChangeNotifier{
         throw Exception('Ошибка сети или сервера');
       }
     }
-}
+  }
 
   Future<String?> getRefreshToken() async => await _storage.read(key: _refreshToken);
   Future<String?> getAccessToken() async => await _storage.read(key: _accessToken);

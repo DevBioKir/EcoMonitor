@@ -1,4 +1,5 @@
 ﻿using EcoMonitor.Core.Models.Users;
+using EcoMonitor.Infrastracture.Services;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -13,11 +14,14 @@ namespace EcoMonitor.DataAccess.Migrations
         private readonly Guid adminRoleId = RoleConstants.AdminId;
         private const string email = "ecomonitor.support@mail.com";
         // this password
-        private const string passwordHash = "04w9E4JPJjmwmVAIhfGWYqH8jly8MpS2gYtwhXymGbl7fgIkWMjX9SQB35pEtiII";
+        //private const string passwordHash = "04w9E4JPJjmwmVAIhfGWYqH8jly8MpS2gYtwhXymGbl7fgIkWMjX9SQB35pEtiII";
+        private const string adminPassword = "P@$$w0rd";
         
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            var passwordHasher  = new PasswordHasher();
+            var passwordHash = passwordHasher.HashPassword(adminPassword);
 
             migrationBuilder.InsertData(
                 table: "Users",

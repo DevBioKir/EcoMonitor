@@ -34,7 +34,11 @@ builder.Services.AddDbContext<EcoMonitorDbContext>(options =>
 {
     options.UseNpgsql(
         configuration.GetConnectionString(nameof(EcoMonitorDbContext)),
-        npgsqlOptions => npgsqlOptions.UseNetTopologySuite());
+        npgsqlOptions => npgsqlOptions.UseNetTopologySuite()
+    );
+
+    options.LogTo(Console.WriteLine, LogLevel.Information);
+    options.EnableSensitiveDataLogging();
 });
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
