@@ -99,7 +99,7 @@ builder.Services.AddScoped<IJWTService, JWTService>();
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 if (jwtSettings == null)
     throw new InvalidOperationException("JwtSettings config section missing or misconfigured.");
-ApiExtensions.AddApiAuthentication(builder.Services, Options.Create(jwtSettings));
+AuthorizationSetup.AddApiAuthentication(builder.Services, Options.Create(jwtSettings));
 
 builder.WebHost.UseUrls("http://0.0.0.0:5198");
 

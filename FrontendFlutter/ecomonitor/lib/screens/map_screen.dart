@@ -1,7 +1,6 @@
 import 'package:ecomonitor/abstractions/ibin_photo_service.dart';
 import 'package:ecomonitor/abstractions/ibin_type_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
-import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
 import 'package:ecomonitor/main.dart';
 import 'package:ecomonitor/screens/add_photo_screen.dart';
 import 'package:ecomonitor/screens/login_screen.dart';
@@ -12,7 +11,6 @@ import 'package:ecomonitor/services/bin_photo_service.dart';
 import 'package:ecomonitor/services/bin_type_service.dart';
 import 'package:ecomonitor/services/user_service.dart';
 import 'package:flutter/material.dart' hide TextStyle;
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart' as ymapkit;

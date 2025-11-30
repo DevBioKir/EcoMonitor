@@ -137,46 +137,45 @@ public class UserController(
         }
     }
 
-    [HttpDelete("{id:guid}")]
-    //[Authorize(Roles = "Admin")]
-    public async Task<IActionResult> DeleteUserAsync(Guid id, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var currentUserId = CurrentUser();
-            await _userService.DeleteAsync(id, currentUserId, cancellationToken);
-            return Ok();
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            _logger.LogWarning(ex, "Access denied in DeleteUser()"); 
-            return Forbid();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-    }
+    // [HttpDelete("{id:guid}")]
+    // //[Authorize(Roles = "Admin")]
+    // public async Task<IActionResult> DeleteUserAsync(Guid id, CancellationToken cancellationToken)
+    // {
+    //     try
+    //     {
+    //         var currentUserId = CurrentUser();
+    //         await _userService.DeleteAsync(id, currentUserId, cancellationToken);
+    //         return Ok();
+    //     }
+    //     catch (UnauthorizedAccessException ex)
+    //     {
+    //         _logger.LogWarning(ex, "Access denied in DeleteUser()"); 
+    //         return Forbid();
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         throw;
+    //     }
+    // }
     
-    [HttpDelete("Delete")]
-    public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
-    {
-        try
-        {
-            await _userService.DeleteUserAsync(id, cancellationToken);
-            return Ok();
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            _logger.LogWarning(ex, "Access denied in DeleteUser()"); 
-            return Forbid();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
-    }
-    
+    // [HttpDelete("Delete")]
+    // public async Task<IActionResult> DeleteAsync(Guid id, CancellationToken cancellationToken)
+    // {
+    //     try
+    //     {
+    //         await _userService.DeleteUserAsync(id, cancellationToken);
+    //         return Ok();
+    //     }
+    //     catch (UnauthorizedAccessException ex)
+    //     {
+    //         _logger.LogWarning(ex, "Access denied in DeleteUser()"); 
+    //         return Forbid();
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         throw;
+    //     }
+    // }
 }

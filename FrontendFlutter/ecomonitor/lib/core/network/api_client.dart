@@ -13,6 +13,12 @@ class ApiClient{
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          if (options.path.contains('login') || options.path.contains('register')) {
+            print('Login без токена');
+            handler.next(options);
+            return;
+          }
+
           final token = await tokenProvider();
           if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';

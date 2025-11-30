@@ -9,7 +9,7 @@ namespace EcoMonitor.DataAccess.Repositories.Users
         Task<User> GetByIdAsync(Guid? id, CancellationToken cancellationToken = default);
         Task<User> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
         Task UpdateAsync(User user, CancellationToken cancellationToken = default);
-        Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        // Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
         Task UpdateLastLoggedAtAsync(User user, DateTime utcNow, CancellationToken cancellationToken =  default);
     }
 }

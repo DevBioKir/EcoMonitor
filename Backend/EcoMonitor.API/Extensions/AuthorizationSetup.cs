@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace EcoMonitor.API.Extensions;
 
-public class ApiExtensions
+public class AuthorizationSetup
 {
     public static void AddApiAuthentication(
         IServiceCollection services,

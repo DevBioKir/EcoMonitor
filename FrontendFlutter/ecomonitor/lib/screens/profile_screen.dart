@@ -58,36 +58,36 @@ class ProfileScreen extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(height: 8),
+            // const SizedBox(height: 8),
             
-            // Отчеты
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.assessment),
-                title: const Text('Отчеты'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  // Переход к экрану отчетов
-                  print('Переход к отчетам');
-                  // Navigator.push(context, MaterialPageRoute(builder: (_) => ReportsScreen()));
-                },
-              ),
-            ),
-            const SizedBox(height: 8),
+            // // Отчеты
+            // Card(
+            //   child: ListTile(
+            //     leading: const Icon(Icons.assessment),
+            //     title: const Text('Отчеты'),
+            //     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            //     onTap: () {
+            //       // Переход к экрану отчетов
+            //       print('Переход к отчетам');
+            //       // Navigator.push(context, MaterialPageRoute(builder: (_) => ReportsScreen()));
+            //     },
+            //   ),
+            // ),
+            // const SizedBox(height: 8),
             
-            // Уведомления
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.notifications),
-                title: const Text('Уведомления'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () {
-                  // Переход к экрану уведомлений
-                  print('Переход к уведомлениям');
-                  // Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen()));
-                },
-              ),
-            ),
+            // // Уведомления
+            // Card(
+            //   child: ListTile(
+            //     leading: const Icon(Icons.notifications),
+            //     title: const Text('Уведомления'),
+            //     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            //     onTap: () {
+            //       // Переход к экрану уведомлений
+            //       print('Переход к уведомлениям');
+            //       // Navigator.push(context, MaterialPageRoute(builder: (_) => NotificationsScreen()));
+            //     },
+            //   ),
+            // ),
             
             const Spacer(),
             

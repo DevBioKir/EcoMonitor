@@ -109,14 +109,14 @@ namespace EcoMonitor.DataAccess.Repositories.Users
                     p => p.LastLogindAt, date), cancellationToken);
         }
 
-        public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            var entity = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
-            if (entity != null)
-            {
-                _context.Users.Remove(entity);
-                await _context.SaveChangesAsync(cancellationToken);
-            }
-        }
+        // public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+        // {
+        //     var entity = await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+        //     if (entity != null)
+        //     {
+        //         _context.Users.Remove(entity);
+        //         await _context.SaveChangesAsync(cancellationToken);
+        //     }
+        // }
     }
 }

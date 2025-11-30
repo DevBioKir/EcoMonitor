@@ -23,7 +23,9 @@ namespace EcoMonitor.Core.Models.Users
         // Auditing
         public DateTime CreatedAt { get; private set; }
         public DateTime LastLogindAt { get; private set; }
+        public bool AccountEnabled { get; private set; } = true;
         public DateTime LockedUntil { get; private set; }
+        
         
         private readonly List<RefreshToken> _refreshTokens = new();
         public IReadOnlyCollection<RefreshToken> RefreshTokens =>  _refreshTokens.AsReadOnly();

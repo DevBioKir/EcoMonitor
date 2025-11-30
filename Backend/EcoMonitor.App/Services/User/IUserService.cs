@@ -11,6 +11,5 @@ public interface IUserService
     Task<UserResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<UserResponse> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
     Task<UserResponse> UpdateAsync(UserRequest user, Guid? currentUserId, CancellationToken cancellationToken = default);
-    Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default);
-    Task DeleteAsync(Guid id, Guid? currentUserId, CancellationToken cancellationToken = default);
+    // Task DeleteUserAsync(Guid id, CancellationToken cancellationToken = default);
 }
