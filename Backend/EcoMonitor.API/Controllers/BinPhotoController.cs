@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using EcoMonitor.API.Attributes;
 using EcoMonitor.App.Services;
 using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Contracts.Contracts.BinPhoto;
@@ -10,8 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EcoMonitor.API.Controllers
 {
-    //[Authorize]
-    [ApiController]
+    [PublicApi]
+    /[Authorize]
     [Route("api/[controller]")]
     public class BinPhotoController : ControllerBase
     {
@@ -38,8 +39,7 @@ namespace EcoMonitor.API.Controllers
             if (userIdClaim == null) throw new UnauthorizedAccessException("User is not authenticated");
             return Guid.Parse(userIdClaim.Value);
         }
-
-        [Authorize]
+        
         [HttpGet("GetBinPhotoById")]
         public async Task<ActionResult<BinPhotoResponse>> GetBinPhotoByIdAsync(Guid id)
         {
@@ -54,8 +54,7 @@ namespace EcoMonitor.API.Controllers
                 return StatusCode(500, "Ошибка при поиске фото в базе.");
             }
         }
-        
-        [Authorize]
+
         [HttpGet("GetPhotosInBounds")]
         public async Task<ActionResult<IEnumerable<BinPhotoResponse>>> GetPhotosInBoundsAsync(
             double north,
@@ -75,7 +74,6 @@ namespace EcoMonitor.API.Controllers
             }
         }
         
-        [Authorize(Policy = "AdminPolicy")]
         [HttpGet("GetAllPhotos")]
         public async Task<ActionResult<IReadOnlyList<BinPhotoResponse>>> GetAllBinPhotosAsync()
         {
@@ -85,7 +83,6 @@ namespace EcoMonitor.API.Controllers
             return Ok(responseBinPhotos);
         }
         
-        [Authorize]
         [HttpGet("userUploadedPhotos")]
         public async Task<ActionResult<PagedResultDTO<BinPhotoResponse>>> GetUserPhotos(
             [FromQuery] PhotoFilterDTO filterDto,
@@ -110,7 +107,6 @@ namespace EcoMonitor.API.Controllers
             }
         }
         
-        [Authorize]
         [HttpPost]
         public async Task<ActionResult<BinPhotoResponse>> AddBinPhotoAsync([FromBody] BinPhotoRequest request)
         {
@@ -119,7 +115,6 @@ namespace EcoMonitor.API.Controllers
             return CreatedAtAction(nameof(AddBinPhotoAsync), new { id = binPhoto.Id }, binPhoto);
         }
         
-        [Authorize]
         [HttpPost("UploadWithMetadata")]
         public async Task<ActionResult<BinPhotoResponse>> UploadWithMetadata(
             [FromForm] BinPhotoUploadRequest request,
@@ -162,22 +157,7 @@ namespace EcoMonitor.API.Controllers
             }
         }
         
-        [Authorize(Policy = "AdminPolicy")]
-        [HttpDelete("Delete")]
-        public async Task<ActionResult<Guid>> DeleteBinPhotoAsync(Guid binPhotoId)
-        {
-            try
-            {
-                var photoId = await _binPhotoService.DeleteBinPhotoAsync(binPhotoId);
-                return photoId;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при удалении фото из базы");
-                return StatusCode(500, "Ошибка при удалении фотографии.");
-            }
-        }
-        
+        [AllowAnonymous]
         [HttpPost("Markers")]
         public async Task<ActionResult<IReadOnlyList<PhotoMarkerDTO>>> GetMarkersAsync()
         {

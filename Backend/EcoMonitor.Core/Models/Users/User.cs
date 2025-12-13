@@ -24,7 +24,8 @@ namespace EcoMonitor.Core.Models.Users
         public DateTime CreatedAt { get; private set; }
         public DateTime LastLogindAt { get; private set; }
         public bool AccountEnabled { get; private set; } = true;
-        public DateTime LockedUntil { get; private set; }
+        public string? BlockReason {get; private set;} 
+        public DateTime? LockedUntil { get; private set; }
         
         
         private readonly List<RefreshToken> _refreshTokens = new();
@@ -91,19 +92,6 @@ namespace EcoMonitor.Core.Models.Users
             if (string.IsNullOrWhiteSpace(Surname))
                 throw new ArgumentException("Surname required");
         }
-
-        // public static User Create(
-        //     string firstname,
-        //     string surname,
-        //     string email,
-        //     PasswordHash passwordHash,
-        //     UserRole? role)
-        // {
-        //     var emailVO = Email.Create(email);
-        //     var defaultRole = role ?? UserRole.User;
-        //
-        //     return new User(firstname, surname, emailVO, passwordHash, defaultRole);
-        // }
         
         public static User Create(
             string firstname,
@@ -161,6 +149,7 @@ namespace EcoMonitor.Core.Models.Users
             Role = newRole;
             RoleId = newRole.Id;
         }
+        
         public void UpdateRole(UserRole newRole) => Role = newRole;
         public void UpdateLastLoggedAt(DateTime newLastLoggedAt) => LastLogindAt = newLastLoggedAt;
 
@@ -186,7 +175,21 @@ namespace EcoMonitor.Core.Models.Users
         
         public bool HasValidRefreshToken(string tokenHash) 
             => _refreshTokens.Any(r => r.TokenHash == tokenHash && r.IsActive());
+
+        public void BlockUser(string reason, TimeSpan? duration = null)
+        {
+            AccountEnabled = false;
+            BlockReason = reason;
+            LockedUntil = duration.HasValue ? DateTime.UtcNow + duration.Value : null;
+        }
+
+        public void UnlockAccount()
+        {
+            AccountEnabled = true;
+            BlockReason = null;
+        }
         
-        
+        public bool CanLogin() => AccountEnabled && isLoginConfirmed 
+                                                 && (LockedUntil == null || LockedUntil < DateTime.UtcNow);
     }
 }

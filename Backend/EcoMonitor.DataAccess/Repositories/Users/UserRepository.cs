@@ -80,6 +80,7 @@ namespace EcoMonitor.DataAccess.Repositories.Users
         public async Task<User> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
         {
             var entity = await _context.Users
+                .AsNoTracking()
                 .Include(u => u.Role)
                 .ThenInclude(r => r.Permissions)
                 .Include(u => u.BinPhoto)
@@ -100,7 +101,7 @@ namespace EcoMonitor.DataAccess.Repositories.Users
             _context.Users.Update(entity);
             await _context.SaveChangesAsync(cancellationToken);
         }
-        
+
         public async Task UpdateLastLoggedAtAsync(User user, DateTime date, CancellationToken cancellationToken = default)
         {
             await _context.Users

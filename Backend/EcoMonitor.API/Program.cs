@@ -19,16 +19,22 @@ using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
-using NetTopologySuite.Geometries;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var env = builder.Environment;
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Conventions.Add(new VersionedPrefixConvention());
+});
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new() { Title = "EcoMonitor API", Version = "v1" });
+});
 
 builder.Services.AddDbContext<EcoMonitorDbContext>(options =>
 {
@@ -118,7 +124,11 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "EcoMonitor.API v1");
+        options.RoutePrefix = string.Empty;
+    });
 }
 
 app.UseStaticFiles(new StaticFileOptions

@@ -1,6 +1,7 @@
 ﻿using EcoMonitor.API.Attributes;
 using EcoMonitor.App.Services;
 using EcoMonitor.Contracts.Contracts.Auth;
+using EcoMonitor.Contracts.Contracts.BlockUser;
 using EcoMonitor.Contracts.Contracts.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -134,5 +135,23 @@ public class AdminAuthorizationController(
             _logger.LogError(ex, "Error during registration for user: {Email}", request.Email);
             return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
         }
+    }
+
+    [HttpPost("block/{userId}")]
+    public async Task<IActionResult> BlockUserAsync(
+        Guid userId,
+        [FromBody] BlockUserRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        await _authService.BlockUserAsync(
+            userId, 
+            request.Reason, 
+            request.ToTimeSpan(), 
+            cancellationToken);
+        
+        return ApiOk( new {
+            message = $"User {userId} blocked {request.Reason}",
+            blockerUntil = DateTime.UtcNow.Add(request.ToTimeSpan())
+        });
     }
 }

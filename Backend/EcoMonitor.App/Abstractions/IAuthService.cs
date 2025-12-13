@@ -16,4 +16,5 @@ public interface IAuthService
         Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
     Task<AuthResponse>  RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
     Task RevokeRefreshTokenAsync(string refreshTokenValue, CancellationToken cancellationToken = default);
+    Task BlockUserAsync(Guid id, string reason, TimeSpan duration, CancellationToken cancellationToken = default);
 }

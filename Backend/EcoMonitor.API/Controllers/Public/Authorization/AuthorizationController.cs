@@ -1,13 +1,8 @@
-﻿using System.Security.Claims;
-using EcoMonitor.API.Attributes;
+﻿using EcoMonitor.API.Attributes;
 using EcoMonitor.App.Services;
 using EcoMonitor.Contracts.Contracts.Auth;
-using EcoMonitor.Contracts.Contracts.Users;
-using EcoMonitor.Core.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 
 namespace EcoMonitor.API.Controllers.Authorization;
 

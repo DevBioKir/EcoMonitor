@@ -24,6 +24,9 @@ namespace EcoMonitor.DataAccess.Configurations.Users
             builder.Property(u => u.PasswordHash)
                 .IsRequired();
 
+            builder.Property(u=> u.isLoginConfirmed)
+                .HasDefaultValue(false);
+
             builder.HasOne(u => u.Role)
                 .WithMany(ur => ur.Users)
                 .HasForeignKey(u => u.RoleId)

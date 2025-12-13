@@ -15,7 +15,7 @@ namespace EcoMonitor.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> UploadImage([FromForm] IFormFile image)
+        public async Task<ActionResult> UploadImage(IFormFile image)
         {
             if (image == null || image.Length < 0) return BadRequest("File not uploaded");
 

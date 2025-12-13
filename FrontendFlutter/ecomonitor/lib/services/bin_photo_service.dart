@@ -12,12 +12,12 @@ class BinPhotoService implements IBinPhotoService {
   BinPhotoService(this._apiClient);
 
   Future<List<BinPhotoResponse>> getAllBinPhoto() async {
-    final response = await _apiClient.get('api/binphoto/GetAllPhotos');
+    final response = await _apiClient.get('/api/public/v1/BinPhoto/GetAllPhotos');
     return response.data;
   }
 
   Future<BinPhotoResponse> getBinPhotoById(String id) async {
-    final response = await _apiClient.get('api/binphoto/GetBinPhotoById',
+    final response = await _apiClient.get('/api/public/v1/BinPhoto/GetBinPhotoById',
         queryParameters: {'id': id});
     return BinPhotoResponse.fromJson(response.data);
   }
@@ -45,7 +45,7 @@ class BinPhotoService implements IBinPhotoService {
         'toDate' : filter.toDate!.toIso8601String(),
       };
       
-      final response = await _apiClient.get('/api/binphoto/userUploadedPhotos',
+      final response = await _apiClient.get('/api/public/v1/BinPhoto/userUploadedPhotos',
       queryParameters: queryParameters);
 
       return PagedResult<BinPhotoResponse>.fromJson(
@@ -69,7 +69,7 @@ class BinPhotoService implements IBinPhotoService {
 
   Future<BinPhotoResponse> uploadWithMetadata(BinPhotoUploadRequest request) async {
     final formData = FormData.fromMap(request.toFormData());
-    final response = await _apiClient.post('api/binphoto/UploadWithMetadata',
+    final response = await _apiClient.post('/api/public/v1/BinPhoto/UploadWithMetadata',
         data: formData);
     return BinPhotoResponse.fromJson(response.data);
   }

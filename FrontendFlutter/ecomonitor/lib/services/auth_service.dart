@@ -16,17 +16,10 @@ class AuthService extends ChangeNotifier{
   static const _refreshToken = 'refresh_token';
 
   AuthService(this._apiClient);
-
-  // Future<bool> checkLoginStatus() async {
-  //   final accessToken = await _storage.read(key: _accessToken);
-  //   _isLoggedIn = accessToken != null;
-  //   notifyListeners();
-  //   return _isLoggedIn;
-  // }
   
   Future<LoginResponse> login(String email, String password) async {
     try{
-      final response = await _apiClient.post('api/authorization/login', data: {
+      final response = await _apiClient.post('/api/public/v1/Authorization/login', data: {
         'email' : email,
         'password' : password,
       });
@@ -57,7 +50,7 @@ class AuthService extends ChangeNotifier{
         throw Exception('Ошибка сети или сервера');
       }
     }
-  }
+}
 
   Future<String?> getRefreshToken() async => await _storage.read(key: _refreshToken);
   Future<String?> getAccessToken() async => await _storage.read(key: _accessToken);
@@ -130,9 +123,7 @@ class AuthService extends ChangeNotifier{
 
  Future<bool> ValidateToken() async {
   final accessToken = getAccessToken();
-  if (accessToken == null) {
-    return false;
-  }
+  if (accessToken == null) return false;    
   try {
     final response = await _apiClient.post(
       'api/authorization/Validate',

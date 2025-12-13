@@ -13,6 +13,7 @@ using EcoMonitor.Infrastracture.Authentication;
 using MapsterMapper;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenQA.Selenium;
 using IPasswordHasher = EcoMonitor.Infrastracture.Abstractions.IPasswordHasher;
 
 namespace EcoMonitor.App.Services.Authorization;
@@ -231,5 +232,38 @@ public class AuthService : IAuthService
     {
         using var sha = SHA256.Create();
         return Convert.ToBase64String(sha.ComputeHash(Encoding.UTF8.GetBytes(token)));
+    }
+
+    public async Task BlockUserAsync(
+        Guid id, 
+        string reason,
+        TimeSpan duration,
+        CancellationToken cancellationToken = default)
+    {
+        if (id == Guid.Empty)
+            throw new ArgumentException("User ID is required");
+
+        if (string.IsNullOrEmpty(reason))
+            throw new ArgumentException("Reason is required");
+        
+        _logger.LogInformation("Blocking user {UserId} for reason: {Reason}", id, reason);
+        
+        try
+        {
+            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+            
+            if (user == null)
+                throw new NotFoundException($"User {id} not found");
+            
+            user.BlockUser(reason, duration);
+            
+            await _userRepository.UpdateAsync(user, cancellationToken);
+            _logger.LogInformation("User {UserId} successfully blocked", id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }
