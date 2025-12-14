@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EcoMonitor.API.Controllers
 {
     [PublicApi]
-    /[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     public class BinPhotoController : ControllerBase
     {

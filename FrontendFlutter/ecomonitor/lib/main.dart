@@ -55,9 +55,8 @@ void main() async {
 
   final storage = const FlutterSecureStorage();
   final apiClient = ApiClient(
-    "http://localhost:5198/", () async => await storage.read(key: 'access_token') ?? '');
-  // final apiClient = ApiClient(
-  //  "http://10.0.2.2:5198/", () async => await storage.read(key: 'access_token') ?? '');
+    //"http://localhost:5198/", () async => await storage.read(key: 'access_token') ?? '');
+    "http://10.0.2.2:5198/", () async => await storage.read(key: 'access_token') ?? '');
 
   final authService = AuthService(apiClient);
   final userService = UserService(apiClient);

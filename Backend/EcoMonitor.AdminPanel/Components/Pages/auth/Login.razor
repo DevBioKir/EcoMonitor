@@ -1,0 +1,54 @@
+﻿@page "auth/login"
+@using System.Text.Json;
+@using EcoMonitor.Contracts.Contracts.Auth
+@rendermode @(new InteractiveServerRenderMode())
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>Вход в административную панель</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Sm" class="mt-16">
+    <MudCard>
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText typo="Typo.h6">Админ панель EcoMonitor></MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField @bind-value="email" />
+            <MudTextField @bind-value="password"/>
+            @if (string.IsNullOrWhiteSpace(error))
+            {
+                <MudAllert>@error</MudAllert>
+            }
+        </MudCardContent>
+        <MudCartAction>
+            <MudButton OnClick="LoginAsync">Войти</MudButton>
+        </MudCartAction>
+    </MudCard>
+</MudContainer>
+
+@code {
+    AuthRequest authRequest;
+    string error = "";
+    bool isLoading = false;
+
+    private async Task LoginAsync()
+    {
+        error = "";
+        isLoading = true;
+
+        try
+        {
+            var responce = await Http.PostAsJsonAsync(
+                "api/admin/v1/AdminAuthorization/admin-login", authRequest);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+    
+}
