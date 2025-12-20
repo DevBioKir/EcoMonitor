@@ -25,7 +25,8 @@
         public static readonly Permission UsersView = new("Users.View");
         public static readonly Permission UsersAdd = new("Users.Add");
         public static readonly Permission UsersEdit = new("Users.Edit");
-        public static readonly Permission UsersDelete = new("Users.Delete");
+        public static readonly Permission UsersBlock = new("Users.Block");
+        public static readonly Permission UserUnblock = new("Users.Unblock");
 
         public static readonly Permission RolesManage = new("Roles.Manage");
 

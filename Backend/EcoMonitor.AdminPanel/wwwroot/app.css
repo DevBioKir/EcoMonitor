@@ -58,3 +58,27 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+
+.auth-background {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #008000 0%, #88D408 40%, #09AD8C 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.btn-ecomonitor {
+    background-color: #111827 !important;
+    color: #ffffff !important;
+}
+.btn-ecomonitor-light {
+    background-color: #ffffff !important;
+    color: #0f766e !important; /* тёмно-зелёный */
+}
+.btn-ecomonitor.mud-button-outlined {
+    background-color: transparent !important;
+    color: #0f766e !important;
+    border-color: #0f766e !important;
+}

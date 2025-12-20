@@ -1,0 +1,41 @@
+@page "/admin/dashboard"
+@* @using Microsoft.AspNetCore.Authorization *@
+@* @attribute [Authorize(Roles = "admin")] *@
+
+<MudText Typo="Typo.h4" Class="mb-2">
+    EcoMonitor — админский Dashboard (заглушка)
+</MudText>
+
+<MudText Typo="Typo.body1" Class="mb-4">
+    Здесь позже появятся метрики по пользователям, фотографиям баков и отчётам.
+</MudText>
+
+<MudGrid Class="mb-4">
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4" Elevation="1">
+            <MudText Typo="Typo.subtitle1">Всего пользователей</MudText>
+            <MudText Typo="Typo.h5" Color="Color.Primary">—</MudText>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4" Elevation="1">
+            <MudText Typo="Typo.subtitle1">Новые фото баков</MudText>
+            <MudText Typo="Typo.h5" Color="Color.Primary">—</MudText>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" md="4">
+        <MudPaper Class="pa-4" Elevation="1">
+            <MudText Typo="Typo.subtitle1">Активные инциденты</MudText>
+            <MudText Typo="Typo.h5" Color="Color.Primary">—</MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<MudPaper Class="pa-4">
+    <MudText Typo="Typo.h6" Class="mb-2">Последние события</MudText>
+    <MudText Typo="Typo.body2" Color="Color.Secondary">
+        Здесь будет таблица с последними фотографиями и действиями администраторов.
+    </MudText>
+</MudPaper>

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EcoMonitor.API.Controllers.User;
 
 [AdminApi]
-[Authorize(Roles = "admin")]
+[Authorize(Roles = "Admin")]
 [Route("[controller]")]
 public class AdminUserController(
     IUserService _userService,
@@ -27,7 +27,7 @@ public class AdminUserController(
         return Guid.Parse(userIdClaim.Value);
     }
 
-    [HttpGet]
+    [HttpGet("GetAll")]
     public async Task<IActionResult> GetAllUsersAsync(CancellationToken cancellationToken)
     {
         try

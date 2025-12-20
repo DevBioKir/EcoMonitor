@@ -37,7 +37,7 @@ public class AuthorizationSetup
                 policy.RequireAssertion(context => 
                     context.User.HasClaim(c => 
                         c.Type == ClaimTypes.Role && 
-                        string.Equals(c.Value, "Admin", StringComparison.OrdinalIgnoreCase)));
+                        string.Equals(c.Value, "admin", StringComparison.OrdinalIgnoreCase)));
                 //policy.RequireClaim(ClaimTypes.Role, "admin");
             });
             

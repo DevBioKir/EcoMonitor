@@ -9,11 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace EcoMonitor.API.Controllers.Authorization;
 
 [AdminApi]
-[Authorize(Roles = "admin")]
+[Authorize(Roles = "Admin")]
 [Route("[controller]")]
 public class AdminAuthorizationController(
     ILogger<AdminAuthorizationController> logger,
-    IAuthService _authService)
+    IAuthService authService)
     : BaseApiController<AdminAuthorizationController>(logger)
 {
     [AllowAnonymous]
@@ -29,7 +29,7 @@ public class AdminAuthorizationController(
         
         try
         {
-            var response = await _authService.LoginAsync(request, cancellationToken);
+            var response = await authService.LoginAsync(request, cancellationToken);
             return Ok(response);
         }
         catch (UnauthorizedAccessException ex)
@@ -70,7 +70,7 @@ public class AdminAuthorizationController(
         
         try
         {
-            var tokens = await _authService.ChangePasswordAsync(
+            var tokens = await authService.ChangePasswordAsync(
                 userId, 
                 request.CurrentPassword, 
                 request.NewPassword, 
@@ -102,7 +102,7 @@ public class AdminAuthorizationController(
     {
         try
         {
-            var response = await _authService.RegisterAsync(request, cancellationToken);
+            var response = await authService.RegisterAsync(request, cancellationToken);
             return Ok(response);
         }
         catch (InvalidOperationException ex)
@@ -122,7 +122,7 @@ public class AdminAuthorizationController(
     {
         try
         {
-            var response = await _authService.RegisterManagerAsync(request, cancellationToken);
+            var response = await authService.RegisterManagerAsync(request, cancellationToken);
             return Ok(response);
         }
         catch (InvalidOperationException ex)
@@ -143,7 +143,7 @@ public class AdminAuthorizationController(
         [FromBody] BlockUserRequest request,
         CancellationToken cancellationToken = default)
     {
-        await _authService.BlockUserAsync(
+        await authService.BlockUserAsync(
             userId, 
             request.Reason, 
             request.ToTimeSpan(), 
@@ -153,5 +153,24 @@ public class AdminAuthorizationController(
             message = $"User {userId} blocked {request.Reason}",
             blockerUntil = DateTime.UtcNow.Add(request.ToTimeSpan())
         });
+    }
+    
+    [HttpPost("logout")]
+    public async Task<IActionResult> LogoutAsync([FromBody] RefreshTokenRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrEmpty(request.RefreshToken))
+            return BadRequest(new { message = "Refresh token is required for logout" });
+        
+        try
+        {
+            await authService.RevokeRefreshTokenAsync(request.RefreshToken, cancellationToken);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Logout failed: {Message}", ex.Message);
+            return Unauthorized(new { message = ex.Message });
+        }
     }
 }

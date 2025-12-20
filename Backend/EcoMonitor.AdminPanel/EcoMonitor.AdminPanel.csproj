@@ -8,20 +8,23 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Update="Data\app.db" CopyToOutputDirectory="PreserveNewest" ExcludeFromSingleFile="true"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.7"/>
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.7"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7"/>
+        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.7" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.7" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
+        <PackageReference Include="MudBlazor" Version="8.15.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\EcoMonitor.API\EcoMonitor.API.csproj" />
       <ProjectReference Include="..\EcoMonitor.Contracts\EcoMonitor.Contracts.csproj" />
       <ProjectReference Include="..\EcoMonitor.Core\EcoMonitor.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Components\Account\Pages\" />
+      <Folder Include="Components\Account\Shared\" />
+      <Folder Include="Data\Migrations\" />
     </ItemGroup>
 
 </Project>
