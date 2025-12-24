@@ -5,26 +5,22 @@ using MudBlazor.Services;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
-Console.WriteLine("ENV: " + builder.Environment.EnvironmentName);
-Console.WriteLine("EcoMonitorAPI: " + (configuration.GetConnectionString("EcoMonitorAPI") ?? "<null>"));
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddCircuitOptions(o => o.DetailedErrors = true);
 
-builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddControllersWithViews();
+builder.Services.AddControllers();
 
 builder.Services.AddMudServices();
 
-builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 var apiBaseUrl = configuration.GetConnectionString("EcoMonitorAPI")
-                 ?? throw new InvalidOperationException("Connection string 'EcoMonitorAPI' not found.");
+                 ?? throw new InvalidOperationException("Connection string 'EcoMonitorAPI' not found.");;
 
-builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddTransient<AdminAuthHandler>();
@@ -40,16 +36,10 @@ builder.Services.AddHttpClient("AdminApi", client =>
 })
     .AddHttpMessageHandler<AdminAuthHandler>();
 
-builder.Services.AddScoped(sp =>
-    sp.GetRequiredService<IHttpClientFactory>().CreateClient("EcoMonitorAPI"));
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-}
-else
+if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
@@ -61,12 +51,10 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
-app.MapStaticAssets();
-
 app.MapControllers();
+
+app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-// Add additional endpoints required by the Identity /Account Razor components.
 
 app.Run();

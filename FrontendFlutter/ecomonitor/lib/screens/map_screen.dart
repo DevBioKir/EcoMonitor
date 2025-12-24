@@ -41,6 +41,10 @@ class MapScreen extends StatefulWidget {
   final ApiClient apiClient;
   //final AuthService authService;
 
+  // MapScreen({Key? key})
+  //     : apiClient = ApiClient("http://localhost:5198/", () async => 'token'),
+  //       super(key: key);
+
   MapScreen({Key? key})
       : apiClient = ApiClient("http://localhost:5198/", () async => 'token'),
         super(key: key);
@@ -56,11 +60,11 @@ class _MapScreenState extends State<MapScreen> {
   late IBinPhotoService _binPhotoService;
   late IBinTypeService _binTypeService;
 
-  final List<ymapkit.Point> _points = [
-    const ymapkit.Point(latitude: 56.838926, longitude: 60.605702),
-    const ymapkit.Point(latitude: 56.839000, longitude: 60.606000),
-    const ymapkit.Point(latitude: 56.839500, longitude: 60.607000),
-  ];
+  // final List<ymapkit.Point> _points = [
+  //   const ymapkit.Point(latitude: 56.838926, longitude: 60.605702),
+  //   const ymapkit.Point(latitude: 56.839000, longitude: 60.606000),
+  //   const ymapkit.Point(latitude: 56.839500, longitude: 60.607000),
+  // ];
 
   List<ymapkit.PlacemarkMapObject> _placemarks = [];
 
@@ -100,11 +104,12 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _onMapCreated(ymapkit.MapWindow mapWindow) async {
     _mapWindow = mapWindow;
 
-    final center = const ymapkit.Point(latitude: 56.838926, longitude: 60.605702);
+    final center = const ymapkit.Point(latitude: 55.160283, longitude: 61.400856);
     mapWindow.map.move(
       ymapkit.CameraPosition(center, zoom: 15, azimuth: 0, tilt: 0),
     );
 
+    await Future.delayed(const Duration(milliseconds: 500));
     await _setPlacemarks();
 
 
@@ -175,44 +180,46 @@ class _MapScreenState extends State<MapScreen> {
 
     //final center = const ymapkit.Point(latitude: 56.838926, longitude: 60.605702);
 
-    final imageProvider = ymapprovider.ImageProvider.fromImageProvider(const AssetImage('assets/ic_pin6.png'));
+    try{
+      final markerResponse = await _binPhotoService.markers();
 
-    final iconStyle = const ymapkit.IconStyle(
+      final imageProvider = ymapprovider.ImageProvider.fromImageProvider(const AssetImage('assets/ic_pin6.png'));
+
+      final iconStyle = const ymapkit.IconStyle(
       anchor: math.Point(0.5, 1.0),
       scale: 2.0,
-    );
+      );
 
-    for (final point in _points) {
+      for(final marker in markerResponse){
+        final point = ymapkit.Point(
+          latitude: marker.latitude, longitude: marker.longitude);
+
       final placemark = _mapWindow.map.mapObjects.addPlacemarkWithImageStyle(
         point,
         imageProvider,
         iconStyle,
       );
-    
-    // final placemark = _mapWindow.map.mapObjects.addPlacemarkWithImageStyle(
-    //   center,
-    //   imageProvider,
-    //   iconStyle);
 
-  placemark.setText("Special place");
-  placemark.setTextStyle(
-    const ymapkit.TextStyle(
-      size: 10.0,
-      color: Colors.black,
-      outlineColor: Colors.white,
-      placement: ymapkit.TextStylePlacement.Right,
-      offset: 5.0,
-    ),
-  );
+      placemark.setText("Special place");
+      placemark.setTextStyle(
+        const ymapkit.TextStyle(
+          size: 10.0,
+          color: Colors.black,
+          outlineColor: Colors.white,
+          placement: ymapkit.TextStylePlacement.Right,
+          offset: 5.0,
+        ),
+      );
 
-  // placemark.addTapListener(MapObjectTapListenerImpl (() {
-  //   ScaffoldMessenger.of(context).showSnackBar(
-  //   SnackBar(content: Text('Маркер нажат!')),
-  //   );
-  // }));
-
-  placemark.addTapListener(_tapListener);
-  _placemarks.add(placemark);
+        placemark.addTapListener(_tapListener);
+        _placemarks.add(placemark);
+      }
+    } catch (e) {
+      if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Ошибка загрузки маркеров: $e")),
+      );
+      }
     }
   }
 

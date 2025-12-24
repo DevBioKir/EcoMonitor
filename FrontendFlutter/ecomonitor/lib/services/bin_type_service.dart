@@ -9,8 +9,8 @@ class BinTypeService implements IBinTypeService {
   BinTypeService(this._apiClient);
 
   Future<List<BinTypeResponse>> getAllType() async {
-    final response = await _apiClient.get('api/bintype/GetAllBinTypes');
+    final response = await _apiClient.get('/api/public/v1/BinType/GetAllBinTypes');
     return (response.data as List)
                   .map((item) => BinTypeResponse.fromJson(item)).toList();
-  }
+  } 
 }

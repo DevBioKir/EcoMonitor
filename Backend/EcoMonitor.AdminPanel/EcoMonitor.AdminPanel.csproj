@@ -4,27 +4,19 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <UserSecretsId>aspnet-EcoMonitor.AdminPanel-d262daa8-ab60-410e-aaa5-d88ca6120d13</UserSecretsId>
+        <RootNamespace>EcoMonitor.AdminPanel</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.7" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.7" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7" />
-        <PackageReference Include="MudBlazor" Version="8.15.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\EcoMonitor.API\EcoMonitor.API.csproj" />
       <ProjectReference Include="..\EcoMonitor.Contracts\EcoMonitor.Contracts.csproj" />
-      <ProjectReference Include="..\EcoMonitor.Core\EcoMonitor.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Components\Account\Pages\" />
-      <Folder Include="Components\Account\Shared\" />
-      <Folder Include="Data\Migrations\" />
+      <PackageReference Include="MudBlazor" Version="8.15.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="Views\Auth\Login.cshtml" />
     </ItemGroup>
 
 </Project>

@@ -126,7 +126,7 @@ class AuthService extends ChangeNotifier{
   if (accessToken == null) return false;    
   try {
     final response = await _apiClient.post(
-      'api/authorization/Validate',
+      '/api/public/v1/Authorization/Validate',
       headers: {
         'Authorization' : 'Bearer $accessToken'
       },

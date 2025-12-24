@@ -3,6 +3,7 @@ import 'package:ecomonitor/abstractions/ibin_photo_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_response.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_upload_request.dart';
+import 'package:ecomonitor/models/markers/photo_markers_dto.dart';
 import 'package:ecomonitor/models/paged_result.dart';
 import 'package:ecomonitor/models/photo_filter.dart';
 
@@ -59,6 +60,11 @@ class BinPhotoService implements IBinPhotoService {
       }
       rethrow;
     }
+  }
+
+  Future<List<PhotoMarkersDTO>> markers() async {
+    final response = await _apiClient.post('/api/public/v1/api/BinPhoto/Markers');
+    return response.data;
   }
 
   // Future<BinPhotoResponse> addBinPhoto(BinPhotoRequest request) async {

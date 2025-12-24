@@ -1,0 +1,27 @@
+﻿@layout AuthLayout
+
+<PageTitle>Вход в административную панель</PageTitle>
+
+@* <MudContainer MaxWidth="MaxWidth.False" Class="d-flex justify-content-center align-content-center" *@
+@*               Style="min-height:100vh;"> *@
+@*     <MudPaper Class="pa-6 mud-elevation-6" Style="max-width:420px; width:100%;"> *@
+<MudStack Spacing="4" AlignItems="AlignItems.Center">
+    <MudText Typo="Typo.h3" Class="fw-bold" Align="Align.Center">EcoMonitor Admin</MudText>
+            
+    <MudText Typo="Typo.body1" Color="Color.Secondary" Align="Align.Center">
+        Панель управления системой мониторинга экологии
+    </MudText>
+            
+    <MudDivider Class="my-4"/>
+            
+    <MudButton Href="/auth/login"
+               Variant="Variant.Filled"
+               Color="Color.Primary"
+               Size="Size.Large"
+               Class="px-8">
+        <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Class="mr-2"/>
+        Войти в админку
+    </MudButton>
+</MudStack>
+@*     </MudPaper> *@
+@* </MudContainer> *@

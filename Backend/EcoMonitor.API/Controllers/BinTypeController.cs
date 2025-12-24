@@ -1,12 +1,15 @@
-﻿using EcoMonitor.App.Services;
+﻿using EcoMonitor.API.Attributes;
+using EcoMonitor.App.Services;
 using EcoMonitor.Contracts.Contracts.BinType;
 using MapsterMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EcoMonitor.API.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
+    [PublicApi]
+    [Authorize]
+    [Route("[controller]")]
     public class BinTypeController : ControllerBase
     {
         private readonly IBinTypeService _binTypeService;
