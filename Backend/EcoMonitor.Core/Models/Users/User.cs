@@ -142,6 +142,19 @@ namespace EcoMonitor.Core.Models.Users
         public bool HasPermission(Permission permission) => Role.HasPermission(permission);
         public void UpdateFirstname(string newFirstname) => Firstname = newFirstname;
         public void UpdateSurname(string newSurname) => Surname = newSurname;
+        
+        public void UpdateProfile(
+            string newFirstname,
+            string newSurname)
+        {
+            if (!string.IsNullOrEmpty(newFirstname)) 
+                Firstname = newFirstname;
+            if (!string.IsNullOrEmpty(newSurname)) 
+                Surname = newSurname;
+        
+            //LastModifiedAt = DateTime.UtcNow;
+        }
+        
         public void UpdateEmail(string newEmail) => Email = Email.Create(newEmail);
 
         public void ChangeRole(UserRole newRole)

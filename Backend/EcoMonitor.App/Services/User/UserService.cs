@@ -129,13 +129,15 @@ public class UserService : IUserService
         var selectedUser = await _userRepository.GetByIdAsync(user.Id, cancellationToken) ??
             throw new KeyNotFoundException($"User with id {user.Id} not found");
         
-        selectedUser.UpdateFirstname(user.Firstname);
-        selectedUser.UpdateSurname(user.Surname);
+        // if (selectedUser.RowVersion != user.RowVersion)
+        //     throw new DbUpdateConcurrencyException("User was modified by another user");
+        
+        selectedUser.UpdateProfile(user.Firstname, user.Surname);
         //selectedUser.UpdateEmail(user.Email);
 
         await _userRepository.UpdateAsync(selectedUser, cancellationToken);
         
-        return _mapper.Map<UserResponse>(user);
+        return _mapper.Map<UserResponse>(selectedUser);
     }
     
     // public async Task DeleteAsync(Guid id, Guid? currentUserId, CancellationToken cancellationToken = default)

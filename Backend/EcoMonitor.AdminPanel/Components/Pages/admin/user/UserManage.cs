@@ -2,7 +2,7 @@ using EcoMonitor.AdminPanel.Data.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
-namespace EcoMonitor.AdminPanel.Components.Pages.admin;
+namespace EcoMonitor.AdminPanel.Components.Pages.admin.user;
 
 public partial class UserManage : ComponentBase
 {
