@@ -8,7 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\EcoMonitor.App\EcoMonitor.App.csproj" />
       <ProjectReference Include="..\EcoMonitor.Contracts\EcoMonitor.Contracts.csproj" />
+      <ProjectReference Include="..\EcoMonitor.Core\EcoMonitor.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>

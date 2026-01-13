@@ -1,0 +1,103 @@
+﻿@page "/admin/photo"
+@using EcoMonitor.AdminPanel.Components.Layout
+@using EcoMonitor.AdminPanel.Data.Models
+@layout MainLayout
+
+<MudText Typo="Typo.h4" Class="mb-2">
+    Фото
+</MudText>
+
+@* $1$ <MudPaper Class="ps-4 mb-3"> #1# *@
+@*     $1$ <MudStack Direction="Row" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Rigth"> #1# *@
+@*          <MudButton Color="Color.Primary" *@
+@*                     Variant="Variant.Filled" *@
+@*                     OnClick="OpenCreateDialog"> *@
+@*              Создать пользователя *@
+@*          </MudButton> *@
+@*     $1$ </MudStack> #1# *@
+@* $1$ </MudPaper> #1# *@
+
+<MudPaper Class="pa-4"> 
+    <MudTable Items="_photos"
+              Dense="true"
+              Hover="true"
+              Loading="_loading">
+        <HeaderContent>
+            <MudTh>Id</MudTh>
+            <MudTh>Имя файла</MudTh>
+            <MudTh>Долгота</MudTh>
+            <MudTh>Широта</MudTh>
+            <MudTh>Дата загрузки</MudTh>
+            <MudTh>Типы баков</MudTh>
+            <MudTh>Уровень заполнения бака(ов)</MudTh>
+            <MudTh>Мусор вне контейнера</MudTh>
+            <MudTh>Количество баков</MudTh>
+            <MudTh>Комментарий</MudTh>
+            <MudTh>Кем загружено фото</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Имя файла">@context.FileName</MudTd>
+            <MudTd DataLabel="Долгота">@context.Longitude.ToString("0.000")</MudTd>
+            <MudTd DataLabel="Широта">@context.Latitude.ToString("0.000")</MudTd>
+            <MudTd DataLabel="Дата загрузки">@context.UploadedAt</MudTd>
+            <MudTd DataLabel="Типы баков">@GetBinTypeName(context.BinTypeId)</MudTd>
+            <MudTd DataLabel="Уровень заполнения бака(ов)">@context.FillLevel</MudTd>
+            <MudTd DataLabel="Мусор вне контейнера">
+                @if (context.IsOutsideBin)
+                {
+                    <MudText>Есть</MudText>
+                }
+                else
+                {
+                    <MudText>Нет</MudText>
+                }
+            </MudTd>
+            <MudTd DataLabel="Количество баков">@context.TotalBins</MudTd>
+            <MudTd DataLabel="Комментарий">@context.Comment</MudTd>
+            <MudTd DataLabel="Кем загружено фото">@context.UploadedById</MudTd>
+            
+            @* <MudTd DataLabel="Действия" Align="Align.Rigth"> *@
+            @*     <MudIconButton Icon="@Icons.Material.Filled.Edit" *@
+            @*                    Variant="Variant.Outlined" *@
+            @*                    Color="Color.Primary" *@
+            @*                    Size="Size.Small"  *@
+            @*                    OnClick="() => OpenEditDialog(context)"/> *@
+            @* </MudTd> *@
+            @* <MudTd DataLabel="Статус"> *@
+            @*     @(context.IsBlocked ? "Заблокирован" : "Активен") *@
+            @* </MudTd> *@
+            
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+<MudFab Color="Color.Tertiary"
+        StartIcon="@Icons.Material.Filled.Add"
+        Href="/admin/photo/add"
+    ></MudFab>
+
+@* <MudDialog @bind-Visible="_createDialogOpen"> *@
+@*     <DialogContent> *@
+@*         <MudStack Spacing="2"> *@
+@*             <MudTextField @bind-Value="_createModel.Firstname" Label="Имя"/> *@
+@*             <MudTextField @bind-Value="_createModel.Surname" Label="Фамилия"/> *@
+@*             <MudTextField @bind-Value="_createModel.Email" Label="Почта"/> *@
+@*             <MudTextField @bind-Value="_createModel.Password" Label="Пароль" *@
+@*                           InputType="InputType.Password"/> *@
+@*             <MudSelect @bind-Value="_createModel.RoleName" Label="Роль"> *@
+@*                 <MudSelectItem Value="@Roles.User">Пользователь</MudSelectItem> *@
+@*                 <MudSelectItem Value="Roles.Manager">Менеджер</MudSelectItem> *@
+@*             </MudSelect> *@
+@*         </MudStack> *@
+@*     </DialogContent> *@
+@* *@
+@*     <DialogActions> *@
+@*         <MudButton OnClick="CloseCreateDialog">Отмена</MudButton> *@
+@*         <MudButton Color="Color.Primary" *@
+@*                    Disabled="_creating" *@
+@*                    OnClick="CreateUserAsync"> *@
+@*             Создать *@
+@*         </MudButton> *@
+@*     </DialogActions> *@
+@* </MudDialog> *@

@@ -5,8 +5,6 @@ using EcoMonitor.App.Abstractions;
 using EcoMonitor.Contracts.Contracts.Auth;
 using EcoMonitor.Contracts.Contracts.Users;
 using EcoMonitor.Core.Models.Auth;
-using EcoMonitor.Core.Models.Users;
-using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Repositories.Auth;
 using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Authentication;
@@ -22,7 +20,7 @@ public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserRoleRepository _userRoleRepository;
-    private readonly IUserFactory _userFactory;
+    private readonly IUserRegisterFactoryResolver _factoryResolver;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJWTService _jwtService;
     private readonly JwtSettings _jwtSettings;
@@ -33,7 +31,11 @@ public class AuthService : IAuthService
     public AuthService(
         IUserRepository userRepository,
         IUserRoleRepository userRoleRepository,
-        IUserFactory userFactory,
+        
+        IUserRegisterFactory userRegisterFactory,
+        IUserRegisterFactory managerRegisterFactory,
+        IUserRegisterFactoryResolver factoryResolver,
+        
         IPasswordHasher passwordHasher,
         IJWTService jwtService,
         IOptions<JwtSettings> options,
@@ -43,7 +45,8 @@ public class AuthService : IAuthService
     {
         _userRepository = userRepository;
         _userRoleRepository = userRoleRepository;
-        _userFactory = userFactory;
+        _factoryResolver = factoryResolver;
+        
         _passwordHasher = passwordHasher;
         _jwtService = jwtService;
         _jwtSettings = options.Value;
@@ -87,24 +90,25 @@ public class AuthService : IAuthService
             _jwtSettings.ExpiresInMinutes * 60);
     }
     
-    private async Task<AuthResponse> RegisterUserAsync(
-        RegisterUserRequest request, 
-        Func<string, string, string, string, Guid, Core.Models.Users.User> createUserFunc,
+    public async Task<AuthResponse> RegisterAsync(
+        RegisterUserRequest request,
         string roleName,
         CancellationToken cancellationToken = default)
     {
         var user =  await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user != null)
             throw new InvalidOperationException("User with this email already exists");
+        
+        // Select a factory by role name
+        var factory = _factoryResolver.Resolve(roleName);
 
-        var roleDomain = await _userRoleRepository.GetByNameASync(roleName, cancellationToken);
+        //var roleDomain = await _userRoleRepository.GetByNameASync(roleName, cancellationToken);
 
-        var userDomain = createUserFunc(
+        var userDomain = factory.CreateUser(
             request.Firstname,
             request.Surname,
             request.Email,
-            request.Password,
-            roleDomain.Id);
+            request.Password);
         
         var userCreated = await _userRepository.AddAsync(userDomain, cancellationToken);
         
@@ -117,20 +121,12 @@ public class AuthService : IAuthService
             userCreated.Id,
             refreshTokenHash);
         
-        await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain);
+        await _refreshTokenRepository.AddRefreshTokenAsync(refreshTokenDomain, cancellationToken);
         
         return new AuthResponse(accessToken, 
             refreshToken, 
             _jwtSettings.ExpiresInMinutes * 60);
     }
-
-    public Task<AuthResponse> RegisterAsync(RegisterUserRequest request,
-        CancellationToken cancellationToken = default)
-        => RegisterUserAsync(request, _userFactory.Create, "User", cancellationToken);
-
-    public async Task<AuthResponse> RegisterManagerAsync(RegisterUserRequest request,
-        CancellationToken cancellationToken = default)
-        => await RegisterUserAsync(request, _userFactory.Create, "Manager", cancellationToken);
 
     public async Task<AuthResponse> ChangePasswordAsync(Guid userId, string currentPassword, string newPassword,
         CancellationToken cancellationToken = default)

@@ -10,6 +10,7 @@ class BinTypeService implements IBinTypeService {
 
   Future<List<BinTypeResponse>> getAllType() async {
     final response = await _apiClient.get('/api/public/v1/BinType/GetAllBinTypes');
+    print('Получение типов баков');
     return (response.data as List)
                   .map((item) => BinTypeResponse.fromJson(item)).toList();
   } 

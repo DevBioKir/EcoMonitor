@@ -1,28 +1,29 @@
 ﻿<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">EcoMonitor.AdminPanel</a>
+        <a class="navbar-brand" href="">EcoMonitor</a>
     </div>
 </div>
-
+@* Тогглер меню *@
 <input type="checkbox" title="Navigation menu" class="navbar-toggler"/>
 
+@* Боковая прокручиваемая навигация *@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+            <NavLink class="nav-link" href="/admin/userManage" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Пользователи
+            </NavLink>
+        </div>
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/admin/photo">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Фотографии
             </NavLink>
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+            <NavLink class="nav-link" href="/admin/photo/add">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Добавить фото
             </NavLink>
         </div>
     </nav>

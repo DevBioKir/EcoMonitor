@@ -1,5 +1,7 @@
 using EcoMonitor.AdminPanel.Components;
 using EcoMonitor.AdminPanel.Infrastucture.Http;
+using EcoMonitor.App.Services;
+using EcoMonitor.App.Services.Authorization;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
+
+// builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddMudServices();
 

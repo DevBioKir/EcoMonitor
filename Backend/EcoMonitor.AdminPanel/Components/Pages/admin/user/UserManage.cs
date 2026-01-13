@@ -1,4 +1,6 @@
 using EcoMonitor.AdminPanel.Data.Models;
+using EcoMonitor.Contracts.Contracts.User;
+using EcoMonitor.Contracts.Contracts.Users.UpdateUser;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -12,12 +14,17 @@ public partial class UserManage : ComponentBase
     [Inject] private IJSRuntime JS { get; set; } = default!;
 
     private List<UserModelResponse> _users = new();
+    private UserModelResponse _originalUser;
     private bool _loading = false;
     private string _errorMessage = "";
     
     private bool _createDialogOpen = false;
     private bool _creating = false;
     private CreateUserModelRequest _createModel = new();
+    
+    private bool _editDialogOpen = false;
+    private bool _editing = false;
+    private EditUserModelRequest _editModel = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -62,6 +69,28 @@ public partial class UserManage : ComponentBase
         _createDialogOpen = false;
     }
 
+    private void OpenEditDialog(UserModelResponse user)
+    {
+        Console.WriteLine($"Происходит изменение: {user.Id}");
+        
+        _originalUser = user;
+        
+        _editModel = new EditUserModelRequest
+        {
+            Id = user.Id,
+            Firstname = user.Firstname,
+            Surname = user.Surname,
+            Email = user.Email,
+            Role = user.RoleUser
+        };
+        _editDialogOpen = true;
+    }
+
+    private void CloseEditDialog()
+    {
+        _editDialogOpen = false;
+    }
+
     private async Task CreateUserAsync()
     {
         _creating = true;
@@ -73,7 +102,8 @@ public partial class UserManage : ComponentBase
                 Firstname = _createModel.Firstname,
                 Surname = _createModel.Surname,
                 Email = _createModel.Email,
-                Password = _createModel.Password
+                Password = _createModel.Password,
+                RoleName = _createModel.RoleName,
             };
             
             var response = await AdminApi.PostAsJsonAsync(
@@ -105,29 +135,32 @@ public partial class UserManage : ComponentBase
     
     private async Task UpdateUserAsync()
     {
-        _creating = true;
+        _editing = true;
+        StateHasChanged();
 
         try
         {
-            var newUser = new CreateUserModelRequest
-            {
-                Firstname = _createModel.Firstname,
-                Surname = _createModel.Surname,
-                Email = _createModel.Email,
-                Password = _createModel.Password
-            };
+            var newUser = new UpdateUserDTO(
+                _editModel.Firstname, 
+                _editModel.Surname, 
+                _editModel.Email, 
+                _editModel.Role.Id);
             
-            var response = await AdminApi.PostAsJsonAsync(
-                "/api/admin/v1/AdminAuthorization/register", newUser);
+            Console.WriteLine($"NewUser: {System.Text.Json.JsonSerializer.Serialize(newUser)}");
+
+            var response = await AdminApi.PutAsJsonAsync(
+                $"/api/admin/v1/AdminUser/{_editModel.Id}", newUser);
 
             if (response.IsSuccessStatusCode)
             {
-                _createDialogOpen = false;
+                _editDialogOpen = false;
                 await LoadUsersAsync();
             }
             else
             {
-                Console.WriteLine(response.Content.ReadAsStringAsync());
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Ошибка: {errorContent}");
+                _errorMessage = $"Ошибка обновления: {errorContent}";
             }
         }
         catch (HttpRequestException ex)
@@ -140,7 +173,52 @@ public partial class UserManage : ComponentBase
         }
         finally
         {
-            _creating = false;
+            _editing = false;
+            StateHasChanged();
         }
     }
+
+    // private async Task BlockUserAsync()
+    // {
+    //     _creating = true;
+    //
+    //     try
+    //     {
+    //         await AdminApi.PostAsync($"api/admin/v1/AdminAuthorization/block{id}", _createModel);
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Console.WriteLine(e);
+    //         throw;
+    //     }
+    // }
+    
+    private static readonly UserRoleResponse UserRoleUser = new(
+        Guid.Empty, "User", "Обычный пользователь", new List<PermissionResponse>());
+
+    private static readonly UserRoleResponse UserRoleManager = new(
+        Guid.Empty, "Manager", "Менеджер", new List<PermissionResponse>());
+    
+    private static readonly UserRoleResponse UserRoleAdmin = new(
+        Guid.Empty, "Admin", "Администратор", new List<PermissionResponse>());
+
+
+    // private bool HasPersonalInfoChanged()
+    // {
+    //     return _originalUser != null && 
+    //            (_originalUser.Firstname != _editModel.Firstname ||
+    //             _originalUser.Surname != _editModel.Surname);
+    // }
+    //
+    // private bool HasEmailChanged()
+    // {
+    //     return _originalUser != null && 
+    //            _originalUser.Email != _editModel.Email;
+    // }
+    //
+    // private bool HasRoleChanged()
+    // {
+    //     return _originalUser != null && 
+    //            _originalUser.RoleUser != _editModel.Role;
+    // }
 }

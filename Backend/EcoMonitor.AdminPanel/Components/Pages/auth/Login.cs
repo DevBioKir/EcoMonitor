@@ -51,8 +51,7 @@ public partial class Login : ComponentBase
                 error = "HttpContext is null";
                 return;
             }
-
-            // Ставим куку ДО NavigateTo
+            
             httpContext.Response.Cookies.Append(
                 "accessToken",
                 token,

@@ -9,6 +9,9 @@ namespace EcoMonitor.Infrastracture.Utils
         {
             if(coordinates == null || coordinates.Length != 3) return null;
             
+            if (coordinates[0].Denominator == 0 || coordinates[1].Denominator == 0 || coordinates[2].Denominator == 0)
+                return null;
+
             double degrees = coordinates[0].ToDouble(); // конвертация градусов в double
             double minutes = coordinates[1].ToDouble(); // конвертация минут в double
             double seconds = coordinates[2].ToDouble(); // конвертация секунды в double

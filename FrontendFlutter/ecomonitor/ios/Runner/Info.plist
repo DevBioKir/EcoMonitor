@@ -4,6 +4,10 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+  	<string>Доступ к GPS метаданным фото для точного размещения на карте</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+  	<string>Доступ к галерее для загрузки фото контейнеров</string>
 	<key>CFBundleDisplayName</key>
 	<string>Ecomonitor</string>
 	<key>CFBundleExecutable</key>

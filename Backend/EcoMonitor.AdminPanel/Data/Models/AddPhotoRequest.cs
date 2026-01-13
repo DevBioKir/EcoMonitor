@@ -1,11 +1,11 @@
 namespace EcoMonitor.AdminPanel.Data.Models;
 
-public record AddPhotoRequest
+public class AddPhotoRequest
 {
-    public string? Photo { get; set; }
-    public List<string> BinTypeCode { get; init; }
-    public double FillLevel { get; init; }
-    public bool IsOutsideBin { get; init; }
-    public string Comment { get; init; }
-    public int TotalBins { get; init; }
+    public string Photo { get; set; } = "";
+    public List<string> BinTypeCode { get; set; } = new();
+    public double FillLevel { get; set; }
+    public bool IsOutsideBin { get; set; }
+    public string Comment { get; set; }
+    public int TotalBins { get; set; }
 }

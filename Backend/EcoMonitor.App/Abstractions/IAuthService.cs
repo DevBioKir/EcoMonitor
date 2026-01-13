@@ -9,9 +9,9 @@ namespace EcoMonitor.App.Services;
 public interface IAuthService
 {
     Task<AuthResponse> LoginAsync(AuthRequest request, CancellationToken cancellationToken = default);
-    Task<AuthResponse> RegisterAsync(RegisterUserRequest request, CancellationToken cancellationToken = default);
-    //Task<AuthResponse> RegisterAdminAsync(RegisterUserRequest request, CancellationToken cancellationToken = default);
-    Task<AuthResponse> RegisterManagerAsync(RegisterUserRequest request, CancellationToken cancellationToken = default);
+    Task<AuthResponse> RegisterAsync(RegisterUserRequest request, string roleName, CancellationToken cancellationToken = default);
+    // //Task<AuthResponse> RegisterAdminAsync(RegisterUserRequest request, CancellationToken cancellationToken = default);
+    // Task<AuthResponse> RegisterManagerAsync(RegisterUserRequest request, CancellationToken cancellationToken = default);
     Task<AuthResponse>  ChangePasswordAsync(
         Guid userId, string currentPassword, string newPassword, CancellationToken cancellationToken = default);
     Task<AuthResponse>  RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);

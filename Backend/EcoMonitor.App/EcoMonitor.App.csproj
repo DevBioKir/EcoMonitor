@@ -11,6 +11,7 @@
     <PackageReference Include="LibHeif.Native" Version="1.15.1" />
     <PackageReference Include="Mapster" Version="9.0.0-pre01" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>

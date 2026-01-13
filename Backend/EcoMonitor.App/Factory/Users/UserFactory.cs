@@ -1,4 +1,5 @@
 ﻿using EcoMonitor.App.Abstractions;
+using EcoMonitor.Contracts.Contracts.Users.UpdateUser;
 using EcoMonitor.Core.Models;
 using EcoMonitor.Core.Models.Users;
 using EcoMonitor.Core.ValueObjects;
@@ -11,9 +12,26 @@ namespace EcoMonitor.App.Factory.Users
         public User Create(string firstname, string surname, string email, string password, Guid roleId)
         {
             var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);
-            // var roleUser = UserRole.GetRole(role);
 
             return User.Create(firstname, surname, email, passwordHash, roleId);
+        }
+
+        public User UpdatePersonalInfo(User user, UpdatePersonalInfoRequest request)
+        {
+            user.UpdatePersonalInfo(request.FirstName, request.Surname);
+            return user;
+        }
+        
+        public User UpdateEmail(User user, string email)
+        {
+            user.UpdateEmail(email);
+            return user;
+        }
+        
+        public User UpdateRole(User user, Guid roleId)
+        {
+            user.ChangeRole(roleId);
+            return user;
         }
         
         public User Restore(

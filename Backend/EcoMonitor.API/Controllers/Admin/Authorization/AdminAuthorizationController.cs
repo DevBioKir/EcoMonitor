@@ -6,7 +6,7 @@ using EcoMonitor.Contracts.Contracts.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EcoMonitor.API.Controllers.Authorization;
+namespace EcoMonitor.API.Controllers.Admin.Authorization;
 
 [AdminApi]
 [Authorize(Roles = "Admin")]
@@ -98,11 +98,14 @@ public class AdminAuthorizationController(
     }
     
     [HttpPost("register")]
-    public async Task<IActionResult> RegisterAsync([FromBody] RegisterUserRequest request, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> RegisterAsync(
+        [FromBody] RegisterUserRequest request, 
+        CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await authService.RegisterAsync(request, cancellationToken);
+            var response = await authService.RegisterAsync(request, request.RoleName, cancellationToken);
+            
             return Ok(response);
         }
         catch (InvalidOperationException ex)
@@ -117,25 +120,25 @@ public class AdminAuthorizationController(
         }
     }
     
-    [HttpPost("register-manager")]
-    public async Task<IActionResult> RegisterManagerAsync([FromBody] RegisterUserRequest request, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var response = await authService.RegisterManagerAsync(request, cancellationToken);
-            return Ok(response);
-        }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning(ex, "Failed registration attempt for user: {Email}", request.Email);
-            return BadRequest(new { message = ex.Message });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error during registration for user: {Email}", request.Email);
-            return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
-        }
-    }
+    // [HttpPost("register-manager")]
+    // public async Task<IActionResult> RegisterManagerAsync([FromBody] RegisterUserRequest request, CancellationToken cancellationToken = default)
+    // {
+    //     try
+    //     {
+    //         var response = await authService.RegisterManagerAsync(request, cancellationToken);
+    //         return Ok(response);
+    //     }
+    //     catch (InvalidOperationException ex)
+    //     {
+    //         _logger.LogWarning(ex, "Failed registration attempt for user: {Email}", request.Email);
+    //         return BadRequest(new { message = ex.Message });
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error during registration for user: {Email}", request.Email);
+    //         return StatusCode(500, new { message = "Internal server error", detail = ex.Message });
+    //     }
+    // }
 
     [HttpPost("block/{userId}")]
     public async Task<IActionResult> BlockUserAsync(

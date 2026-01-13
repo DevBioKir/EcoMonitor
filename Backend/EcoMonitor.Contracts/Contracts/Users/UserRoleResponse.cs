@@ -4,6 +4,7 @@
         Guid Id,
         string Name,
         string Description,
-        List<UserResponse> Users,
-        List<PermissionResponse> Permissions);
+        //List<UserWithPhotosResponse> Users,
+        List<PermissionResponse> Permissions
+        );
 }

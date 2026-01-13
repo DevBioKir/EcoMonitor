@@ -65,49 +65,49 @@ class AuthService extends ChangeNotifier{
   //   return token != null && token.isNotEmpty;
   // }
 
-  Future<String> registration(RegisterUserRequest request) async {
-      final response = await _apiClient.post(
-        'api/authorization/register',
-        data: request.toJson()
-      );
+  // Future<String> registration(RegisterUserRequest request) async {
+  //     final response = await _apiClient.post(
+  //       'api/authorization/register',
+  //       data: request.toJson()
+  //     );
 
-      final accessToken = response.data['accessToken'] as String?;
-      final refreshToken = response.data['refreshToken'] as String?;
+  //     final accessToken = response.data['accessToken'] as String?;
+  //     final refreshToken = response.data['refreshToken'] as String?;
 
-      if (accessToken == null || refreshToken == null) {
-        throw Exception('Authorization tokens not found in response');
-      }
+  //     if (accessToken == null || refreshToken == null) {
+  //       throw Exception('Authorization tokens not found in response');
+  //     }
 
-      await _storage.write(key: _accessToken, value: accessToken);
-      await _storage.write(key: _refreshToken, value: refreshToken);
+  //     await _storage.write(key: _accessToken, value: accessToken);
+  //     await _storage.write(key: _refreshToken, value: refreshToken);
 
-      return accessToken;
-  }
+  //     return accessToken;
+  // }
 
-  Future<String> registerAdmin(RegisterUserRequest request) async {
-      final response = await _apiClient.post(
-        'api/authorization/register',
-        data: request.toJson()
-      );
+  // Future<String> registerAdmin(RegisterUserRequest request) async {
+  //     final response = await _apiClient.post(
+  //       'api/authorization/register',
+  //       data: request.toJson()
+  //     );
 
-      final accessToken = response.data['accessToken'] as String?;
-      final refreshToken = response.data['refreshToken'] as String?;
+  //     final accessToken = response.data['accessToken'] as String?;
+  //     final refreshToken = response.data['refreshToken'] as String?;
 
-      if (accessToken == null || refreshToken == null) {
-        throw Exception('Authorization tokens not found in response');
-      }
+  //     if (accessToken == null || refreshToken == null) {
+  //       throw Exception('Authorization tokens not found in response');
+  //     }
 
-      await _storage.write(key: _accessToken, value: accessToken);
-      await _storage.write(key: _refreshToken, value: refreshToken);
+  //     await _storage.write(key: _accessToken, value: accessToken);
+  //     await _storage.write(key: _refreshToken, value: refreshToken);
 
-      return accessToken;
-  }
+  //     return accessToken;
+  // }
 
   Future<void> refreshToken() async {
     final refreshToken = getRefreshToken();
 
     final response = await _apiClient.post(
-      'api/authorization/refresh-token', 
+      '/api/public/v1/Authorization/refresh-token', 
       data: {'refreshToken': refreshToken},
       );
       final newAccessToken = response.data['accessToken'] as String?;

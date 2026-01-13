@@ -6,6 +6,7 @@ using EcoMonitor.Contracts.Contracts.BinPhotoBinType;
 using EcoMonitor.Contracts.Contracts.BinType;
 using EcoMonitor.Contracts.Contracts.User;
 using EcoMonitor.Contracts.Contracts.Users;
+using EcoMonitor.Contracts.Contracts.Users.UpdateUser;
 using EcoMonitor.Contracts.Models;
 using EcoMonitor.Core.Models;
 using EcoMonitor.Core.Models.Auth;
@@ -49,27 +50,21 @@ namespace EcoMonitor.App.Mapper
         public void Register(TypeAdapterConfig config)
         {
             _logger.LogInformation("MappingConfig.Register called - Mapster configuration starting");
-            /// <summary>
-            /// Mapping VO, string for Email
-            /// </summary>
+
             config.NewConfig<Email, string>()
                 .MapWith(src => src.Value);
 
             config.NewConfig<string, Email>()
                 .MapWith(src => Email.Create(src));
 
-            /// <summary>
-            /// Mapping VO, string for PasswordHash
-            /// </summary>
+
             config.NewConfig<PasswordHash, string>()
                 .MapWith(src => src.Hash);
 
             config.NewConfig<string, PasswordHash>()
                 .MapWith(src => PasswordHash.FromHash(src));
   
-            /// <summary>
-            /// Mapping Entities, Domain for BinPhoto
-            /// </summary>
+
             // config.NewConfig<BinPhoto, BinPhoto>()
             //     .ConstructUsing(src => BinPhoto.Create(
             //             src.FileName,
@@ -190,9 +185,7 @@ namespace EcoMonitor.App.Mapper
                     .Map(dest => dest.Comment, src => src.Comment)
                     .Map(dest => dest.TotalBins, src => src.TotalBins);
                 
-            /// <summary>
-            /// Mapping Entities, Domain for BinType
-            /// </summary>
+
             config.NewConfig<BinType, BinType>()
                 .ConstructUsing(src => BinType.Create(
                     src.Code,
@@ -207,9 +200,7 @@ namespace EcoMonitor.App.Mapper
                     src.Code,
                     src.Name));
 
-            /// <summary>
-            /// Mapping Entities, Domain for BinPhotoBinType
-            /// </summary>
+
             config.NewConfig<BinPhotoBinType, BinPhotoBinType>()
                 .Map(dest => dest.BinPhotoId, src => src.BinPhotoId)
                 .Map(dest => dest.BinTypeId, src => src.BinTypeId);
@@ -222,9 +213,7 @@ namespace EcoMonitor.App.Mapper
                 .ConstructUsing(src => new BinPhotoBinType(src.BinPhotoId, src.BinTypeId))
                 .Ignore(dest => dest.BinType);
 
-            /// <summary>
-            /// Mapping Entities, Domain for User
-            /// </summary>
+
             config.NewConfig<User, UserEntity>()
                 .PreserveReference(true) // одна ссылка - один объект
                 .Map(dest => dest.Id, src => src.Id)
@@ -234,6 +223,16 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.PasswordHash, src => src.PasswordHash.Hash) // VO → string
                 .Map(dest => dest.isLoginConfirmed, src => src.isLoginConfirmed)
                 .Map(dest => dest.RoleId, src => src.RoleId)
+                .Map(dest => dest.Role, src => new UserRoleEntity
+                {
+                    Id = src.Role.Id,
+                    Name = src.Role.Name,
+                    Description = src.Role.Description,
+                    Permissions = src.Role.Permissions.Select(p => new PermissionEntity
+                    {
+                        Code = p.Code
+                    }).ToList()
+                })
                 // .Map(dest => dest.Role, src => new UserRoleEntity
                 //     {
                 //         Id = src.Role.Id,
@@ -244,8 +243,8 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
                 .Map(dest => dest.LastLogindAt, src => src.LastLogindAt)
                 .Map(dest => dest.LockedUntil, src => src.LockedUntil)
-                .Map(dest => dest.BinPhoto, src => src.Photos.Adapt<List<BinPhotoEntity>>())
-                .Ignore(dest => dest.Role);
+                .Map(dest => dest.BinPhoto, src => src.Photos.Adapt<List<BinPhotoEntity>>());
+                //.Ignore(dest => dest.Role);
 
             config.NewConfig<UserEntity, User>()
                 .ConstructUsing(src => _userFactory.Restore(
@@ -264,10 +263,7 @@ namespace EcoMonitor.App.Mapper
                     src.LockedUntil,
                     src.BinPhoto.Select(bp => bp.Adapt<BinPhoto>()).ToList() ?? new List<BinPhoto>()
                 ));
-
-            /// <summary>
-            /// Mapping Entities, Domain for UserRole
-            /// </summary>
+            
             config.NewConfig<UserRoleEntity, UserRole>()
                 .ConstructUsing(src => UserRole.Restore(
                     src.Id,
@@ -280,20 +276,26 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Id, src => src.Id)
                 .Map(dest => dest.Name, src => src.Name)
                 .Map(dest => dest.Description, src => src.Description)
-                .Map(dest => dest.Permissions, src => src.Permissions.Select(p => new PermissionEntity { Code = p.Code }).ToList());
+                .Map(dest => dest.Permissions, src 
+                    => src.Permissions.Select(p => new PermissionEntity { Code = p.Code }).ToList());
 
-            /// <summary>
-            /// Mapping Entities, Domain for Permission
-            /// </summary>
+            config.NewConfig<UserRole, UserRoleResponse>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.Name, src => src.Name)
+                .Map(dest => dest.Description, src => src.Description)
+                .Map(dest => dest.Permissions, src 
+                    => src.Permissions.Select(p => new PermissionResponse(p.Code)).ToList());
+            
+            
             config.NewConfig<PermissionEntity, Permission>()
                 .ConstructUsing(src => new Permission(src.Code));
 
             config.NewConfig<Permission, PermissionEntity>()
                 .Map(dest => dest.Code, src => src.Code);
             
-            /// <summary>
-            /// Mapping Entities, Domain for RefreshToken
-            /// </summary>
+            config.NewConfig<Permission, PermissionResponse>()
+                .Map(dest => dest.Code, src => src.Code);
+            
             config.NewConfig<RefreshTokenEntity, RefreshToken>()
                 .ConstructUsing(src => RefreshToken.Restore(
                     src.Id,
@@ -330,10 +332,25 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.IssuedAt, src => src.IssuedAt)
                 .Map(dest => dest.ExpireAt, src => src.ExpireAt)
                 .Map(dest => dest.Revoked, src => src.Revoked);
-
-            /// <summary>
-            /// Mapping DTOs for User
-            /// </summary>
+            
+            
+            config.NewConfig<UserRequest, User>()
+                .ConstructUsing(src => _userFactory.Restore(
+                    src.Id,
+                    src.Firstname,
+                    src.Surname,
+                    Email.Create(src.Email),
+                    PasswordHash.FromHash(src.Password),
+                    _userRoleFactory.Restore(
+                        src.Role.Id,
+                        src.Role.Name,
+                        src.Role.Description,
+                        src.Role.Permissions.Select(p => new Permission(p.Code)).ToList()),
+                    src.CreatedAt,
+                    src.LastLogindAt,
+                    src.LockedUntil,
+                    src.BinPhoto.Select(bp => bp.Adapt<BinPhoto>()).ToList()));
+            
             config.NewConfig<UserRequest, User>()
                 .ConstructUsing(src => _userFactory.Restore(
                     src.Id,
@@ -374,8 +391,15 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.LastLogindAt, src => src.LastLogindAt)
                 .Map(dest => dest.LockedUntil, src => src.LockedUntil)
                 .Map(dest => dest.BinPhoto, src => src.Photos.Adapt<List<BinPhotoEntity>>());
-            
+
             config.NewConfig<User, UserResponse>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.Firstname, src => src.Firstname)
+                .Map(dest => dest.Surname, src => src.Surname)
+                .Map(dest => dest.Email, src => src.Email.Value)
+                .Map(dest => dest.RoleUser, src => src.Role.Adapt<UserRoleResponse>());          // VO → string
+            
+            config.NewConfig<User, UserWithPhotosResponse>()
                 .Map(dest => dest.Firstname, src => src.Firstname)
                 .Map(dest => dest.Surname, src => src.Surname)
                 .Map(dest => dest.Email, src => src.Email.Value)          // VO → string
@@ -387,9 +411,7 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Email, src => src.Email.Value)
                 .Map(dest => dest.Password, src => src.PasswordHash.Hash);
  
-            /// <summary>
-            /// Mapping DTOs for BinPhoto
-            /// </summary>
+
             // config.NewConfig<BinPhotoRequest, BinPhoto>()
             //     .ConstructUsing(src => BinPhoto.Create(
             //         src.FileName,
@@ -429,9 +451,7 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Comment, src => src.Comment)
                 .Map(dest => dest.UploadedById, src => src.UploadedById);
 
-            /// <summary>
-            /// Mapping DTOs for BinType
-            /// </summary>
+
             config.NewConfig<BinTypeRequest, BinType>()
                 .ConstructUsing(src => BinType.Create(
                     src.Code,
@@ -442,9 +462,7 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Code, src => src.Code)
                 .Map(dest => dest.Name, src => src.Name);
 
-            /// <summary>
-            /// Mapping DTOs for BinPhotoBinType
-            /// </summary>
+
             config.NewConfig<BinPhotoBinTypeRequest, BinPhotoBinType>()
                 .Map(dest => dest.BinPhotoId, src => src.BinPhotoId)
                 .Map(dest => dest.BinTypeId, src => src.BinTypeId);
@@ -482,8 +500,6 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Longitude, src => src.Longitude)
                 .Map(dest => dest.PhotoUrl, src => src.PhotoUrl)
                 .TwoWays();
-            
-            
         }
     }
 }

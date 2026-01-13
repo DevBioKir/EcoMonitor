@@ -38,16 +38,20 @@ final class MapObjectTapListenerImpl implements ymapkit.MapObjectTapListener {
 }
 
 class MapScreen extends StatefulWidget {
-  final ApiClient apiClient;
+  final AuthService authService;
+  late final ApiClient apiClient;
   //final AuthService authService;
 
   // MapScreen({Key? key})
-  //     : apiClient = ApiClient("http://localhost:5198/", () async => 'token'),
+  //     : apiClient = ApiClient("http://localhost:5198", () async => 'token'),
   //       super(key: key);
 
-  MapScreen({Key? key})
-      : apiClient = ApiClient("http://localhost:5198/", () async => 'token'),
-        super(key: key);
+  MapScreen({Key? key, required this.authService}) : super(key: key) {
+    apiClient = ApiClient(
+      "http://localhost:5198", 
+      () async => authService.getAccessToken() ?? 'token'
+    );
+  }
   
 
   @override
@@ -75,7 +79,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    _binPhotoService = BinPhotoService(widget.apiClient);
+    _binPhotoService = BinPhotoService(widget.apiClient, widget.authService);
     _binTypeService = BinTypeService(widget.apiClient);
     _tapListener = MapObjectTapListenerImpl();
     _startMapkit();
@@ -104,7 +108,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _onMapCreated(ymapkit.MapWindow mapWindow) async {
     _mapWindow = mapWindow;
 
-    final center = const ymapkit.Point(latitude: 55.160283, longitude: 61.400856);
+    final center = const ymapkit.Point(latitude: 55.159897, longitude: 61.402554);
     mapWindow.map.move(
       ymapkit.CameraPosition(center, zoom: 15, azimuth: 0, tilt: 0),
     );
@@ -182,6 +186,7 @@ class _MapScreenState extends State<MapScreen> {
 
     try{
       final markerResponse = await _binPhotoService.markers();
+      print("Получено маркеров: ${markerResponse.length}");
 
       final imageProvider = ymapprovider.ImageProvider.fromImageProvider(const AssetImage('assets/ic_pin6.png'));
 
@@ -191,8 +196,11 @@ class _MapScreenState extends State<MapScreen> {
       );
 
       for(final marker in markerResponse){
+        print("${marker.id}: ${marker.latitude}, ${marker.longitude}");
+
         final point = ymapkit.Point(
-          latitude: marker.latitude, longitude: marker.longitude);
+          latitude: marker.latitude, 
+          longitude: marker.longitude);
 
       final placemark = _mapWindow.map.mapObjects.addPlacemarkWithImageStyle(
         point,
@@ -223,15 +231,15 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  void _onRegisterPressed() {
-  final authService = Provider.of<AuthService>(context, listen: false);
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => RegisterScreen(authService: authService),
-    ),
-  );
-}
+//   void _onRegisterPressed() {
+//   final authService = Provider.of<AuthService>(context, listen: false);
+//   Navigator.push(
+//     context,
+//     MaterialPageRoute(
+//       builder: (_) => RegisterScreen(authService: authService),
+//     ),
+//   );
+// }
 
   Future<void> _onProfilePressed() async {
     print('Нажали на профиль');
@@ -255,7 +263,7 @@ class _MapScreenState extends State<MapScreen> {
       MaterialPageRoute(
         builder: (_) => LoginScreen(
           authService: authService,
-          onRegister: _onRegisterPressed,
+          //onRegister: _onRegisterPressed,
           onLoginSuccess: () async {
             final loggedInUser = await userService.getCurrentUser();
             if (!mounted) return;
@@ -281,25 +289,28 @@ class _MapScreenState extends State<MapScreen> {
   if (isTokenValid) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen(
       binPhotoService: _binPhotoService,
-      binTypeService: _binTypeService)));
+      binTypeService: _binTypeService,
+      apiClient: widget.apiClient,)));
   } else {
     final loginSuccess = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => LoginScreen(
           authService: authService,
-          onRegister: _onRegisterPressed,
-          onLoginSuccess: () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen(
-              binPhotoService: _binPhotoService,
-              binTypeService: _binTypeService)));
-          },
+          //onRegister: _onRegisterPressed,
+          onLoginSuccess: () { },
         ),
       ),
     );
 
-    if (loginSuccess != true) {
-      // обработка неудачного логина, если нужно
+    if (loginSuccess == true && mounted) {
+      print('Логин успешен, переходим к AddPhotoScreen');
+      Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen(
+        binPhotoService: _binPhotoService,
+        binTypeService: _binTypeService,
+        apiClient: widget.apiClient,)));
+    } else {
+      print('Логин неуспешен или context unmounted');
     }
   }
 }

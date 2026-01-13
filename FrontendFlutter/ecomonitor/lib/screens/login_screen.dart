@@ -6,13 +6,13 @@ import 'package:flutter/widgets.dart';
 
 class LoginScreen extends StatefulWidget{
   //final Future<void> Function(String login, String password) onLogin;
-  final VoidCallback onRegister;
+  //final VoidCallback onRegister;
   final AuthService authService;
   final VoidCallback? onLoginSuccess;
 
   const LoginScreen({
     super.key,
-    required this.onRegister,
+    //required this.onRegister,
     required this.authService,
     required this.onLoginSuccess});
 
@@ -91,11 +91,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _emailController,
                     enabled: !_loading,
                     decoration: const InputDecoration(
-                      labelText: 'Login',
+                      labelText: 'Логин',
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) => 
-                    value?.isEmpty ?? true ? 'Input Login' : null,
+                    value?.isEmpty ?? true ? 'Введите пароль' : null,
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
@@ -103,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     enabled: !_loading,
                     obscureText: _obscurePassword,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: 'Пароль',
                       border: const OutlineInputBorder(),
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     validator: (value) => 
-                    value?.isEmpty ?? true ? 'Input password' : null,
+                    value?.isEmpty ?? true ? 'Введите пароль' : null,
                   ),
                 const SizedBox(height: 24),
                 SizedBox(
@@ -127,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             width: 24, height: 24,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Text('Log in'),
+                        : const Text('Войти'),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -135,15 +135,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: _loading ? null : () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RegisterScreen(
-                            authService: widget.authService),
-                        ),
-                      );
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => RegisterScreen(
+                      //       authService: widget.authService),
+                      //   ),
+                      // );
                     },
-                    child: const Text("Don't have an account? Sign up"),
+                    child: const Text("Регистрация аккаунта"),
                   ),
                 ),
               ],

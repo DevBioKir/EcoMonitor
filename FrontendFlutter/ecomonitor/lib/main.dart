@@ -55,12 +55,12 @@ void main() async {
 
   final storage = const FlutterSecureStorage();
   final apiClient = ApiClient(
-    "http://localhost:5198/", () async => await storage.read(key: 'access_token') ?? '');
+    "http://localhost:5198", () async => await storage.read(key: 'access_token') ?? '');
     //"http://10.0.2.2:5198/", () async => await storage.read(key: 'access_token') ?? '');
 
   final authService = AuthService(apiClient);
   final userService = UserService(apiClient);
-  final binPhotoService = BinPhotoService(apiClient);
+  final binPhotoService = BinPhotoService(apiClient, authService);
 
   runApp(
     MultiProvider(
@@ -90,12 +90,14 @@ class MyApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       home: Consumer<AuthService>(
         builder: (context, authService, _) {
-          return MapScreen();
+          return MapScreen(
+            authService: authService,);
         },
       ),
       routes: {
         '/map': (context) => Consumer<AuthService>(
-          builder: (context, authService, _) => MapScreen(),
+          builder: (context, authService, _) => MapScreen(
+            authService: authService,),
         ),
       },
     );

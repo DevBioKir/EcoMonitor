@@ -1,5 +1,9 @@
 ﻿@page "/admin/userManage"
 @using EcoMonitor.AdminPanel.Components.Layout
+@using EcoMonitor.AdminPanel.Data.Models
+@using EcoMonitor.Contracts.Contracts.User
+@using EcoMonitor.Core.Models.Users
+@using Microsoft.AspNetCore.Identity
 @layout MainLayout
 
 <MudText Typo="Typo.h4" Class="mb-2">
@@ -16,7 +20,7 @@
     @* </MudStack> *@
 @* </MudPaper> *@
 
-<MudPaper Class="pa-4">
+<MudPaper Class="pa-4"> 
     <MudTable Items="_users"
               Dense="true"
               Hover="true"
@@ -32,9 +36,19 @@
             <MudTd DataLabel="Имя">@context.Firstname</MudTd>
             <MudTd DataLabel="Фамилия">@context.Surname</MudTd>
             <MudTd DataLabel="Почта">@context.Email</MudTd>
+            <MudTd DataLabel="Роль">@context.RoleUser.Name</MudTd>
+            
+            <MudTd DataLabel="Действия" Align="Align.Rigth">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Size="Size.Small" 
+                               OnClick="@(() => OpenEditDialog(context))"/>
+            </MudTd>
             @* <MudTd DataLabel="Статус"> *@
             @*     @(context.IsBlocked ? "Заблокирован" : "Активен") *@
             @* </MudTd> *@
+            
         </RowTemplate>
     </MudTable>
 </MudPaper>
@@ -47,6 +61,10 @@
             <MudTextField @bind-Value="_createModel.Email" Label="Почта"/>
             <MudTextField @bind-Value="_createModel.Password" Label="Пароль"
                           InputType="InputType.Password"/>
+            <MudSelect @bind-Value="_createModel.RoleName" Label="Роль">
+                <MudSelectItem Value="@Roles.User">Пользователь</MudSelectItem>
+                <MudSelectItem Value="Roles.Manager">Менеджер</MudSelectItem>
+            </MudSelect>
         </MudStack>
     </DialogContent>
 
@@ -56,6 +74,32 @@
                    Disabled="_creating"
                    OnClick="CreateUserAsync">
             Создать
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+<MudDialog @bind-Visible="_editDialogOpen">
+    <TitleContent>Редактировать пользователя</TitleContent>
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudTextField @bind-Value="_editModel.Firstname" Label="Имя"/>
+            <MudTextField @bind-Value="_editModel.Surname" Label="Фамилия"/>
+            <MudTextField @bind-Value="_editModel.Email" Label="Почта"/>
+
+            <MudSelect T="UserRoleResponse" @bind-Value="_editModel.Role" Label="Роль">
+                <MudSelectItem Value="@UserRoleUser">Пользователь</MudSelectItem>
+                <MudSelectItem Value="@UserRoleManager">Менеджер</MudSelectItem>
+                <MudSelectItem Value="@UserRoleAdmin">Администратор</MudSelectItem>
+            </MudSelect>
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="CloseEditDialog">Отмена</MudButton>
+        <MudButton Color="Color.Primary"
+                   Disabled="_editing"
+                   OnClick="UpdateUserAsync">
+            Сохранить
         </MudButton>
     </DialogActions>
 </MudDialog>

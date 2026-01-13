@@ -133,12 +133,17 @@ namespace EcoMonitor.App.Services
             if (binTypes == null || !binTypes.Any())
                 throw new InvalidOperationException($"No bin types found for code {request.BinTypeCode}");
 
+            var lat = processed.Gps?.lat ?? 0;
+            var lon = processed.Gps?.lon ?? 0;
+            if (double.IsNaN(lat)) lat = 0;
+            if (double.IsNaN(lon)) lon = 0;
+
             var binPhoto = BinPhoto.Create(
                 fileName: Path.GetFileName(request.Photo.FileName),
                 urlFile: processed.OriginalUrl ?? 
                          throw new InvalidOperationException("Processed image URL is null"),
-                latitude: processed.Gps?.lat ?? 0,
-                longitude: processed.Gps?.lon ?? 0,
+                latitude: lat,
+                longitude: lon,
                 BinTypeId: binTypes.Select(bt => bt.Id).ToList(),
                 fillLevel: request.FillLevel,
                 isOutsideBin: request.IsOutsideBin,

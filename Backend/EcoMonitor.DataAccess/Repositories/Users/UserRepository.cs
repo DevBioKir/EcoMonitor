@@ -1,8 +1,10 @@
-﻿using EcoMonitor.Core.Models.Users;
+﻿using EcoMonitor.Contracts.Contracts.Users.UpdateUser;
+using EcoMonitor.Core.Models.Users;
 using EcoMonitor.DataAccess.Entities.Users;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using OpenQA.Selenium;
 
 namespace EcoMonitor.DataAccess.Repositories.Users
 {
@@ -24,7 +26,7 @@ namespace EcoMonitor.DataAccess.Repositories.Users
             var entities = await _context.Users
                 .Include(u => u.Role)
                 .ThenInclude(r => r.Permissions)
-                .Include(u => u.BinPhoto)
+                //.Include(u => u.BinPhoto)
                 .ToListAsync(cancellationToken);
 
             return _mapper.Map<List<User>>(entities);
@@ -93,9 +95,8 @@ namespace EcoMonitor.DataAccess.Repositories.Users
         public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
         {
             var entity = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
-            if (entity == null) return;
-
-
+            if (entity is null) return;
+            
             user.Adapt(entity);
 
             _context.Users.Update(entity);
@@ -118,6 +119,6 @@ namespace EcoMonitor.DataAccess.Repositories.Users
         //         _context.Users.Remove(entity);
         //         await _context.SaveChangesAsync(cancellationToken);
         //     }
-        // }
+        
     }
 }

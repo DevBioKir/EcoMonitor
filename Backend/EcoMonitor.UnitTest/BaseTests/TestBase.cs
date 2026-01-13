@@ -54,7 +54,7 @@ namespace EcoMonitor.UnitTest
             });
 
             var webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwrootTest");
-            services.AddSingleton<IImageStorageService>(new ImageStorageService(webRootPath));
+            //services.AddSingleton<IImageStorageService>(new ImageStorageService(webRootPath));
             services.AddSingleton<IGeolocationService, GeolocationService>();
             services.AddSingleton<IPasswordHasher, PasswordHasher>();
             services.AddSingleton<IUserFactory, UserFactory>();

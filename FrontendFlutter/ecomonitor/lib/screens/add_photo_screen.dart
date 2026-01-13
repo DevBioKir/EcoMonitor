@@ -13,10 +13,12 @@ import 'package:image_picker/image_picker.dart';
 class AddPhotoScreen extends StatefulWidget {
   final IBinPhotoService binPhotoService;
   final IBinTypeService binTypeService;
+  final ApiClient apiClient;
 
   AddPhotoScreen({
     required this.binPhotoService,
     required this.binTypeService,
+    required this.apiClient,
   });
 
   @override
@@ -30,7 +32,7 @@ class AddPhotoScreen extends StatefulWidget {
 //   ApiClient("http://localhost:5198/", () async => 'token'));
 
 class _AddPhotoScreenState extends State<AddPhotoScreen> {
-  File? _selectedPhoto;
+  XFile? _selectedPhoto;
   final _picker = ImagePicker();
 
   final TextEditingController _fillLevelController = TextEditingController();
@@ -38,7 +40,7 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
   final TextEditingController _totalBins = TextEditingController();
   bool _isOutsideBin = false;
   List<BinTypeResponse> _binTypes = [];
-  List<String> _binTypeCode = [];
+  Set<String> _selectedBinTypes = {};
 
   @override
   void initState() {
@@ -46,21 +48,28 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
     _loadBinTypes();
   }
 
-  void _loadBinTypes() async {
+  Future<void> _loadBinTypes() async {
     try {
-      _binTypes = await widget.binTypeService.getAllType();
+      final binTypeService = BinTypeService(widget.apiClient);  
+      _binTypes = await binTypeService.getAllType();
       setState(() {});
     } catch (e) {
-      print('Ошибка загрузки типов контейнеров: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка загрузки типов: $e')),
+        );
+      }
     }
   }
   
   Future<void> _pickPhoto() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 100,
+      requestFullMetadata: true);
+    // final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      setState(() {
-        _selectedPhoto = File(pickedFile.path);
-      });
+      setState(() => _selectedPhoto = pickedFile);
     }
   }
 
@@ -81,7 +90,7 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
   try {
     final request = BinPhotoUploadRequest(
       photo: _selectedPhoto!,
-      binTypeCode: _binTypeCode,
+      binTypeCode: _selectedBinTypes.toList(),
       fillLevel: double.parse(_fillLevelController.text),
       isOutsideBin: _isOutsideBin,
       comment: _commentController.text,
@@ -104,39 +113,55 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Добавить фото')),
+      appBar: AppBar(title: const Text('Добавить фото')),
       body: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
             ElevatedButton(
               onPressed: _pickPhoto,
-              child: Text('Выбрать фото'),
+              child: const Text('📸 Сделать фото'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             _selectedPhoto != null
-                ? Image.file(_selectedPhoto!, height: 200)
-                : Text('Фото не выбрано'),
-            SizedBox(height: 20),
+                ? Image.file(
+                  File(_selectedPhoto!.path), 
+                  height: 200,)
+                : const Text('Фото не сделано', style: TextStyle(color: Colors.grey)),
+            const SizedBox(height: 20),
+            
             TextField(
               controller: _commentController,
-              decoration: InputDecoration(labelText: 'Комментарий'),
+              decoration: const InputDecoration(
+                labelText: 'Комментарий',
+                border: OutlineInputBorder(),
+              ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
+            
             TextField(
               controller: _fillLevelController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Уровень заполнения (от 0 до 1)'),
+              decoration: const InputDecoration(
+                labelText: 'Уровень заполнения (0.0 - 1.0)',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const SizedBox(height: 10),
+            
             TextField(
               controller: _totalBins,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Количество баков'),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(
+                labelText: 'Количество баков',
+                border: OutlineInputBorder(),
+              ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 15),
+            
             Row(
               children: [
-                Text('Есть мусор вне контейнеров'),
+                const Text('🗑️ Мусор вне контейнеров'),
                 Checkbox(
                   value: _isOutsideBin,
                   onChanged: (value) {
@@ -147,29 +172,58 @@ class _AddPhotoScreenState extends State<AddPhotoScreen> {
                 ),
               ],
             ),
-            // Здесь добавьте виджеты для ввода binTypeCode (например, мультичекбоксы)
-            SizedBox(height: 20),
-            Column(
-              children: _binTypes.map((binType) {
-                return CheckboxListTile(
-                  title: Text(binType.name),
-                  value: _binTypeCode.contains(binType.id),
-                  onChanged: (bool? checked) {
-                    setState(() {
-                      if (checked == true) {
-                        _binTypeCode.add(binType.id);
-                      } else {
-                        _binTypeCode.remove(binType.id);
-                      }
-                    });
-                  },
-                );
-              }).toList(),
+            
+            const SizedBox(height: 20),
+            const Text(
+              'Типы контейнеров:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _submit,
-              child: Text('Загрузить фото'),
+            const SizedBox(height: 10),
+            Container(
+              constraints: const BoxConstraints(maxHeight: 400),
+              child: _binTypes.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _binTypes.length,
+                      itemBuilder: (context, index) {
+                        final binType = _binTypes[index];
+                        return CheckboxListTile(
+                          title: Text(binType.name ?? 'Без названия'),
+                          // subtitle: Text(binType.id), // показывает id
+                          value: _selectedBinTypes.contains(binType.code),
+                          onChanged: (bool? checked) {
+                            setState(() {
+                              if (checked == true) {
+                                _selectedBinTypes.add(binType.code);
+                              } else {
+                                _selectedBinTypes.remove(binType.code);
+                              }
+                            });
+                          },
+                        );
+                      },
+                    ),
+            ),
+            
+            const SizedBox(height: 10),
+            Text(
+              'Выбрано: ${_selectedBinTypes.length} типов',
+              style: TextStyle(
+                color: _selectedBinTypes.isEmpty ? Colors.red : Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _submit,
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
+                child: const Text('Загрузить фото', style: TextStyle(fontSize: 18)),
+              ),
             ),
           ],
         ),

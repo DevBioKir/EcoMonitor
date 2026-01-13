@@ -19,9 +19,16 @@ using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+using System.Globalization;
+using EcoMonitor.App.Factory.Users.Resolve;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+var culture = CultureInfo.InvariantCulture;
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
+
 var configuration = builder.Configuration;
 var env = builder.Environment;
 
@@ -50,6 +57,9 @@ builder.Services.AddDbContext<EcoMonitorDbContext>(options =>
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IUserFactory, UserFactory>();
 builder.Services.AddScoped<IUserRoleFactory, UserRoleFactory>();
+builder.Services.AddScoped<IUserRegisterFactory, UserRegisterFactory>();
+builder.Services.AddScoped<IUserRegisterFactory, ManagerRegisterFactory>();
+builder.Services.AddScoped<IUserRegisterFactoryResolver, UserRegisterFactoryResolver>();
 builder.Services.AddLogging();
 
 builder.Services.AddSingleton(TypeAdapterConfig.GlobalSettings); // глобальный Mapster config

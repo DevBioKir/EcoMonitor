@@ -41,8 +41,7 @@ namespace EcoMonitor.Core.Models.Users
             string surname,
             Email email,
             PasswordHash passwordHash,
-            Guid roleId
-            )
+            Guid roleId)
         {
             Id = Guid.NewGuid();
             Firstname = firstname;
@@ -127,23 +126,21 @@ namespace EcoMonitor.Core.Models.Users
         public bool CheckPassword(string plainPassword, IPasswordHasher hasher) => 
             PasswordHash.Verify(plainPassword, hasher);
 
-        public void SetRole(UserRole newRole, User currentUser)
-        {
-            if (newRole == null) throw new ArgumentNullException(nameof(newRole));
-            if (currentUser == null) throw new ArgumentNullException(nameof(currentUser));
-
-            if(!currentUser.HasPermission(Permission.RolesManage))
-                throw new InvalidOperationException("User does not have permission to change roles.");
-
-            Role = newRole;
-            RoleId = newRole.Id;
-        }
+        // public void SetRole(UserRole newRole, User currentUser)
+        // {
+        //     if (newRole == null) throw new ArgumentNullException(nameof(newRole));
+        //     if (currentUser == null) throw new ArgumentNullException(nameof(currentUser));
+        //
+        //     if(!currentUser.HasPermission(Permission.RolesManage))
+        //         throw new InvalidOperationException("User does not have permission to change roles.");
+        //
+        //     Role = newRole;
+        //     RoleId = newRole.Id;
+        // }
 
         public bool HasPermission(Permission permission) => Role.HasPermission(permission);
-        public void UpdateFirstname(string newFirstname) => Firstname = newFirstname;
-        public void UpdateSurname(string newSurname) => Surname = newSurname;
         
-        public void UpdateProfile(
+        public void UpdatePersonalInfo(
             string newFirstname,
             string newSurname)
         {
@@ -157,13 +154,8 @@ namespace EcoMonitor.Core.Models.Users
         
         public void UpdateEmail(string newEmail) => Email = Email.Create(newEmail);
 
-        public void ChangeRole(UserRole newRole)
-        {
-            Role = newRole;
-            RoleId = newRole.Id;
-        }
+        public void ChangeRole(Guid roleId) => RoleId = roleId;
         
-        public void UpdateRole(UserRole newRole) => Role = newRole;
         public void UpdateLastLoggedAt(DateTime newLastLoggedAt) => LastLogindAt = newLastLoggedAt;
 
         public void ChangePassword(string currentPassword, string newPassword, IPasswordHasher hasher)

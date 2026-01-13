@@ -33,6 +33,16 @@ namespace EcoMonitor.Infrastracture.Pipeline
         {
             if (file == null) throw new ArgumentNullException(nameof(file));
             if (file.Length == 0) throw new InvalidOperationException("File is empty");
+            
+            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var supportedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".heic", ".heif" };
+    
+            if (!supportedExtensions.Contains(fileExtension))
+            {
+                _logger.LogWarning("Unsupported file extension: {Extension}, ContentType: {ContentType}", 
+                    fileExtension, file.ContentType);
+                throw new ArgumentException($"Not an image. Supported: {string.Join(", ", supportedExtensions)}");
+            }
 
             await using var ms = new MemoryStream();
             await file.CopyToAsync(ms, ct);
@@ -50,12 +60,14 @@ namespace EcoMonitor.Infrastracture.Pipeline
 
             try
             {
+                var url = await _storageService.SaveImageAsync(file);
+                
                 using var uploadedImage = Image.Load<Rgba32>(decoderOptions, ms);
 
                 var exif = uploadedImage.Metadata.ExifProfile;
                 var (lat, lon) = _geolocationService.GeoLocationService(exif);
 
-                var url = await _storageService.SaveImageAsync(file);
+                //var url = await _storageService.SaveImageAsync(file);
 
                 return new ProcessedImageResult(
                     OriginalUrl: url,

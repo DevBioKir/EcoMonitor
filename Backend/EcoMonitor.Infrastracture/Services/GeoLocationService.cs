@@ -9,7 +9,20 @@ namespace EcoMonitor.Infrastracture.Services
     {
         public (double? Latitude, double? Longitude) GeoLocationService(ExifProfile profile)
         {
-            if (profile == null) return (null, null);
+            if (profile == null)
+            {
+                Console.WriteLine("❌ EXIF PROFILE NULL!");
+                return (null, null);
+            }
+            
+            Console.WriteLine($"✅ EXIF Values count: {profile.Values.Count}");
+    
+            // Проверяем ВСЕ GPS теги
+            foreach(var tag in profile.Values)
+            {
+                if (tag.Tag.ToString().Contains("GPS"))
+                    Console.WriteLine($"GPS TAG: {tag.Tag} = {tag.GetValue()}");
+            }
 
             profile.TryGetValue(ExifTag.GPSLatitude, out IExifValue<Rational[]>? latRaw); // Значение координаты
             profile.TryGetValue(ExifTag.GPSLatitudeRef, out IExifValue<string>? latRefRaw); // Референс направления North(Север от 0 до +90 градусов)
@@ -17,6 +30,8 @@ namespace EcoMonitor.Infrastracture.Services
             profile.TryGetValue(ExifTag.GPSLongitude, out IExifValue<Rational[]>? lonRaw); // Значение координаты
             profile.TryGetValue(ExifTag.GPSLongitudeRef, out IExifValue<string>? lonRefRaw); // Референс направления East(Восток от 0 до +180 градусов)
                                                                                              // West(Запад от 0 до -180 градусов)
+            Console.WriteLine($"RAW GPS: lat={latRaw?.Value}, latRef={latRefRaw?.Value}"); 
+            Console.WriteLine($"RAW GPS: lon={lonRaw?.Value}, lonRef={lonRefRaw?.Value}");
 
             var lat = latRaw?.Value;
             var latRef = latRefRaw?.Value;

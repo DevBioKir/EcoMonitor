@@ -1,9 +1,15 @@
 import 'package:dio/dio.dart';
+import 'package:ecomonitor/services/auth_service.dart';
+import 'package:flutter/material.dart';
 
 class ApiClient{
   final Dio _dio;
+  //final AuthService _authService;
 
-  ApiClient(String baseUrl, Future<String?> Function() tokenProvider)
+  ApiClient(
+    String baseUrl, 
+    Future<String?> Function() tokenProvider, //this._authService
+    )
       : _dio = Dio(BaseOptions(
           baseUrl: baseUrl,
           connectTimeout: const Duration(seconds: 10),
@@ -28,6 +34,28 @@ class ApiClient{
           }
           handler.next(options);
         },
+        // onError: (error, handler) async {
+        //   if (error.response?.statusCode == 401) {
+        //     try{
+        //       await _authService.refreshToken();
+
+        //       final opts = error.requestOptions;
+        //       opts.headers['Authorization'] = 'Bearer ${await tokenProvider()}';
+
+        //       final response = await _dio.request(
+        //         opts.path,
+        //         options: Options(
+        //           method: opts.method,
+        //           headers: opts.headers,
+        //         ),
+        //       );
+
+        //       return handler.resolve(response);
+        //     } catch (e){
+        //       print('Refresh token failed: $e');
+        //     }
+        //   }
+        // }
       ),
     );
   }

@@ -27,7 +27,7 @@ public class UserController(
     }
 
     [HttpGet("me")]
-    public async Task<ActionResult<UserResponse>> GetCurrentUser()
+    public async Task<ActionResult<UserWithPhotosResponse>> GetCurrentUser()
     {
         var userId = CurrentUser();
         if (userId == null) 

@@ -13,7 +13,7 @@ namespace EcoMonitor.API.Controllers
 {
     [PublicApi]
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class BinPhotoController : ControllerBase
     {
         private readonly IBinPhotoService _binPhotoService;

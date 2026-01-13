@@ -55,6 +55,7 @@ public class RefreshToken
         int validDays = 30)
     {
         var now = DateTime.UtcNow;
+        
         return new RefreshToken(
             userId,
             //user,

@@ -1,10 +1,13 @@
 using EcoMonitor.App.Abstractions;
 using EcoMonitor.App.Services.Authorization;
 using EcoMonitor.Contracts.Contracts.User;
+using EcoMonitor.Contracts.Contracts.Users;
+using EcoMonitor.Contracts.Contracts.Users.UpdateUser;
 using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Authentication;
 using MapsterMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.Logging;
 
 namespace EcoMonitor.App.Services.User;
@@ -69,76 +72,64 @@ public class UserService : IUserService
         
         await _userRepository.AddAsync(userDomain, cancellationToken);
     }
-    
-    // public async Task AddAdminUserAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
-    // {
-    //     var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
-    //                       throw new UnauthorizedAccessException("Current user not found");
-    //     
-    //     _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
-    //     
-    //     var userDomain = _userFactory.Create(
-    //         user.Firstname,
-    //         user.Surname,
-    //         user.Email,
-    //         user.Password,
-    //         "Admin");
-    //     
-    //     await _userRepository.AddAsync(userDomain, cancellationToken);
-    // }
-    //
-    // public async Task AddManagerUserAsync(UserRequest user, Guid currentUserId, CancellationToken cancellationToken = default)
-    // {
-    //     var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
-    //                       throw new UnauthorizedAccessException("Current user not found");
-    //     
-    //     _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
-    //     
-    //     var userDomain = _userFactory.Create(
-    //         user.Firstname,
-    //         user.Surname,
-    //         user.Email,
-    //         user.Password,
-    //         "Manager");
-    //     
-    //     await _userRepository.AddAsync(userDomain, cancellationToken);
-    // }
 
-    public async Task<UserResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<UserWithPhotosResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var user =  await _userRepository.GetByIdAsync(id, cancellationToken);
         
-        return _mapper.Map<UserResponse>(user);
+        return _mapper.Map<UserWithPhotosResponse>(user);
     }
 
-    public async Task<UserResponse> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
+    public async Task<UserWithPhotosResponse> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
     {
         var userEmail =  await _userRepository.GetByEmailAsync(email, cancellationToken);
         
-        return _mapper.Map<UserResponse>(userEmail);
+        return _mapper.Map<UserWithPhotosResponse>(userEmail);
     }
 
-    public async Task<UserResponse> UpdateAsync(UserRequest user, Guid? currentUserId,
-        CancellationToken cancellationToken = default)
+    public async Task<UserResponse> UpdateAsync(
+        Guid actorId, Guid userId, UpdateUserDTO request, CancellationToken cancellationToken = default)
     {
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
-            throw new UnauthorizedAccessException("Current user not found");
+        var actor = await _userRepository.GetByIdAsync(actorId, cancellationToken) ?? 
+                      throw new UnauthorizedAccessException("Actor not found");
         
-        _authorizationService.CheckPermisson(currentUser, Permission.UsersEdit);
+        _authorizationService.CheckPermisson(actor, Permission.UsersEdit);
         
-        var selectedUser = await _userRepository.GetByIdAsync(user.Id, cancellationToken) ??
-            throw new KeyNotFoundException($"User with id {user.Id} not found");
+        var selectedUser = await _userRepository.GetByIdAsync(userId, cancellationToken) ?? 
+                           throw new KeyNotFoundException($"User with id {userId} not found");
         
-        // if (selectedUser.RowVersion != user.RowVersion)
-        //     throw new DbUpdateConcurrencyException("User was modified by another user");
+        selectedUser.UpdatePersonalInfo(request.Firstname, request.Surname);
+        selectedUser.UpdateEmail(request.Email);
+        selectedUser.ChangeRole(request.UserRole);
         
-        selectedUser.UpdateProfile(user.Firstname, user.Surname);
-        //selectedUser.UpdateEmail(user.Email);
-
         await _userRepository.UpdateAsync(selectedUser, cancellationToken);
         
         return _mapper.Map<UserResponse>(selectedUser);
     }
+    
+    // public async Task<UserWithPhotosResponse> UpdateAsync(UserRequest user, Guid? currentUserId,
+    //     CancellationToken cancellationToken = default)
+    // {
+    //     var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
+    //         throw new UnauthorizedAccessException("Current user not found");
+    //     
+    //     _authorizationService.CheckPermisson(currentUser, Permission.UsersEdit);
+    //     
+    //     var selectedUser = await _userRepository.GetByIdAsync(user.Id, cancellationToken) ??
+    //         throw new KeyNotFoundException($"User with id {user.Id} not found");
+    //     
+    //     // if (selectedUser.RowVersion != user.RowVersion)
+    //     //     throw new DbUpdateConcurrencyException("User was modified by another user");
+    //     
+    //     selectedUser.UpdateProfile(user.Firstname, user.Surname);
+    //     //selectedUser.UpdateEmail(user.Email);
+    //
+    //     await _userRepository.UpdateAsync(selectedUser, cancellationToken);
+    //     
+    //     return _mapper.Map<UserWithPhotosResponse>(selectedUser);
+    // }
+    
+    
     
     // public async Task DeleteAsync(Guid id, Guid? currentUserId, CancellationToken cancellationToken = default)
     // {
