@@ -6,13 +6,13 @@ import 'package:flutter/widgets.dart';
 
 class LoginScreen extends StatefulWidget{
   //final Future<void> Function(String login, String password) onLogin;
-  //final VoidCallback onRegister;
+  final VoidCallback onRegister;
   final AuthService authService;
   final VoidCallback? onLoginSuccess;
 
   const LoginScreen({
     super.key,
-    //required this.onRegister,
+    required this.onRegister,///
     required this.authService,
     required this.onLoginSuccess});
 
@@ -135,13 +135,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   child: OutlinedButton(
                     onPressed: _loading ? null : () {
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) => RegisterScreen(
-                      //       authService: widget.authService),
-                      //   ),
-                      // );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RegisterScreen(
+                            authService: widget.authService),
+                        ),
+                      );
                     },
                     child: const Text("Регистрация аккаунта"),
                   ),

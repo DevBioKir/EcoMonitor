@@ -231,15 +231,15 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-//   void _onRegisterPressed() {
-//   final authService = Provider.of<AuthService>(context, listen: false);
-//   Navigator.push(
-//     context,
-//     MaterialPageRoute(
-//       builder: (_) => RegisterScreen(authService: authService),
-//     ),
-//   );
-// }
+  void _onRegisterPressed() { ///////////////
+  //final authService = Provider.of<AuthService>(context, listen: false);
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => RegisterScreen(authService: widget.authService),
+    ),
+  );
+}
 
   Future<void> _onProfilePressed() async {
     print('Нажали на профиль');
@@ -263,7 +263,7 @@ class _MapScreenState extends State<MapScreen> {
       MaterialPageRoute(
         builder: (_) => LoginScreen(
           authService: authService,
-          //onRegister: _onRegisterPressed,
+          onRegister: _onRegisterPressed,//
           onLoginSuccess: () async {
             final loggedInUser = await userService.getCurrentUser();
             if (!mounted) return;
@@ -297,7 +297,7 @@ class _MapScreenState extends State<MapScreen> {
       MaterialPageRoute(
         builder: (_) => LoginScreen(
           authService: authService,
-          //onRegister: _onRegisterPressed,
+          onRegister: _onRegisterPressed,////
           onLoginSuccess: () { },
         ),
       ),

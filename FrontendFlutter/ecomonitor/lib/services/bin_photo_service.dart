@@ -96,20 +96,17 @@ class BinPhotoService implements IBinPhotoService {
   Future<BinPhotoResponse> uploadWithMetadata(BinPhotoUploadRequest request) async {
   final bytes = await request.photo.readAsBytes();
   
-  // ✅ ЧИСТЫЙ http вместо Dio!
   var httpRequest = http.MultipartRequest(
     'POST', 
     Uri.parse('http://localhost:5198/api/public/v1/BinPhoto/UploadWithMetadata')
   );
   
-  // ✅ RAW bytes с EXIF
   httpRequest.files.add(http.MultipartFile.fromBytes(
     'Photo',
     bytes,
     filename: path.basename(request.photo.path),
   ));
   
-  // ✅ List<string> для сервера
   for (int i = 0; i < request.binTypeCode.length; i++) {
     httpRequest.fields['BinTypeCode[$i]'] = request.binTypeCode[i];
   }
