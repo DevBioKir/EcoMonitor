@@ -49,45 +49,56 @@ public class AdminUserController(
         }
     }
 
-    [HttpPost("AddUser")]
-    public async Task<IActionResult> AddUserAsync(UserRequest user, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var actorId = Actor();
-            await _userService.AddAsync(user, actorId, cancellationToken);
-            return Ok();
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            _logger.LogWarning(ex, "Access denied in AddUser()");
-            return Forbid();
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Error adding user");
-            return StatusCode(500, "Internal server error");
-        }
-    }
+    // [HttpPost("AddUser")]
+    // public async Task<IActionResult> AddUserAsync(UserRequest user, CancellationToken cancellationToken)
+    // {
+    //     try
+    //     {
+    //         var actorId = Actor();
+    //         await _userService.AddAsync(user, actorId, cancellationToken);
+    //         return Ok();
+    //     }
+    //     catch (UnauthorizedAccessException ex)
+    //     {
+    //         _logger.LogWarning(ex, "Access denied in AddUser()");
+    //         return Forbid();
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         _logger.LogError(e, "Error adding user");
+    //         return StatusCode(500, "Internal server error");
+    //     }
+    // }
     
     // TODO: Split the controller into use cases [HttpPatch] dictionary most likely
     
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUserAsync(Guid userId, UpdateUserDTO request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdateUserAsync(string id, [FromBody] UpdateUserDTO request, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
+        if (!Guid.TryParse(id, out var userId))
         {
-            _logger.LogWarning("ModelState invalid для UserRequest: {@Errors}", ModelState);
-            return BadRequest(ModelState);
+            return BadRequest(new { error = "Invalid User ID format" });
         }
+        _logger.LogInformation("📥 Контроллер получил JSON: {@Request}", request);
+        
+        //_logger.LogInformation("🔥 userId = {UserId}, request = {@Request}", userId, request);
     
-        _logger.LogInformation("✅ Controller вызван, user.Id: {Id}", userId);
+        // if (!ModelState.IsValid)
+        // {
+        //     _logger.LogWarning("ModelState invalid для UserRequest: {@Errors}", ModelState);
+        //     return BadRequest(ModelState);
+        // }
     
-        if (userId == Guid.Empty)
-            return BadRequest(new { error = "User ID cannot be empty" });
+        //_logger.LogInformation("Controller вызван, user.Id: {Id}", userId);
+    
+        // if (userId == Guid.Empty)
+        //     return BadRequest(new { error = "User ID cannot be empty" });
+        //
+        // _logger.LogInformation("📧 Email перед сервисом: '{Email}'", request.Email);
         
         var currentUserId = Actor();
         await _userService.UpdateAsync(currentUserId, userId, request, cancellationToken);
+        _logger.LogInformation("Контроллер ПОСЛЕ: {@Request}", request);
         return NoContent();
     }
     
@@ -126,11 +137,11 @@ public class AdminUserController(
     // {
     //     if (!ModelState.IsValid)
     //     {
-    //         _logger.LogWarning("❌ ModelState invalid для UserRequest: {@Errors}", ModelState);
+    //         _logger.LogWarning("ModelState invalid для UserRequest: {@Errors}", ModelState);
     //         return BadRequest(ModelState);
     //     }
     //
-    //     _logger.LogInformation("✅ Controller вызван, user.Id: {Id}", user.Id);
+    //     _logger.LogInformation("Controller вызван, user.Id: {Id}", user.Id);
     //
     //     if (user.Id == Guid.Empty)
     //         return BadRequest(new { error = "User ID cannot be empty" });

@@ -1,28 +1,66 @@
-﻿@using EcoMonitor.AdminPanel.Components.Layout
-@layout MainLayout
+﻿@page "/auth/login"
+@using EcoMonitor.AdminPanel.Infrastucture.TokenStorage
+@using EcoMonitor.Contracts.Contracts.Auth
 
-<PageTitle>Вход в административную панель</PageTitle>
-
-@* <MudContainer MaxWidth="MaxWidth.False" Class="d-flex justify-content-center align-content-center" *@
-@*               Style="min-height:100vh;"> *@
-@*     <MudPaper Class="pa-6 mud-elevation-6" Style="max-width:420px; width:100%;"> *@
-<MudStack Spacing="4" AlignItems="AlignItems.Center">
-    <MudText Typo="Typo.h3" Class="fw-bold" Align="Align.Center">EcoMonitor Admin</MudText>
-            
-    <MudText Typo="Typo.body1" Color="Color.Secondary" Align="Align.Center">
-        Панель управления системой мониторинга экологии
+<MudPaper Class="pa-6 mx-auto my-12" Style="max-width: 420px; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.1);">
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-4">EcoMonitor Admin</MudText>
+    <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-6" Color="Color.Secondary">
+        Введите учетные данные администратора
     </MudText>
-            
-    <MudDivider Class="my-4"/>
-            
-    <MudButton Href="/auth/login"
-               Variant="Variant.Filled"
-               Color="Color.Primary"
-               Size="Size.Large"
-               Class="px-8">
-        <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Class="mr-2"/>
-        Войти в админку
+
+    <MudTextField @bind-Value="email" Label="Почта" Required="true" FullWidth="true" Class="mb-4" />
+    <MudTextField @bind-Value="password" Label="Пароль" InputType="InputType.Password" Required="true" FullWidth="true" Class="mb-4" />
+
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4">@error</MudAlert>
+    }
+
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" FullWidth="true" OnClick="LoginAsync" Disabled="isLoading">
+        @if (isLoading)
+        {
+            <MudProgressCircular Size="Size.Small" Color="Color.Inherit" Class="mr-2" />
+            <span>Вход...</span>
+        }
+        else
+        {
+            <span>Войти</span>
+        }
     </MudButton>
-</MudStack>
-@*     </MudPaper> *@
-@* </MudContainer> *@
+
+    <MudText Typo="Typo.caption" Align="Align.Center" Class="mt-6">
+        EcoMonitor © @DateTime.UtcNow.Year
+    </MudText>
+</MudPaper>
+
+
+
+
+@* @using EcoMonitor.AdminPanel.Components.Layout *@
+@* @layout MainLayout *@
+@* *@
+@* <PageTitle>Вход в административную панель</PageTitle> *@
+@* *@
+@* $1$ <MudContainer MaxWidth="MaxWidth.False" Class="d-flex justify-content-center align-content-center" #1# *@
+@* $1$               Style="min-height:100vh;"> #1# *@
+@* $1$     <MudPaper Class="pa-6 mud-elevation-6" Style="max-width:420px; width:100%;"> #1# *@
+@* <MudStack Spacing="4" AlignItems="AlignItems.Center"> *@
+@*     <MudText Typo="Typo.h3" Class="fw-bold" Align="Align.Center">EcoMonitor Admin</MudText> *@
+@*              *@
+@*     <MudText Typo="Typo.body1" Color="Color.Secondary" Align="Align.Center"> *@
+@*         Панель управления системой мониторинга экологии *@
+@*     </MudText> *@
+@*              *@
+@*     <MudDivider Class="my-4"/> *@
+@*              *@
+@*     <MudButton Href="/auth/login" *@
+@*                Variant="Variant.Filled" *@
+@*                Color="Color.Primary" *@
+@*                Size="Size.Large" *@
+@*                Class="px-8"> *@
+@*         <MudIcon Icon="@Icons.Material.Filled.AdminPanelSettings" Class="mr-2"/> *@
+@*         Войти в админку *@
+@*     </MudButton> *@
+@* </MudStack> *@
+@* $1$     </MudPaper> #1# *@
+@* $1$ </MudContainer> #1# *@

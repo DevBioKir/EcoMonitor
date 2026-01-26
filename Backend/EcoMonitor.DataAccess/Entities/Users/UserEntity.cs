@@ -18,6 +18,8 @@ namespace EcoMonitor.DataAccess.Entities.Users
 
         public DateTime CreatedAt { get; set; }
         public DateTime LastLogindAt { get; set; }
+        public bool AccountEnabled { get; set; } = true;
+        public string? BlockReason { get; set; }
         public DateTime LockedUntil { get; set; }
         public ICollection<RefreshTokenEntity> RefreshTokens { get; set; } = new List<RefreshTokenEntity>();
 

@@ -137,7 +137,7 @@ public partial class AddPhotos : ComponentBase
 
             if (response.IsSuccessStatusCode)
             {
-                Navigation.NavigateTo("/admin/photos");
+                Navigation.NavigateTo("/admin/photo");
             }
             else
             {

@@ -50,28 +50,28 @@ public class UserService : IUserService
         return _mapper.Map<IReadOnlyList<UserResponse>>(users);
     }
 
-    public async Task AddAsync(UserRequest user, Guid? currentUserId, CancellationToken cancellationToken = default)
-    {
-        var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
-            throw new UnauthorizedAccessException("Current user not found");
-        
-        _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
-        
-        var role = await _userRoleRepository.GetByNameASync("User", cancellationToken);
-        if (role == null)
-        {
-            throw new InvalidOperationException($"Role {role.Name} not found");
-        }
-        
-        var userDomain = _userFactory.Create(
-            user.Firstname, 
-            user.Surname,
-            user.Email,
-            user.Password,
-            role.Id);
-        
-        await _userRepository.AddAsync(userDomain, cancellationToken);
-    }
+    // public async Task AddAsync(UserRequest user, Guid? currentUserId, CancellationToken cancellationToken = default)
+    // {
+    //     var currentUser = await _userRepository.GetByIdAsync(currentUserId, cancellationToken) ??
+    //         throw new UnauthorizedAccessException("Current user not found");
+    //     
+    //     _authorizationService.CheckPermisson(currentUser, Permission.UsersAdd);
+    //     
+    //     var role = await _userRoleRepository.GetByNameASync("User", cancellationToken);
+    //     if (role == null)
+    //     {
+    //         throw new InvalidOperationException($"Role {role.Name} not found");
+    //     }
+    //     
+    //     var userDomain = _userFactory.Create(
+    //         user.Firstname, 
+    //         user.Surname,
+    //         user.Email,
+    //         user.Password,
+    //         role.Id);
+    //     
+    //     await _userRepository.AddAsync(userDomain, cancellationToken);
+    // }
 
     public async Task<UserWithPhotosResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
@@ -98,9 +98,27 @@ public class UserService : IUserService
         var selectedUser = await _userRepository.GetByIdAsync(userId, cancellationToken) ?? 
                            throw new KeyNotFoundException($"User with id {userId} not found");
         
+        _logger.LogInformation("🔥 Service User получил: Firstname='{Firstname}', Surname='{Surname}', Email='{Email}'", 
+            request.Firstname, request.Surname, request.Email);
+        
+        if (string.IsNullOrWhiteSpace(request.Firstname))
+            throw new ArgumentException("Firstname cannot be empty");
+        if (string.IsNullOrWhiteSpace(request.Surname))
+            throw new ArgumentException("Surname cannot be empty");
+        if (string.IsNullOrWhiteSpace(request.Email))
+            throw new ArgumentException("Email cannot be empty");
+
+        _logger.LogInformation("Email ДОБАВЛЕН: '{Email}' (Length: {Length})", 
+            request.Email, request.Email?.Length ?? 0);
+        
         selectedUser.UpdatePersonalInfo(request.Firstname, request.Surname);
         selectedUser.UpdateEmail(request.Email);
-        selectedUser.ChangeRole(request.UserRole);
+        
+        var newRole = await _userRoleRepository.GetByIdASync(
+            request.UserRoleId, cancellationToken
+        ) ?? throw new ArgumentException("Invalid role");
+
+        selectedUser.ChangeRole(newRole);
         
         await _userRepository.UpdateAsync(selectedUser, cancellationToken);
         

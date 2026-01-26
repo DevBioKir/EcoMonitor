@@ -229,7 +229,7 @@ class _MapScreenState extends State<MapScreen> {
       );
       }
     }
-  }
+  } 
 
   void _onRegisterPressed() { ///////////////
   //final authService = Provider.of<AuthService>(context, listen: false);

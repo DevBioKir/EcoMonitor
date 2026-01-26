@@ -9,12 +9,12 @@ namespace EcoMonitor.App.Factory.Users
 {
     public class UserFactory(IPasswordHasher passwordHasher) : IUserFactory
     {
-        public User Create(string firstname, string surname, string email, string password, Guid roleId)
-        {
-            var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);
-
-            return User.Create(firstname, surname, email, passwordHash, roleId);
-        }
+        // public User Create(string firstname, string surname, string email, string password, Guid roleId)
+        // {
+        //     var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);
+        //
+        //     return User.Create(firstname, surname, email, passwordHash, roleId);
+        // }
 
         public User UpdatePersonalInfo(User user, UpdatePersonalInfoRequest request)
         {
@@ -28,9 +28,9 @@ namespace EcoMonitor.App.Factory.Users
             return user;
         }
         
-        public User UpdateRole(User user, Guid roleId)
+        public User UpdateRole(User user, UserRole role)
         {
-            user.ChangeRole(roleId);
+            user.ChangeRole(role);
             return user;
         }
         

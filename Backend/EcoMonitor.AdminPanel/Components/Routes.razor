@@ -1,6 +1,28 @@
-﻿<Router AppAssembly="typeof(Program).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>
-        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
-    </Found>
-</Router>
+﻿@using EcoMonitor.AdminPanel.Infrastucture.Http
+@using NetTopologySuite.Operation.Overlay.Validate
+@inject Http401HandlerAccessor Accessor
+
+<CascadingValue Value="_handler">
+    <Http401Handler @ref="_handler">
+        <Router AppAssembly="typeof(Program).Assembly">
+            <Found Context="routeData">
+                <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>
+                <FocusOnNavigate RouteData="routeData" Selector="h1"/>
+            </Found>
+        </Router>
+    </Http401Handler>
+</CascadingValue>
+
+@code{
+
+    private Http401Handler _handler;
+
+    protected override void OnAfterRender(bool firstReader)
+    {
+        if (firstReader)
+        {
+            Accessor.Handler = _handler;
+        }
+    }
+
+}

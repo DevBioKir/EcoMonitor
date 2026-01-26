@@ -30,8 +30,8 @@ class BinPhotoResponse {
   factory BinPhotoResponse.fromJson(Map<String, dynamic> json) {
     return BinPhotoResponse(
       id: json['id'] as String,
-      fileName: json['fileName'] as String,
-      urlFile: json['urlFile'] as String,
+      fileName: json['fileName']?.toString() ?? '',
+      urlFile: json['urlFile']?.toString() ?? '',
       longitude: (json['longitude'] as num).toDouble(),
       latitude: (json['latitude'] as num).toDouble(),
       uploadedAt: DateTime.parse(json['uploadedAt'] as String),
@@ -39,8 +39,8 @@ class BinPhotoResponse {
       fillLevel: (json['fillLevel'] as num).toDouble(),
       isOutsideBin: json['isOutsideBin'] as bool,
       totalBins: json['totalBins'] as int,
-      comment: json['comment'] as String,
-      uploadedById: json['uploadedById'] as String,
+      comment: json['comment']?.toString() ?? '',
+      uploadedById: (json['uploadedBy']['id'] ?? '').toString(),
     );
   }
 

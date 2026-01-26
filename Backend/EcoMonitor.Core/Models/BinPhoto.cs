@@ -226,6 +226,37 @@ namespace EcoMonitor.Core.Models
         {
             UploadedBy = uploadedBy ?? throw new ArgumentNullException(nameof(uploadedBy));
         }
+
+        public void UpdateMetadata(
+            double fillLevel,
+            bool isOutsideBin,
+            string comment,
+            int totalBins,
+            IEnumerable<Guid> binTypeIds)
+        {
+            FillLevel = fillLevel;
+            IsOutsideBin = isOutsideBin;
+            Comment = comment;
+            TotalBins = totalBins;
+            
+            BinPhotoBinTypes.Clear();
+            foreach (var id in binTypeIds)
+            {
+                AddBinType(id);
+            }
+        }
+        
+        public void UpdateFile(
+            string fileName,
+            string urlFile,
+            double latitude,
+            double longitude)
+        {
+            FileName = fileName;
+            UrlFile = urlFile;
+            Latitude = latitude;
+            Longitude = longitude;
+        }
         
         
     }

@@ -20,6 +20,7 @@ namespace EcoMonitor.UnitTest
         protected EcoMonitorDbContext _context { get; private set; }
         protected IMapper _mapper;
         protected IPasswordHasher _passwordHasher;
+        protected IUserRegisterFactoryResolver _factoryResolver;
         protected IUserFactory _userFactory;
         protected IUserRoleFactory _userRoleFactory;
         protected User _user;
@@ -92,34 +93,35 @@ namespace EcoMonitor.UnitTest
         private async Task CreateUser()
         {
             var email = Email.Create("ivanov@mail.ru");
-            var userRoleId = Guid.NewGuid();
+            string userRoleName = "Manager";
 
-            _user = _userFactory.Create(
+            var factory = _factoryResolver.Resolve(userRoleName);
+
+            _user = factory.CreateUser(
                 "Peter",
                 "Petrov",
                 email.Value,
-                "somepassword",
-                userRoleId
+                "somepassword"
             );
 
             // Создаем роль с разрешениями
-            var roleEntity = new UserRoleEntity
-            {
-                Id = UserRole.User.Id,
-                Name = UserRole.User.Name,
-                Description = UserRole.User.Description,
-                Permissions = UserRole.User.Permissions
-                    .Select(p => new PermissionEntity { Code = p.Code })
-                    .ToList()
-            };
-
-            await _context.UserRoles.AddAsync(roleEntity);
+            // var roleEntity = new UserRoleEntity
+            // {
+            //     Id = UserRole.User.Id,
+            //     Name = UserRole.User.Name,
+            //     Description = UserRole.User.Description,
+            //     Permissions = UserRole.User.Permissions
+            //         .Select(p => new PermissionEntity { Code = p.Code })
+            //         .ToList()
+            // };
+            //
+            // await _context.UserRoles.AddAsync(roleEntity);
             await _context.SaveChangesAsync();
 
             // Мапим пользователя в сущность и связываем с ролью
             var userEntity = _mapper.Map<UserEntity>(_user);
-            userEntity.RoleId = roleEntity.Id;
-            userEntity.Role = roleEntity;
+            // userEntity.RoleId = roleEntity.Id;
+            // userEntity.Role = roleEntity;
 
             // Добавляем пользователя в базу и сохраняем
             await _context.Users.AddAsync(userEntity);

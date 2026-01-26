@@ -1,6 +1,5 @@
 ﻿@page "/admin/photo"
 @using EcoMonitor.AdminPanel.Components.Layout
-@using EcoMonitor.AdminPanel.Data.Models
 @layout MainLayout
 
 <MudText Typo="Typo.h4" Class="mb-2">
@@ -17,13 +16,81 @@
 @*     $1$ </MudStack> #1# *@
 @* $1$ </MudPaper> #1# *@
 
+<MudPaper Class="pa-4 mb-3">
+    <MudStack Spacing="2">
+
+        <MudStack Direction="Row"
+                  Spacing="2"
+                  AlignItems="AlignItems.Center"
+                  Wrap="Wrap.Wrap">
+
+            <MudDateRangePicker @bind-DateRange="_dateRange"
+                                Label="Период загрузки"
+                                Disabled="_loading" />
+            
+            <MudSelect T="bool?"
+                       @bind-Value="_outsideFilter"
+                       Label="Мусор вне контейнера"
+                       Disabled="_loading"
+                       Style="width: 220px;">
+                <MudSelectItem T="bool?" Value="@(null)">Все</MudSelectItem>
+                <MudSelectItem T="bool?" Value="@(true)">Мусор вне контейнера</MudSelectItem>
+                <MudSelectItem T="bool?" Value="@(false)">Чисто</MudSelectItem>
+            </MudSelect>
+
+            @* <MudSlider T="double" *@
+            @*            Range="true" *@
+            @*            @bind-Values="_fillRange" *@
+            @*            Min="0" *@
+            @*            Max="1" *@
+            @*            Step="0.1" *@
+            @*            Disabled="_loading" *@
+            @*            Style="width: 260px;" *@
+            @*            Label="Уровень заполнения (0-1)" /> *@
+
+            @* <MudSwitch T="bool"  *@
+            @*            @bind-Checked="_outsideFilter" *@
+            @*            Color="Color.Error" *@
+            @*            Label="Только вне контейнера" *@
+            @*            Disabled="_loading" /> *@
+
+            <MudSelect T="string"
+                       @bind-Value="_sortBy"
+                       Label="Сортировка"
+                       Disabled="_loading"
+                       Style="width: 180px;">
+                <MudSelectItem Value="@("dateDesc")">Сначала новые</MudSelectItem>
+                <MudSelectItem Value="@("dateAsc")">Сначала старые</MudSelectItem>
+                <MudSelectItem Value="@("fillLevelDesc")">Уровень заполнения ↓</MudSelectItem>
+                <MudSelectItem Value="@("fillLevelAsc")">Уровень заполнения ↑</MudSelectItem>
+                <MudSelectItem Value="@("totalBinsDesc")">Кол-во баков ↓</MudSelectItem>
+            </MudSelect>
+
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       Disabled="_loading"
+                       OnClick="ApplyFilters">
+                Применить
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Disabled="_loading"
+                       OnClick="ResetFilters">
+                Сбросить
+            </MudButton>
+
+        </MudStack>
+
+    </MudStack>
+</MudPaper>
+
 <MudPaper Class="pa-4"> 
     <MudTable Items="_photos"
               Dense="true"
               Hover="true"
               Loading="_loading">
         <HeaderContent>
-            <MudTh>Id</MudTh>
+            @* <MudTh>Id</MudTh> *@
             <MudTh>Имя файла</MudTh>
             <MudTh>Долгота</MudTh>
             <MudTh>Широта</MudTh>
@@ -55,7 +122,19 @@
             </MudTd>
             <MudTd DataLabel="Количество баков">@context.TotalBins</MudTd>
             <MudTd DataLabel="Комментарий">@context.Comment</MudTd>
-            <MudTd DataLabel="Кем загружено фото">@context.UploadedById</MudTd>
+            <MudTd DataLabel="Кем загружено фото">
+                @context.UploadedBy.Firstname
+                @context.UploadedBy.Surname
+                @context.UploadedBy.Email
+            </MudTd>
+            
+            <MudTd DataLable="Действия" Align="Align.Rigth">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Size="Size.Small"
+                               OnClick="() => OpenEditDialog(context)"/>
+            </MudTd>
             
             @* <MudTd DataLabel="Действия" Align="Align.Rigth"> *@
             @*     <MudIconButton Icon="@Icons.Material.Filled.Edit" *@
@@ -77,27 +156,130 @@
         Href="/admin/photo/add"
     ></MudFab>
 
-@* <MudDialog @bind-Visible="_createDialogOpen"> *@
-@*     <DialogContent> *@
-@*         <MudStack Spacing="2"> *@
-@*             <MudTextField @bind-Value="_createModel.Firstname" Label="Имя"/> *@
-@*             <MudTextField @bind-Value="_createModel.Surname" Label="Фамилия"/> *@
-@*             <MudTextField @bind-Value="_createModel.Email" Label="Почта"/> *@
-@*             <MudTextField @bind-Value="_createModel.Password" Label="Пароль" *@
-@*                           InputType="InputType.Password"/> *@
-@*             <MudSelect @bind-Value="_createModel.RoleName" Label="Роль"> *@
-@*                 <MudSelectItem Value="@Roles.User">Пользователь</MudSelectItem> *@
-@*                 <MudSelectItem Value="Roles.Manager">Менеджер</MudSelectItem> *@
-@*             </MudSelect> *@
-@*         </MudStack> *@
-@*     </DialogContent> *@
-@* *@
-@*     <DialogActions> *@
-@*         <MudButton OnClick="CloseCreateDialog">Отмена</MudButton> *@
-@*         <MudButton Color="Color.Primary" *@
-@*                    Disabled="_creating" *@
-@*                    OnClick="CreateUserAsync"> *@
-@*             Создать *@
-@*         </MudButton> *@
-@*     </DialogActions> *@
-@* </MudDialog> *@
+<MudDialog @bind-IsVisible="_editDialogOpen" MaxWidth="MaxWidth.Medium">
+    <DialogContent>
+        <MudText Typo="Typo.h5" GutterBottom="true">
+            Редактирование фото контейнера
+        </MudText>
+
+        <MudPaper Class="pa-4">
+
+            @if (_originalPhoto is not null)
+            {
+                <MudText Typo="Typo.subtitle2">Текущее фото:</MudText>
+                <MudImage Src="@_originalPhoto.UrlFile"
+                          Width="200"
+                          Height="200"
+                          Class="rounded mb-3"
+                          Elevation="2" />
+            }
+
+            <MudText Typo="Typo.subtitle2">Загрузить новое фото (необязательно)</MudText>
+
+            <MudFileUpload T="IBrowserFile"
+                           FilesChanged="OnPhotoSelected"
+                           Accept=".jpg,.jpeg,.png"
+                           MaxFilesAllowed="1">
+                <ActivatorContent>
+                    <MudFab Color="Color.Success"
+                            StartIcon="@Icons.Material.Filled.AttachFile" />
+                </ActivatorContent>
+            </MudFileUpload>
+
+            @if (_newFiles.Any())
+            {
+                <MudText Typo="Typo.body2" Class="mt-2">
+                    Выбрано: @_newFiles.Count файл(ов)
+                </MudText>
+
+                <MudList>
+                    @foreach (var file in _newFiles)
+                    {
+                        <MudListItem Icon="@Icons.Material.Filled.AttachFile">
+                            @file.Name <code>@file.Size bytes</code>
+                        </MudListItem>
+                    }
+                </MudList>
+            }
+
+            @if (!string.IsNullOrEmpty(_previewImage))
+            {
+                <MudImage Src="@_previewImage"
+                          Width="200"
+                          Height="200"
+                          Class="mt-3 rounded"
+                          Elevation="2" />
+            }
+
+            <MudGrid Class="mt-4">
+
+                <MudItem xs="12" md="6">
+                    <MudNumericField @bind-Value="_editModel.FillLevel"
+                                     Label="Уровень заполнения (0.0–1.0)"
+                                     Min="0"
+                                     Max="1"
+                                     Step="0.1"
+                                     Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudNumericField @bind-Value="_editModel.TotalBins"
+                                     Label="Количество баков"
+                                     Min="1"
+                                     Step="1"
+                                     Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_editModel.Comment"
+                                  Label="Комментарий"
+                                  Lines="3"
+                                  Variant="Variant.Outlined" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudCheckBox T="bool"
+                                 @bind-Checked="_editModel.IsOutsideBin"
+                                 Label="Мусор вне контейнеров"
+                                 Color="Color.Primary" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-2">Типы контейнеров:</MudText>
+
+                    <MudSelect T="Guid"
+                               MultiSelection="true"
+                               @bind-SelectedValues="_editModel.BinTypeId"
+                               Variant="Variant.Outlined"
+                               Label="Выберите типы">
+
+                        @foreach (var kv in _binTypesName)
+                        {
+                            <MudSelectItem Value="@kv.Key">@kv.Value</MudSelectItem>
+                        }
+                    </MudSelect>
+
+                    <MudText Class="mt-2">
+                        Выбрано: <strong>@_editModel.BinTypeId.Count</strong>
+                    </MudText>
+                </MudItem>
+
+            </MudGrid>
+
+        </MudPaper>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   Disabled="_editing"
+                   OnClick="UpdatePhotoAsync">
+            Сохранить
+        </MudButton>
+
+        <MudButton Variant="Variant.Outlined"
+                   OnClick="CloseEditDialog">
+            Отмена
+        </MudButton>
+    </DialogActions>
+</MudDialog>

@@ -4,6 +4,6 @@
         Guid Id,
         string Name,
         string Description,
-        List<UserRequest> Users,
+        //List<UserRequest> Users,
         List<PermissionRequest> Permissions);
 }

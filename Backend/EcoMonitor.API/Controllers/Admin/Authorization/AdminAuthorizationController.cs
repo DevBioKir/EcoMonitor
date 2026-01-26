@@ -104,7 +104,7 @@ public class AdminAuthorizationController(
     {
         try
         {
-            var response = await authService.RegisterAsync(request, request.RoleName, cancellationToken);
+            var response = await authService.RegisterAsync(request, cancellationToken);
             
             return Ok(response);
         }
@@ -155,6 +155,18 @@ public class AdminAuthorizationController(
         return ApiOk( new {
             message = $"User {userId} blocked {request.Reason}",
             blockerUntil = DateTime.UtcNow.Add(request.ToTimeSpan())
+        });
+    }
+    
+    [HttpPost("unlock/{userId}")]
+    public async Task<IActionResult> UnlockUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        await authService.UnlockUserAsync(userId, cancellationToken);
+        
+        return ApiOk( new {
+            message = $"User {userId} Unlock"
         });
     }
     

@@ -1,9 +1,7 @@
 ﻿@page "/admin/userManage"
 @using EcoMonitor.AdminPanel.Components.Layout
-@using EcoMonitor.AdminPanel.Data.Models
 @using EcoMonitor.Contracts.Contracts.User
 @using EcoMonitor.Core.Models.Users
-@using Microsoft.AspNetCore.Identity
 @layout MainLayout
 
 <MudText Typo="Typo.h4" Class="mb-2">
@@ -11,17 +9,54 @@
 </MudText>
 
 @* <MudPaper Class="ps-4 mb-3"> *@
-    @* <MudStack Direction="Row" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Rigth"> *@
-         <MudButton Color="Color.Primary"
-                    Variant="Variant.Filled"
-                    OnClick="OpenCreateDialog">
-             Создать пользователя
-         </MudButton>
-    @* </MudStack> *@
+<MudStack Direction="Column" Class="mb-3 w-100">
+
+    <!-- Первый ряд: Создать слева -->
+    <MudStack Row="true"
+              AlignItems="AlignItems.Center"
+              Justify="Justify.FlexStart"
+              Class="w-100">
+        
+        <MudButton Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   OnClick="OpenCreateDialog">
+            Создать пользователя
+        </MudButton>
+    </MudStack>
+
+    <!-- Второй ряд: справа блок с кнопкой и поиском -->
+    @* <MudStack Row="true" *@
+    @*           AlignItems="AlignItems.Start" *@
+    @*           Justify="Justify.FlexEnd" *@
+    @*           Class="w-100 mt-2"> *@
+
+        <!-- Внутренний вертикальный блок справа -->
+        <MudStack Direction="Column" AlignItems="AlignItems.End">
+
+            <!-- Кнопка обновить -->
+            <MudButton Color="Color.Primary"
+                       Variant="Variant.Filled"
+                       OnClick="@(() => LoadUsersAsync())"
+                       Class="mb-2">
+                Обновить
+            </MudButton>
+
+            <!-- Поиск под кнопкой -->
+            <MudTextField @bind-Value="_search"
+                          Placeholder="Поиск"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Immediate="true"
+                          Disabled="_loading"
+                          Style="max-width: 300px;" />
+        </MudStack>
+
+    </MudStack>
 @* </MudPaper> *@
 
-<MudPaper Class="pa-4"> 
+<MudPaper Class="pa-4">
     <MudTable Items="_users"
+              Filter="_loading ? null : FilterUser"
               Dense="true"
               Hover="true"
               Loading="_loading">
@@ -30,6 +65,9 @@
             <MudTh>Имя</MudTh>
             <MudTh>Фамилия</MudTh>
             <MudTh>Почта</MudTh>
+            <MudTh>Роль</MudTh>
+            <MudTh>Статус</MudTh>
+            <MudTh>Действия</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
@@ -37,18 +75,64 @@
             <MudTd DataLabel="Фамилия">@context.Surname</MudTd>
             <MudTd DataLabel="Почта">@context.Email</MudTd>
             <MudTd DataLabel="Роль">@context.RoleUser.Name</MudTd>
+            <MudTd DataLabel="Статус">
+                @* <MudText Typo="Typo.caption"> *@
+                @*     LockedUntil (raw): @context.LockedUntil?.ToString("O") <br /> *@
+                @*     Now (UTC): @DateTime.UtcNow.ToString("O") *@
+                @* </MudText> *@
+                @if (IsBlocked(context))
+                {
+                    <MudChip T="string"
+                             Color="Color.Error"
+                             Variant="Variant.Filled">
+                        Заблокирован
+                    </MudChip>
+
+                    <MudText Typo="Typo.caption">
+                        @if (!string.IsNullOrWhiteSpace(context.BlockReason))
+                        {
+                            <span>Причина: @context.BlockReason<br /></span>
+                        }
+                        До: @context.LockedUntil.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")
+                    </MudText>
+                }
+                else
+                {
+                    <MudChip T="string"
+                             Color="Color.Success"
+                             Variant="Variant.Outlined">
+                        Активен
+                    </MudChip>
+                }
+            </MudTd>
             
             <MudTd DataLabel="Действия" Align="Align.Rigth">
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Variant="Variant.Outlined"
                                Color="Color.Primary"
-                               Size="Size.Small" 
+                               Size="Size.Small"
                                OnClick="@(() => OpenEditDialog(context))"/>
+                @if (IsBlocked(context))
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.LockOpen"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Dark"
+                                   Size="Size.Small"
+                                   OnClick="() => OpenUnlock(context)"/>
+                }
+                else
+                {
+                    <MudIconButton Icon="@Icons.Material.Filled.Block"
+                                   Variant="Variant.Outlined"
+                                   Color="Color.Dark"
+                                   Size="Size.Small"
+                                   OnClick="@(() => OpenBlockDialog(context))"/>
+                }
             </MudTd>
             @* <MudTd DataLabel="Статус"> *@
             @*     @(context.IsBlocked ? "Заблокирован" : "Активен") *@
             @* </MudTd> *@
-            
+
         </RowTemplate>
     </MudTable>
 </MudPaper>
@@ -61,9 +145,15 @@
             <MudTextField @bind-Value="_createModel.Email" Label="Почта"/>
             <MudTextField @bind-Value="_createModel.Password" Label="Пароль"
                           InputType="InputType.Password"/>
-            <MudSelect @bind-Value="_createModel.RoleName" Label="Роль">
-                <MudSelectItem Value="@Roles.User">Пользователь</MudSelectItem>
-                <MudSelectItem Value="Roles.Manager">Менеджер</MudSelectItem>
+            <MudSelect T="Guid"
+                       @bind-Value="_createModel.RoleName"
+                       Label="Роль">
+                <MudSelectItem T="Guid" Value="@RoleConstants.UserId">
+                    Пользователь
+                </MudSelectItem>
+                <MudSelectItem T="Guid" Value="@RoleConstants.ManagerId">
+                    Менеджер
+                </MudSelectItem>
             </MudSelect>
         </MudStack>
     </DialogContent>
@@ -86,7 +176,7 @@
             <MudTextField @bind-Value="_editModel.Surname" Label="Фамилия"/>
             <MudTextField @bind-Value="_editModel.Email" Label="Почта"/>
 
-            <MudSelect T="UserRoleResponse" @bind-Value="_editModel.Role" Label="Роль">
+            <MudSelect T="UserRoleResponse" Label="Роль" @bind-Value="_editModel.Role" >
                 <MudSelectItem Value="@UserRoleUser">Пользователь</MudSelectItem>
                 <MudSelectItem Value="@UserRoleManager">Менеджер</MudSelectItem>
                 <MudSelectItem Value="@UserRoleAdmin">Администратор</MudSelectItem>
@@ -100,6 +190,39 @@
                    Disabled="_editing"
                    OnClick="UpdateUserAsync">
             Сохранить
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+<MudDialog @bind-Visible="_blockDialogOpen">
+    <TitleContent>Блокировка пользователя</TitleContent>
+
+    <DialogContent>
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.subtitle2">
+                @_userToBlock?.Email
+            </MudText>
+
+            <MudTextField Label="Причина блокировки"
+                          @bind-Value="_blockModel.Reason"
+                          Required="true"/>
+
+            <MudNumericField T="int"
+                             Label="Количество дней"
+                             @bind-Value="_blockModel.Days"
+                             Min="1"/>
+        </MudStack>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="CloseBlockDialog">
+            Отмена
+        </MudButton>
+
+        <MudButton Color="Color.Error"
+                   Disabled="_blocking"
+                   OnClick="BlockUserAsync">
+            Заблокировать
         </MudButton>
     </DialogActions>
 </MudDialog>

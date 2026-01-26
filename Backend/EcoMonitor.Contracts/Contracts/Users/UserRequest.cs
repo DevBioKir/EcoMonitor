@@ -14,5 +14,5 @@ namespace EcoMonitor.Contracts.Contracts.User
         DateTime CreatedAt,
         DateTime LastLogindAt,
         DateTime LockedUntil,
-        List<BinPhotoRequest> BinPhoto);
+        List<AddPhotoRequest> BinPhoto);
 }

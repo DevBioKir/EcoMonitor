@@ -72,7 +72,7 @@ class _UserPhotosScreenState extends State<UserPhotosScreen> {
       print('Stack trace: $stackTrace');
       
       setState(() {
-        _error = "Не удалось загрузить фотографии: $e"; // Покажите конкретную ошибку
+        _error = "Не удалось загрузить фотографии: $e";
         _isLoading = false;
       });
     }

@@ -2,6 +2,7 @@
 {
     public record ProcessedImageResult(
         string OriginalUrl,
+        string FileName,
         // string LargeUrl,
         // string ThumbUrl,
         int OriginalWidth,

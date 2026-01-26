@@ -24,7 +24,7 @@ namespace EcoMonitor.Core.Models.Users
         public DateTime CreatedAt { get; private set; }
         public DateTime LastLogindAt { get; private set; }
         public bool AccountEnabled { get; private set; } = true;
-        public string? BlockReason {get; private set;} 
+        public string? BlockReason { get; private set; }
         public DateTime? LockedUntil { get; private set; }
         
         
@@ -36,6 +36,28 @@ namespace EcoMonitor.Core.Models.Users
 
         private User() {}
 
+        // private User(
+        //     string firstname,
+        //     string surname,
+        //     Email email,
+        //     PasswordHash passwordHash,
+        //     UserRole role)
+        // {
+        //     Id = Guid.NewGuid();
+        //     Firstname = firstname;
+        //     Surname = surname;
+        //     Email = email;
+        //     PasswordHash = passwordHash;
+        //     isLoginConfirmed = true;
+        //     //Role = role ?? throw new ArgumentNullException(nameof(role));
+        //     Role = role;
+        //     RoleId = role.Id;
+        //     CreatedAt = DateTime.UtcNow;
+        //     LastLogindAt = DateTime.UtcNow;
+        //
+        //     Validate();
+        // }
+        
         private User(
             string firstname,
             string surname,
@@ -56,6 +78,7 @@ namespace EcoMonitor.Core.Models.Users
 
             Validate();
         }
+        
         private User(
             Guid id,
             string firstname,
@@ -75,8 +98,9 @@ namespace EcoMonitor.Core.Models.Users
             Surname = surname;
             Email = email;
             PasswordHash = passwordHash;
-            Role = role;
-            RoleId = role.Id;
+            ChangeRole(role);
+            // Role = role;
+            // RoleId = role.Id;
             //isLoginConfirmed = true;
             CreatedAt = createdAt;
             LastLogindAt = lastLogindAt;
@@ -90,6 +114,8 @@ namespace EcoMonitor.Core.Models.Users
                 throw new ArgumentException("Firstname required");
             if (string.IsNullOrWhiteSpace(Surname))
                 throw new ArgumentException("Surname required");
+            if (RoleId == null)
+                throw new InvalidOperationException("User must have a role");
         }
         
         public static User Create(
@@ -105,6 +131,20 @@ namespace EcoMonitor.Core.Models.Users
             return user;
 
         }
+        
+        // public static User Create(
+        //     string firstname,
+        //     string surname,
+        //     string email,
+        //     PasswordHash passwordHash,
+        //     UserRole role)
+        // {
+        //     var emailVo = Email.Create(email);
+        //
+        //     var user = new User(firstname, surname, emailVo, passwordHash, role);
+        //     return user;
+        //
+        // }
 
         public static User Restore(
             Guid id,
@@ -154,7 +194,17 @@ namespace EcoMonitor.Core.Models.Users
         
         public void UpdateEmail(string newEmail) => Email = Email.Create(newEmail);
 
-        public void ChangeRole(Guid roleId) => RoleId = roleId;
+        public void ChangeRole(UserRole role)
+        {
+            if (role is null)
+                throw new ArgumentNullException(nameof(role));
+
+            if (Role != null && Role.Id == role.Id)
+                return;
+
+            Role = role;
+            RoleId = role.Id;
+        } 
         
         public void UpdateLastLoggedAt(DateTime newLastLoggedAt) => LastLogindAt = newLastLoggedAt;
 
@@ -192,6 +242,7 @@ namespace EcoMonitor.Core.Models.Users
         {
             AccountEnabled = true;
             BlockReason = null;
+            LockedUntil = null;
         }
         
         public bool CanLogin() => AccountEnabled && isLoginConfirmed 

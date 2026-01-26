@@ -26,6 +26,12 @@ namespace EcoMonitor.DataAccess.Configurations.Users
 
             builder.Property(u=> u.isLoginConfirmed)
                 .HasDefaultValue(false);
+            
+            builder.Property(u => u.AccountEnabled)
+                .HasDefaultValue(true);
+            
+            builder.Property(u => u.LockedUntil)
+                .HasDefaultValue(DateTime.MinValue);
 
             builder.HasOne(u => u.Role)
                 .WithMany(ur => ur.Users)

@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using EcoMonitor.AdminPanel.Infrastucture.TokenPersistence
+@using EcoMonitor.AdminPanel.Infrastucture.TokenStorage
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -16,8 +18,111 @@
 
 <body>
 <Routes @rendermode="InteractiveServer"/>
+
+@* @if (!_initialized) *@
+@* { *@
+@*     <div class="d-flex justify-content-center align-items-center" style="height:100vh;"> *@
+@*         <p>Загрузка...</p> *@
+@*     </div> *@
+@* } *@
+
 <script src="_framework/blazor.web.js"></script>
 <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+
+@code {
+    // [Inject] private ITokenStore TokenStore { get; set; } = default!;
+    // [Inject] private NavigationManager Navigation { get; set; } = default!;
+    // [Inject] private ITokenPersistenceService TokenPersistence { get; set; } = default!;
+    //
+    // private bool _initialized;
+    
+    public static TaskCompletionSource<bool> TokensLoaded { get; } = new();
+    
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (!firstRender || _initialized) return;
+    //
+    //     try
+    //     {
+    //         await TokenPersistence.LoadAsync();
+    //         // Загружаем токены из localStorage
+    //         // var access = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken");
+    //         // var refresh = await JS.InvokeAsync<string>("localStorage.getItem", "refreshToken");
+    //         
+    //         Console.WriteLine($"[App.razor] HasAccessToken: {TokenStore.HasAccessToken()}");
+    //         Console.WriteLine($"[App.razor] AccessToken: {TokenStore.AccessToken}");
+    //         Console.WriteLine($"[App.razor] RefreshToken: {TokenStore.RefreshToken}");
+    //
+    //         // if (!string.IsNullOrWhiteSpace(access) && !string.IsNullOrWhiteSpace(refresh))
+    //         // {
+    //         //     // Сохраняем в TokenStore, чтобы AdminAuthHandler мог их использовать
+    //         //     TokenStore.SetTokens(access, refresh);
+    //         //     // Навигация на dashboard без forceLoad
+    //         //     //Navigation.NavigateTo("/admin/dashboard");
+    //         // }
+    //         // // else
+    //         // // {
+    //         // //     Navigation.NavigateTo("/auth/login");
+    //         // // }
+    //         //
+    //         // TokensLoaded.TrySetResult(true);
+    //         
+    //         if (!TokenStore.HasAccessToken())
+    //         {
+    //             // токены нет → редирект на login
+    //             TokensLoaded.TrySetResult(false);
+    //             Navigation.NavigateTo("/auth/login", true);
+    //             return;
+    //         }
+    //         
+    //         TokensLoaded.TrySetResult(true);
+    //         _initialized = true;
+    //         StateHasChanged();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"[App.razor] Error reading tokens: {ex.Message}");
+    //         TokensLoaded.TrySetResult(false);
+    //         Navigation.NavigateTo("/auth/login", true);
+    //         //Navigation.NavigateTo("/auth/login");
+    //     }
+    // }
+}
+@* @code { *@
+@*     [Inject] private IJSRuntime JS { get; set; } = default!; *@
+@*     [Inject] private ITokenStore TokenStore { get; set; } = default!; *@
+@* *@
+@*     // protected override async Task OnInitializedAsync() *@
+@*     // { *@
+@*     //     var access = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken"); *@
+@*     //     var refresh = await JS.InvokeAsync<string>("localStorage.getItem", "refreshToken"); *@
+@*     // *@
+@*     //     if (!string.IsNullOrWhiteSpace(access) && !string.IsNullOrWhiteSpace(refresh)) *@
+@*     //     { *@
+@*     //         TokenStore.SetTokens(access, refresh); *@
+@*     //     } *@
+@*     // } *@
+@*      *@
+@*     protected override async Task OnAfterRenderAsync(bool firstRender) *@
+@*     { *@
+@*         if (!firstRender) return; *@
+@*      *@
+@*         var access = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken"); *@
+@*         var refresh = await JS.InvokeAsync<string>("localStorage.getItem", "refreshToken"); *@
+@*      *@
+@*         if (!string.IsNullOrWhiteSpace(access) && !string.IsNullOrWhiteSpace(refresh)) *@
+@*         { *@
+@*             TokenStore.SetTokens(access, refresh); *@
+@* *@
+@*             // Навигация на dashboard *@
+@*             Navigation.NavigateTo("/admin/dashboard", true); *@
+@*         } *@
+@*         else *@
+@*         { *@
+@*             Navigation.NavigateTo("/auth/login", true); *@
+@*         } *@
+@*     } *@
+@* } *@
 </body>
 
 </html>

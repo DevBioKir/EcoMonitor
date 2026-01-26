@@ -92,15 +92,19 @@ public class AuthService : IAuthService
     
     public async Task<AuthResponse> RegisterAsync(
         RegisterUserRequest request,
-        string roleName,
         CancellationToken cancellationToken = default)
     {
         var user =  await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
         if (user != null)
             throw new InvalidOperationException("User with this email already exists");
         
+        var userRole = await _userRoleRepository.GetRoleByIdAsNoTrackingAsync(request.RoleName, cancellationToken);
+        
         // Select a factory by role name
-        var factory = _factoryResolver.Resolve(roleName);
+        var factory = _factoryResolver.Resolve(userRole.Name);
+        
+        if (userRole is null)
+            throw new InvalidOperationException("Role not found");
 
         //var roleDomain = await _userRoleRepository.GetByNameASync(roleName, cancellationToken);
 
@@ -255,6 +259,34 @@ public class AuthService : IAuthService
             
             await _userRepository.UpdateAsync(user, cancellationToken);
             _logger.LogInformation("User {UserId} successfully blocked", id);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+    
+    public async Task UnlockUserAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        if (id == Guid.Empty)
+            throw new ArgumentException("User ID is required");
+        
+        _logger.LogInformation("Unlocking user {UserId}", id);
+        
+        try
+        {
+            var user = await _userRepository.GetByIdAsync(id, cancellationToken);
+            
+            if (user == null)
+                throw new NotFoundException($"User {id} not found");
+            
+            user.UnlockAccount();
+            
+            await _userRepository.UpdateAsync(user, cancellationToken);
+            _logger.LogInformation("User {UserId} successfully unlocked", id);
         }
         catch (Exception e)
         {

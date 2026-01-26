@@ -35,4 +35,12 @@ public class UserRoleRepository : IUserRoleRepository
         var userRoleEntity = await _context.UserRoles.FindAsync(new object[] { id }, cancellationToken);
         return _mapper.Map<UserRole>(userRoleEntity);
     }
+    
+    public async Task<UserRole> GetRoleByIdAsNoTrackingAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var userRoleEntity = await _context.UserRoles
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+        return _mapper.Map<UserRole>(userRoleEntity);
+    }
 }

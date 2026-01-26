@@ -5,5 +5,5 @@
         string Surname,
         string Email,
         string Password,
-        string RoleName = "User");
+        Guid RoleName);
 }

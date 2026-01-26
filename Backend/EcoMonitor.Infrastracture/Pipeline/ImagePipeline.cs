@@ -61,6 +61,7 @@ namespace EcoMonitor.Infrastracture.Pipeline
             try
             {
                 var url = await _storageService.SaveImageAsync(file);
+                var fileName = Path.GetFileName(new  Uri(url).LocalPath);
                 
                 using var uploadedImage = Image.Load<Rgba32>(decoderOptions, ms);
 
@@ -71,6 +72,7 @@ namespace EcoMonitor.Infrastracture.Pipeline
 
                 return new ProcessedImageResult(
                     OriginalUrl: url,
+                    FileName: fileName,
                     OriginalWidth: uploadedImage.Width,
                     OriginalHeight: uploadedImage.Height,
                     SourceFormat: uploadedImage.Metadata.DecodedImageFormat?.Name ?? "unknown",

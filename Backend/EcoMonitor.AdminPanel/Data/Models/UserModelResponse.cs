@@ -9,9 +9,11 @@ public sealed record UserModelResponse(
     string Email,
     //string RoleName
     //bool isLoginConfirmed,
-    UserRoleResponse RoleUser
+    UserRoleResponse RoleUser,
     //DateTime CreatedAt,
     //DateTime LastLogindAt,
-    //DateTime LockedUntil,
+    string? AccountEnabled,
+    string? BlockReason,
+    DateTime? LockedUntil
     //List<BinPhotoResponse> BinPhoto
     );

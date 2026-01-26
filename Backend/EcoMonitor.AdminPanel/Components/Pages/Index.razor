@@ -1,10 +1,42 @@
 @page "/"
+@using EcoMonitor.AdminPanel.Infrastucture.TokenStorage
+@inject ITokenStore TokenStore
+@inject IJSRuntime JS
 @inject NavigationManager Navigation
 
-@code {
+<div class="d-flex justify-content-center align-items-center" style="height:100vh;">
+    <p>Загрузка...</p>
+</div>
 
-    protected override void OnInitialized()
+@code {
+    private bool _loaded;
+    public static TaskCompletionSource<bool> TokensLoaded { get; } = new();
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Navigation.NavigateTo("/auth/Login", true);
+        if (!firstRender || _loaded) return;
+        _loaded = true;
+
+        var access = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken");
+        var refresh = await JS.InvokeAsync<string>("localStorage.getItem", "refreshToken");
+        
+        Console.WriteLine("[Index] Loaded tokens from localStorage:");
+        Console.WriteLine($"[Index] AccessToken: {access}");
+        Console.WriteLine($"[Index] RefreshToken: {refresh}");
+
+        if (!string.IsNullOrWhiteSpace(access) && !string.IsNullOrWhiteSpace(refresh))
+        {
+            TokenStore.SetTokens(access, refresh);
+            //TokensLoaded.TrySetResult(true);
+            App.TokensLoaded.TrySetResult(true);
+            Console.WriteLine("[Index] Tokens saved to TokenStore, redirecting to /admin/dashboard");
+            Navigation.NavigateTo("/admin/dashboard");
+        }
+        else
+        {
+            App.TokensLoaded.TrySetResult(false);
+            Console.WriteLine("[Index] Tokens not found, redirecting to /auth/login");
+            Navigation.NavigateTo("/auth/login", true);
+        }
     }
 }

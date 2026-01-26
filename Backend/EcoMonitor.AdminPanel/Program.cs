@@ -1,5 +1,7 @@
 using EcoMonitor.AdminPanel.Components;
 using EcoMonitor.AdminPanel.Infrastucture.Http;
+using EcoMonitor.AdminPanel.Infrastucture.TokenPersistence;
+using EcoMonitor.AdminPanel.Infrastucture.TokenStorage;
 using EcoMonitor.App.Services;
 using EcoMonitor.App.Services.Authorization;
 using MudBlazor.Services;
@@ -27,7 +29,13 @@ var apiBaseUrl = configuration.GetConnectionString("EcoMonitorAPI")
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddTransient<AdminAuthHandler>();
+builder.Services.AddScoped<Http401Handler>();
+builder.Services.AddScoped<Http401HandlerAccessor>();
+
+builder.Services.AddSingleton<ITokenStore, TokenStore>();
+builder.Services.AddSingleton<ITokenPersistenceService, TokenPersistenceService>();
+
+builder.Services.AddScoped<AdminAuthHandler>();
 
 builder.Services.AddHttpClient("PublicApi", client =>
 {
@@ -39,6 +47,13 @@ builder.Services.AddHttpClient("AdminApi", client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 })
     .AddHttpMessageHandler<AdminAuthHandler>();
+
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.SetMinimumLevel(LogLevel.Debug);
+    logging.AddFilter("Microsoft", LogLevel.Warning);
+});
 
 var app = builder.Build();
 

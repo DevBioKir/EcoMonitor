@@ -1,3 +1,5 @@
+using EcoMonitor.Contracts.Contracts.User;
+
 namespace EcoMonitor.AdminPanel.Data.Models;
 
 public sealed record CreateUserModelRequest
@@ -6,5 +8,5 @@ public sealed record CreateUserModelRequest
     public string Surname { get; set; } = "";
     public string Email { get; set; } = "";
     public string Password { get; set; } = "";
-    public string RoleName { get; set; } = "User";
+    public Guid RoleName { get; set; }
 }

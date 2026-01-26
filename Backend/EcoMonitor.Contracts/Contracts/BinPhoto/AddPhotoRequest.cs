@@ -4,7 +4,7 @@ using NetTopologySuite.Geometries;
 
 namespace EcoMonitor.Contracts.Contracts.BinPhoto
 {
-    public record BinPhotoRequest(
+    public record AddPhotoRequest(
         //Guid Id,
         string FileName,
         string UrlFile,

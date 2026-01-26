@@ -53,10 +53,15 @@ void main() async {
     print('MapKit initialization failed: $e');
   }
 
+  
+  //String apiUrl = dotenv.env['BASE_URL_FOR_VD'] ?? '';
+  String apiUrl = dotenv.env['BASE_URL_FOR_FD'] ?? '';
+  
   final storage = const FlutterSecureStorage();
   final apiClient = ApiClient(
     //"http://localhost:5198", () async => await storage.read(key: 'access_token') ?? '');
-    "http://10.0.2.2:5198", () async => await storage.read(key: 'access_token') ?? '');
+    //"https://10.0.2.2:7198", () async => await storage.read(key: 'access_token') ?? '');
+    apiUrl, () async => await storage.read(key: 'access_token') ?? '');
 
   final authService = AuthService(apiClient);
   final userService = UserService(apiClient);

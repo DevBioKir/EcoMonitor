@@ -10,6 +10,13 @@ public class ManagerRegisterFactory(IPasswordHasher passwordHasher) : IUserRegis
 {
     public UserRole Role => UserRole.Manager;
 
+    // public User CreateUser(string firstname, string surname, string email, string password)
+    // {
+    //     var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);
+    //
+    //     return User.Create(firstname, surname, email, passwordHash, Role);
+    // }
+    
     public User CreateUser(string firstname, string surname, string email, string password)
     {
         var passwordHash = PasswordHash.FromPlainPassword(password, passwordHasher);

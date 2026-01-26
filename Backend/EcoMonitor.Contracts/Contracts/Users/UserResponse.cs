@@ -7,4 +7,6 @@ public record UserResponse(
     string Firstname,
     string Surname,
     string Email,
-    UserRoleResponse RoleUser);
+    UserRoleResponse RoleUser,
+    string BlockReason,
+    DateTime LockedUntil);

@@ -1,0 +1,21 @@
+﻿@inject NavigationManager Navigation
+
+@if (_shouldRedirect)
+{
+    Navigation.NavigateTo("/auth/login", true);
+}
+
+@ChildContent
+
+@code {
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    private bool _shouldRedirect;
+
+    public void TriggerRedirect()
+    {
+        _shouldRedirect = true;
+        StateHasChanged();
+    }
+}

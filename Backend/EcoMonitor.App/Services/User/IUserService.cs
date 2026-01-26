@@ -7,7 +7,7 @@ namespace EcoMonitor.App.Services.User;
 public interface IUserService
 {
     Task<IReadOnlyList<UserResponse>> GetAllAsync(Guid? currentUserId, CancellationToken cancellationToken = default);
-    Task AddAsync(UserRequest user, Guid? currentUser, CancellationToken cancellationToken = default);
+    //Task AddAsync(UserRequest user, Guid? currentUser, CancellationToken cancellationToken = default);
     Task<UserWithPhotosResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<UserWithPhotosResponse> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
     Task<UserResponse> UpdateAsync(

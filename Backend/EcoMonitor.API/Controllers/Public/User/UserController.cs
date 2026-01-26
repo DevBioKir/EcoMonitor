@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using EcoMonitor.API.Attributes;
 using EcoMonitor.App.Services;
 using EcoMonitor.App.Services.User;
 using EcoMonitor.Contracts.Contracts.User;
@@ -7,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EcoMonitor.API.Controllers.User;
 
-[ApiController]
-[Route("api/[controller]")]
+[PublicApi]
+[Route("[controller]")]
 [Authorize]
 public class UserController(
     IUserService _userService,

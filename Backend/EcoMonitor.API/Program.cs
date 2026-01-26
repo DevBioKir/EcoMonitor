@@ -117,7 +117,8 @@ if (jwtSettings == null)
     throw new InvalidOperationException("JwtSettings config section missing or misconfigured.");
 AuthorizationSetup.AddApiAuthentication(builder.Services, Options.Create(jwtSettings));
 
-builder.WebHost.UseUrls("http://0.0.0.0:5198");
+builder.WebHost.UseUrls("http://0.0.0.0:5198", 
+    "https://0.0.0.0:7198");
 
 var app = builder.Build();
 

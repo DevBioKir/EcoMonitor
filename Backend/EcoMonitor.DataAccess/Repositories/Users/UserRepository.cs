@@ -4,6 +4,7 @@ using EcoMonitor.DataAccess.Entities.Users;
 using Mapster;
 using MapsterMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using OpenQA.Selenium;
 
 namespace EcoMonitor.DataAccess.Repositories.Users
@@ -12,13 +13,15 @@ namespace EcoMonitor.DataAccess.Repositories.Users
     {
         private readonly EcoMonitorDbContext _context;
         private readonly IMapper _mapper;
+        private readonly ILogger<UserRepository> _logger;
 
         public UserRepository(
             EcoMonitorDbContext context,
-            IMapper mapper)
+            IMapper mapper, ILogger<UserRepository> logger)
         {
             _context = context;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<IReadOnlyList<User>> GetAllAsync(CancellationToken cancellationToken = default)
@@ -34,8 +37,6 @@ namespace EcoMonitor.DataAccess.Repositories.Users
 
         public async Task<User> AddAsync(User user, CancellationToken cancellationToken = default)
         {
-            var entity = _mapper.Map<UserEntity>(user);
-
             var roleEntity = _context.UserRoles.Local.FirstOrDefault(r => r.Id == user.RoleId);
             if (roleEntity == null)
             {
@@ -43,6 +44,8 @@ namespace EcoMonitor.DataAccess.Repositories.Users
                 if (roleEntity == null)
                     throw new InvalidOperationException("Role not found");
             }
+            
+            var entity = _mapper.Map<UserEntity>(user);
             // Attaching a role to the current context
             // _context.UserRoles.Attach(roleEntity);
             // Linking a user to a role
@@ -94,13 +97,32 @@ namespace EcoMonitor.DataAccess.Repositories.Users
 
         public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
         {
-            var entity = await _context.Users.FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
-            if (entity is null) return;
-            
-            user.Adapt(entity);
+            try
+            {
+                var entity = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Id == user.Id, cancellationToken);
 
-            _context.Users.Update(entity);
-            await _context.SaveChangesAsync(cancellationToken);
+                if (entity is null)
+                    throw new KeyNotFoundException();
+                
+                entity.Firstname = user.Firstname;
+                entity.Surname = user.Surname;
+                entity.Email = user.Email.Value;
+                entity.RoleId = user.RoleId;
+                
+                entity.AccountEnabled = user.AccountEnabled;
+                entity.LockedUntil = user.LockedUntil ??  DateTime.MinValue;
+                entity.BlockReason = user.BlockReason;
+
+                //user.Adapt(entity);
+
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при обновлении пользователя {UserId}", user.Id);
+                throw;
+            }
         }
 
         public async Task UpdateLastLoggedAtAsync(User user, DateTime date, CancellationToken cancellationToken = default)

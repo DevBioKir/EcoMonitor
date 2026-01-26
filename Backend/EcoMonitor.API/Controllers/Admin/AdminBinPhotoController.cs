@@ -1,8 +1,10 @@
 using System.Security.Claims;
 using EcoMonitor.API.Attributes;
 using EcoMonitor.App.Services;
+using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
+using EcoMonitor.Contracts.Models;
 using MapsterMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -64,7 +66,7 @@ public class AdminBinPhotoController(
 
         try
         {
-            var binPhoto = await _binPhotoService.UploadImage(request, currentUserId, ct);
+            var binPhoto = await _binPhotoService.UploadPhotoAsync(request, currentUserId, ct);
             _logger.LogInformation("Фото успешно загружено, Id={Id}", binPhoto.Id);
 
             return Ok(binPhoto);
@@ -76,6 +78,47 @@ public class AdminBinPhotoController(
             return StatusCode(500, "Ошибка при обработке изображения.");
         }
     }
+    
+    [HttpGet("allPhotos")]
+    public async Task<ActionResult<PagedResultDTO<BinPhotoResponse>>> GetAllPhotosWithFilterAsync(
+        [FromQuery] PhotoFilterDTO filterDto,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            //var user = GetCurrentUserId();
+                
+            var query = _mapper.Map<PhotoQuery>(filterDto);
+
+            var photos = await _binPhotoService.GetAllPhotosWithFilterAsync(
+                query,
+                cancellationToken);
+
+            return Ok(photos);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+    
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUserAsync(string id, [FromBody] UpdatePhotoRequest request, CancellationToken cancellationToken)
+    {
+        if (!Guid.TryParse(id, out var photoId))
+        {
+            return BadRequest(new { error = "Invalid User ID format" });
+        }
+        _logger.LogInformation("📥 Контроллер получил JSON: {@Request}", request);
+        
+        var currentUserId = GetCurrentUserId();
+        
+        await _binPhotoService.UpdatePhotoAsync(currentUserId, photoId, request, cancellationToken);
+        _logger.LogInformation("Контроллер ПОСЛЕ: {@Request}", request);
+        
+        return NoContent();
+    }
+    
     
     [HttpGet("GetAllPhotos")]
     public async Task<ActionResult<IReadOnlyList<BinPhotoResponse>>> GetAllBinPhotosAsync()

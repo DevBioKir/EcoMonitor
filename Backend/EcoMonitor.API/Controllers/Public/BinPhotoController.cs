@@ -83,8 +83,31 @@ namespace EcoMonitor.API.Controllers
             return Ok(responseBinPhotos);
         }
         
+        [HttpGet("allPhotos")]
+        public async Task<ActionResult<PagedResultDTO<BinPhotoResponse>>> GetAllPhotosWithFilterAsync(
+            [FromQuery] PhotoFilterDTO filterDto,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                //var user = GetCurrentUserId();
+                
+                var query = _mapper.Map<PhotoQuery>(filterDto);
+
+                var photos = await _binPhotoService.GetAllPhotosWithFilterAsync(
+                    query,
+                    cancellationToken);
+
+                return Ok(photos);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+        
         [HttpGet("userUploadedPhotos")]
-        public async Task<ActionResult<PagedResultDTO<BinPhotoResponse>>> GetUserPhotos(
+        public async Task<ActionResult<PagedResultDTO<BinPhotoResponse>>> GetUserPhotosAsync(
             [FromQuery] PhotoFilterDTO filterDto,
             CancellationToken cancellationToken)
         {
@@ -108,7 +131,7 @@ namespace EcoMonitor.API.Controllers
         }
         
         [HttpPost]
-        public async Task<ActionResult<BinPhotoResponse>> AddBinPhotoAsync([FromBody] BinPhotoRequest request)
+        public async Task<ActionResult<BinPhotoResponse>> AddBinPhotoAsync([FromBody] AddPhotoRequest request)
         {
             var binPhoto = await _binPhotoService.AddBinPhotoAsync(request);
 
@@ -144,7 +167,7 @@ namespace EcoMonitor.API.Controllers
 
             try
             {
-                var binPhoto = await _binPhotoService.UploadImage(request, currentUserId, ct);
+                var binPhoto = await _binPhotoService.UploadPhotoAsync(request, currentUserId, ct);
                 _logger.LogInformation("Фото успешно загружено, Id={Id}", binPhoto.Id);
 
                 return Ok(binPhoto);
