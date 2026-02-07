@@ -10,6 +10,7 @@ namespace EcoMonitor.Contracts.Contracts.BinPhoto
         string UrlFile,
         double Latitude,
         double Longitude,
+        int District,
         DateTime UploadedAt,
         List<Guid> BinTypeId, 
         double FillLevel,

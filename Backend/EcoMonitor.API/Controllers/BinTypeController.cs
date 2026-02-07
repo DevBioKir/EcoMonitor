@@ -25,7 +25,8 @@ namespace EcoMonitor.API.Controllers
             _mapper = mapper;
             _logger = logger;
         }
-
+        
+        [AllowAnonymous]
         [HttpGet("GetAllBinTypes")]
         public async Task<ActionResult<IReadOnlyList<BinTypeResponse>>> GetAllBinTypesAsync()
         {

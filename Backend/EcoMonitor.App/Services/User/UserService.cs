@@ -87,6 +87,11 @@ public class UserService : IUserService
         return _mapper.Map<UserWithPhotosResponse>(userEmail);
     }
 
+    public async Task<int> GetCountUsersAsync(CancellationToken cancellationToken = default)
+    {
+        return await _userRepository.GetCountUsersAsync(cancellationToken);
+    }
+
     public async Task<UserResponse> UpdateAsync(
         Guid actorId, Guid userId, UpdateUserDTO request, CancellationToken cancellationToken = default)
     {

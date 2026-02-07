@@ -21,6 +21,10 @@ namespace EcoMonitor.DataAccess.Configurations
             builder.Property(p => p.Location)
                 .HasColumnType("geography (Point,4326)")
                 .IsRequired();
+            
+            builder.Property(p => p.District)
+                .IsRequired()
+                .HasConversion<int>();
 
             builder.Property(p => p.UploadedAt)
                 .IsRequired();

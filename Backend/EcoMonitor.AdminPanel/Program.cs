@@ -1,9 +1,12 @@
 using EcoMonitor.AdminPanel.Components;
+using EcoMonitor.AdminPanel.Components.Pages.currentUserUI;
+using EcoMonitor.AdminPanel.Infrastucture;
 using EcoMonitor.AdminPanel.Infrastucture.Http;
 using EcoMonitor.AdminPanel.Infrastucture.TokenPersistence;
 using EcoMonitor.AdminPanel.Infrastucture.TokenStorage;
 using EcoMonitor.App.Services;
 using EcoMonitor.App.Services.Authorization;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +37,10 @@ builder.Services.AddScoped<Http401HandlerAccessor>();
 
 builder.Services.AddSingleton<ITokenStore, TokenStore>();
 builder.Services.AddSingleton<ITokenPersistenceService, TokenPersistenceService>();
+
+builder.Services.AddScoped<CurrentUserService>();
+
+builder.Services.AddScoped<UISync>();
 
 builder.Services.AddScoped<AdminAuthHandler>();
 

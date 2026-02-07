@@ -48,6 +48,7 @@ public class AuthorizationController(
         }
     }
     
+    [AllowAnonymous]
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken = default)
     {
@@ -62,11 +63,11 @@ public class AuthorizationController(
             var tokens = await authService.RefreshTokenAsync(request.RefreshToken, cancellationToken);
             return Ok(tokens);
         }
-        catch (InvalidOperationException ex)
-        {
-            _logger.LogWarning(ex, "Invalid or expired refresh token provided");
-            return Unauthorized(new { message = "Invalid or expired refresh token" });
-        }
+        // catch (InvalidOperationException ex)
+        // {
+        //     _logger.LogWarning(ex, "Invalid or expired refresh token provided");
+        //     return Unauthorized(new { message = "Invalid or expired refresh token" });
+        // }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error during refresh token");

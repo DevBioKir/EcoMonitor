@@ -40,6 +40,7 @@ namespace EcoMonitor.API.Controllers
             return Guid.Parse(userIdClaim.Value);
         }
         
+        [AllowAnonymous]
         [HttpGet("GetBinPhotoById")]
         public async Task<ActionResult<BinPhotoResponse>> GetBinPhotoByIdAsync(Guid id)
         {
@@ -184,20 +185,47 @@ namespace EcoMonitor.API.Controllers
         [HttpPost("Markers")]
         public async Task<ActionResult<IReadOnlyList<PhotoMarkerDTO>>> GetMarkersAsync()
         {
-            try
+            var markers = await _binPhotoService.GetMarkersAsync();
+            foreach (var marker in markers)
             {
-                var markers = await _binPhotoService.GetMarkersAsync();
-                foreach (var marker in markers)
-                {
-                    _logger.LogInformation("Фото успешно загружено, Id={Id}", marker.Id);
-                }
-                return Ok(markers);
+                _logger.LogInformation("Фото успешно загружено, Id={Id}", marker.Id);
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+
+            return Ok(markers);
         }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePhotoAsync(
+            string id, [FromForm] UpdatePhotoRequest request, CancellationToken cancellationToken)
+        {
+            if (!Guid.TryParse(id, out var photoId))
+            {
+                return BadRequest(new { error = "Invalid User ID format" });
+            }
+            _logger.LogInformation("Контроллер получил JSON: {@Request}", request);
+        
+            var currentUserId = GetCurrentUserId();
+        
+            await _binPhotoService.UpdatePhotoAsync(currentUserId, photoId, request, cancellationToken);
+            _logger.LogInformation("Контроллер ПОСЛЕ: {@Request}", request);
+        
+            return NoContent();
+        }
+        
+        // [AllowAnonymous]
+        // [HttpPost("by-coordinates")]
+        // public async Task<ActionResult<BinPhotoMapResponse>> GetByCoordinatesAsync(
+        //     [FromQuery] double latitude,
+        //     [FromQuery] double longitude,
+        //     CancellationToken cancellationToken)
+        // {
+        //         var photoByCoordinates = await _binPhotoService.GetByCoordinatesAsync(latitude, longitude, cancellationToken);
+        //
+        //         if (photoByCoordinates is null)
+        //         {
+        //             return NotFound();
+        //         }
+        //         return Ok(photoByCoordinates);
+        // }
     }
 }

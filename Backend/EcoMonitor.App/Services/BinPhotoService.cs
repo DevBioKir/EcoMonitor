@@ -1,14 +1,18 @@
-﻿using EcoMonitor.App.Services.Authorization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using EcoMonitor.App.Services.Authorization;
 using EcoMonitor.Contracts.Contracts;
 using EcoMonitor.Contracts.Contracts.BinPhoto;
 using EcoMonitor.Contracts.Contracts.BinPhotoUpload;
 using EcoMonitor.Contracts.Models;
 using EcoMonitor.Core.Models;
+using EcoMonitor.Core.Models.Users;
 using EcoMonitor.Core.ValueObjects;
 using EcoMonitor.DataAccess.Repositories;
 using EcoMonitor.DataAccess.Repositories.Users;
 using EcoMonitor.Infrastracture.Abstractions;
 using MapsterMapper;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Microsoft.Extensions.Logging;
@@ -23,10 +27,24 @@ namespace EcoMonitor.App.Services
         ILogger<BinPhotoService> logger,
         IImagePipeline _pipeline,
         IUserRepository _userRepository,
-        IAuthorizationService _authorizationService)
+        IAuthorizationService _authorizationService,
+        IWebHostEnvironment _environment)
         : IBinPhotoService
     {
         private readonly ILogger<BinPhotoService> _logger = logger;
+
+        public async Task<int> GetCountPhotosAsync(CancellationToken cancellationToken = default)
+        {
+            return await _binPhotoRepository.GetCountPhotosAsync(cancellationToken);
+        }
+
+        public async Task<IReadOnlyList<BinPhotoResponse>> GetLatestPhotosAsync(
+            int count = 5,
+            CancellationToken cancellationToken = default)
+        {
+            var latestPhotos = await _binPhotoRepository.GetLatestPhotosAsync(count, cancellationToken);
+            return _mapper.Map<IReadOnlyList<BinPhotoResponse>>(latestPhotos);
+        }
 
         public async Task<BinPhotoResponse> AddBinPhotoAsync(
             AddPhotoRequest request)
@@ -43,6 +61,7 @@ namespace EcoMonitor.App.Services
                 request.UrlFile,
                 request.Latitude,
                 request.Longitude,
+                (District)request.District,
                 request.BinTypeId,
                 request.FillLevel,
                 request.IsOutsideBin,
@@ -55,9 +74,16 @@ namespace EcoMonitor.App.Services
             return _mapper.Map<BinPhotoResponse>(addBinPhoto);
         }
         
-        public async Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId)
+        public async Task DeleteBinPhotoAsync(Guid binPhotoId)
         {
-            return await _binPhotoRepository.DeleteBinPhotoAsync(binPhotoId);
+            var photo = await _binPhotoRepository.GetPhotoByIdAsync(binPhotoId);
+            
+            if (!string.IsNullOrWhiteSpace(photo.UrlFile))
+            {
+                DeleteFileSafe(photo.UrlFile);
+            }
+            
+            await _binPhotoRepository.DeleteBinPhotoAsync(binPhotoId);
         }
 
         public async Task <IReadOnlyList<PhotoMarkerDTO>> GetMarkersAsync()
@@ -146,6 +172,16 @@ namespace EcoMonitor.App.Services
             return _mapper.Map<IEnumerable<BinPhotoResponse>>(photos);
         }
 
+        // public async Task<BinPhotoMapResponse> GetByCoordinatesAsync(
+        //     double latitude, 
+        //     double longitude, 
+        //     CancellationToken cancellationToken = default)
+        // {
+        //     var photosByCoordinates = await _binPhotoRepository.GetByCoordinatesAsync(latitude, longitude, cancellationToken);
+        //     
+        //     return _mapper.Map<BinPhotoMapResponse>(photosByCoordinates);
+        // }
+
         public async Task<BinPhotoResponse> UploadPhotoAsync(
             BinPhotoUploadRequest request, 
             Guid userId,
@@ -179,6 +215,7 @@ namespace EcoMonitor.App.Services
                          throw new InvalidOperationException("Processed image URL is null"),
                 latitude: lat,
                 longitude: lon,
+                district: (District)request.District,
                 BinTypeId: binTypes.Select(bt => bt.Id).ToList(),
                 fillLevel: request.FillLevel,
                 isOutsideBin: request.IsOutsideBin,
@@ -211,6 +248,31 @@ namespace EcoMonitor.App.Services
             UpdatePhotoRequest request,
             CancellationToken cancellationToken = default)
         {
+            _logger.LogWarning("=== UPDATE PHOTO START ===");
+            _logger.LogWarning("PhotoId: {PhotoId}", photoId);
+            _logger.LogWarning("New photo uploaded: {HasPhoto}", request.Photo != null);
+            
+            double? parsedFillLevel = null;
+            
+            if (!string.IsNullOrWhiteSpace(request.FillLevel))
+            {
+                if (!double.TryParse(
+                        request.FillLevel, 
+                        NumberStyles.Float, 
+                        CultureInfo.InvariantCulture, 
+                        out var value))
+                {
+                    throw new ValidationException("FillLevel has invalid format. Use 0.0–1.0");
+                }
+
+                if (value < 0.0 || value > 1.0)
+                {
+                    throw new ValidationException("FillLevel must be between 0.0 and 1.0");
+                }
+
+                parsedFillLevel = value;
+            }
+            
             var actor = await _userRepository.GetByIdAsync(actorId, cancellationToken) 
                         ?? throw new UnauthorizedAccessException("Actor not found");
             
@@ -219,29 +281,111 @@ namespace EcoMonitor.App.Services
             var selectedPhoto = await _binPhotoRepository.GetPhotoByIdAsync(photoId, cancellationToken) 
                                 ?? throw new KeyNotFoundException($"Photo with id {photoId} not found");
             
+            _logger.LogWarning(
+                "CURRENT PHOTO UrlFile: '{UrlFile}'",
+                selectedPhoto.UrlFile
+            );
+            
             _logger.LogInformation("UPDATE PHOTO: {Json}", System.Text.Json.JsonSerializer.Serialize(selectedPhoto));
             
             bool newPhotoFile = request.Photo != null;
 
             if (newPhotoFile)
             {
+                _logger.LogWarning("Uploading new photo...");
+                
                 var processed = await UploadImageAsync(request.Photo, cancellationToken);
+                
+                _logger.LogWarning(
+                    "New photo uploaded. New UrlFile: '{NewUrl}'",
+                    processed.OriginalUrl
+                );
+
+                string? oldPhotoPath = null;
+
+                if (!string.IsNullOrWhiteSpace(selectedPhoto.UrlFile))
+                {
+                    oldPhotoPath = Path.Combine(
+                        _environment.WebRootPath,
+                        selectedPhoto.UrlFile);
+                    
+                    _logger.LogWarning(
+                        "Calculated old photo path: {OldPath}",
+                        oldPhotoPath
+                    );
+                    
+                    _logger.LogWarning(
+                        "Old file exists: {Exists}",
+                        File.Exists(oldPhotoPath)
+                    );
+                }
+                else
+                {
+                    _logger.LogWarning("Old UrlFile is NULL or EMPTY");
+                }
                 
                 selectedPhoto.UpdateFile(
                     fileName: processed.FileName,
                     urlFile: processed.OriginalUrl,
                     latitude: processed.Latitude,
                     longitude: processed.Longitude);
+
+                if (oldPhotoPath != null)
+                {
+                    try
+                    {
+                        if (File.Exists(oldPhotoPath))
+                        {
+                            File.Delete(oldPhotoPath);
+                            _logger.LogWarning("OLD PHOTO DELETED SUCCESSFULLY");
+                        }
+                        else
+                        {
+                            _logger.LogWarning("OLD PHOTO NOT FOUND ON DISK");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(
+                            ex,
+                            "ERROR WHILE DELETING OLD PHOTO: {Path}",
+                            oldPhotoPath
+                        );
+                    }
+                }
+                
+                // if (oldPhotoPath != null && File.Exists(oldPhotoPath))
+                // {
+                //     File.Delete(oldPhotoPath);
+                // }
+            }
+            else
+            {
+                _logger.LogWarning("No new photo uploaded → skipping file deletion");
             }
             
             selectedPhoto.UpdateMetadata(
-                request.FillLevel ?? selectedPhoto.FillLevel, 
+                request.District.HasValue ? (District)request.District.Value : selectedPhoto.District,
+                parsedFillLevel ?? selectedPhoto.FillLevel, 
                 request.IsOutsideBin ??  selectedPhoto.IsOutsideBin,
                 request.Comment ?? selectedPhoto.Comment,
-                request.TotalBins ?? selectedPhoto.TotalBins,
-                request.BinTypeId ?? selectedPhoto.BinPhotoBinTypes.Select(x => x.BinTypeId));
+                request.TotalBins ?? selectedPhoto.TotalBins);
+
+            if (request.BinTypeId is not null)
+            {
+                selectedPhoto.BinPhotoBinTypes.Clear();
+
+                foreach (var id in request.BinTypeId)
+                {
+                    selectedPhoto.BinPhotoBinTypes.Add(new BinPhotoBinType(selectedPhoto.Id, id));
+                }
+                
+                //selectedPhoto.UpdateBinTypes(request.BinTypeId);
+            }
             
             await _binPhotoRepository.UpdateBinPhotoAsync(selectedPhoto, cancellationToken);
+            
+            _logger.LogWarning("=== UPDATE PHOTO END ===");
         }
 
         private async Task<(double Latitude, double Longitude, string OriginalUrl, string FileName)> UploadImageAsync(
@@ -264,7 +408,26 @@ namespace EcoMonitor.App.Services
                 OriginalUrl: processed.OriginalUrl ?? throw new InvalidOperationException("Processed image URL is null"), 
                 FileName: processed.FileName ?? throw new InvalidOperationException("Processed image FileName is null"));
         }
+        
+        private void DeleteFileSafe(string filePath)
+        {
+            try
+            {
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", filePath);
+
+                if (File.Exists(fullPath))
+                {
+                    File.Delete(fullPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Не удалось удалить файл {Path}", filePath);
+            }
+        }
     }
+    
+    
     
     // public static class LoggingExtensions
     // {

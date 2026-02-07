@@ -1,0 +1,26 @@
+﻿@using EcoMonitor.AdminPanel.Infrastucture
+@using EcoMonitor.AdminPanel.Infrastucture.TokenPersistence
+@using EcoMonitor.AdminPanel.Infrastucture.TokenStorage
+@inject UISync Sync
+@inject ITokenStore TokenStore
+@inject ITokenPersistenceService TokenPersistence
+@inject NavigationManager Navigation
+
+@rendermode InteractiveServer
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        Sync.Context = SynchronizationContext.Current;
+        Console.WriteLine("[AppInitializer.Interactive] UISync context captured");
+
+        await TokenPersistence.LoadTokensAsync();
+
+        if (!TokenStore.HasAccessToken())
+        {
+            Navigation.NavigateTo("/auth/login", true);
+        }
+    }
+}

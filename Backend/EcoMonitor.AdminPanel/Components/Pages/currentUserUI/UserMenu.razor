@@ -1,0 +1,54 @@
+﻿@rendermode InteractiveServer
+@using EcoMonitor.AdminPanel.Infrastucture.Http
+@inject AdminAuthHandler AuthHandler
+@inject CurrentUserService CurrentUser
+@inject NavigationManager Nav
+@inject Http401HandlerAccessor Accessor
+
+<MudMenu Label="@(CurrentUser?.UserName ?? "Гость")" Color="Color.Inherit">
+    <MudMenuItem OnClick="@Logout">Выйти</MudMenuItem>
+</MudMenu>
+
+@code {
+    // Делаем реактивное свойство, чтобы обновлялось при загрузке CurrentUser
+    private string UserLabel => string.IsNullOrWhiteSpace(CurrentUser.UserName) ? "Гость" : CurrentUser.UserName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser.OnChange += StateHasChanged;
+        //Accessor.Handler.OnUnauthorized += ForceLogout;
+        //await CurrentUser.LoadUserAsync();
+        //StateHasChanged(); // <- обязательно, чтобы обновился Label после загрузки имени
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            if (Accessor.Handler is not null)
+            {
+                Accessor.Handler.OnUnauthorized += ForceLogout;
+            }
+        }
+    }
+    
+    private async void ForceLogout()
+    {
+        await AuthHandler.LogoutAsync();
+        CurrentUser.Clear();
+        Nav.NavigateTo("/auth/login", true);
+    }
+
+    private async Task Logout()
+    {
+        await AuthHandler.LogoutAsync();
+        CurrentUser.Clear(); 
+        Nav.NavigateTo("/auth/login", true);
+    }
+
+    public void Dispose()
+    {
+        CurrentUser.OnChange -= StateHasChanged; 
+        if (Accessor.Handler is not null) 
+            Accessor.Handler.OnUnauthorized -= ForceLogout;
+    }
+}

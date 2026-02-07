@@ -61,7 +61,8 @@ namespace EcoMonitor.Infrastracture.Pipeline
             try
             {
                 var url = await _storageService.SaveImageAsync(file);
-                var fileName = Path.GetFileName(new  Uri(url).LocalPath);
+                var fileName = Path.GetFileName(url);
+                //var fileName = Path.GetFileName(new  Uri(url).LocalPath);
                 
                 using var uploadedImage = Image.Load<Rgba32>(decoderOptions, ms);
 

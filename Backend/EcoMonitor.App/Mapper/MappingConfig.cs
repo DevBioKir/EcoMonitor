@@ -107,6 +107,7 @@ namespace EcoMonitor.App.Mapper
                             src.UrlFile ?? string.Empty,
                             src.Location != null ? src.Location.Y : 0.0,
                             src.Location != null ? src.Location.X : 0.0,
+                            src.District,
                             src.UploadedAt,
                             src.BinPhotoBinTypes != null && src.BinPhotoBinTypes.Any()
                                 ? src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId)
@@ -175,6 +176,7 @@ namespace EcoMonitor.App.Mapper
                     .Map(dest => dest.UrlFile, src => src.UrlFile)
                     .Map(dest => dest.Latitude, src => src.Location != null ? src.Location.Y : 0.0)
                     .Map(dest => dest.Longitude, src => src.Location != null ? src.Location.X : 0.0)
+                    .Map(dest => dest.District, src => src.District)
                     .Map(dest => dest.UploadedAt, src => src.UploadedAt)
                     .Map(dest => dest.BinTypeId, src => src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId))
                     .Map(dest => dest.FillLevel, src => src.FillLevel)
@@ -442,6 +444,7 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.UrlFile, src => src.UrlFile)
                 .Map(dest => dest.Longitude, src => src.Longitude)
                 .Map(dest => dest.Latitude, src => src.Latitude)
+                .Map(dest => dest.District, src => src.District.ToString())
                 .Map(dest => dest.UploadedAt, src => src.UploadedAt)
                 .Map(dest => dest.BinTypeId, src =>
                     src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId).ToList())
@@ -449,6 +452,22 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
                 .Map(dest => dest.Comment, src => src.Comment)
                 .Map(dest => dest.UploadedBy, src => src.UploadedBy);
+
+            config.NewConfig<BinPhoto, BinPhotoMapResponse>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.FileName, src => src.FileName)
+                .Map(dest => dest.UrlFile, src => src.UrlFile)
+                .Map(dest => dest.Latitude, src => src.Latitude)
+                .Map(dest => dest.Longitude, src => src.Longitude)
+                .Map(dest => dest.District, src => src.District.ToString())
+                .Map(dest => dest.UploadedAt, src => src.UploadedAt)
+                .Map(dest => dest.Comment, src => src.Comment);
+                // .Map(dest => dest.BinTypeId, src =>
+                //     src.BinPhotoBinTypes.Select(bbt => bbt.BinTypeId).ToList())
+                // .Map(dest => dest.FillLevel, src => src.FillLevel)
+                // .Map(dest => dest.IsOutsideBin, src => src.IsOutsideBin)
+                // .Map(dest => dest.Comment, src => src.Comment)
+                // .Map(dest => dest.UploadedBy, src => src.UploadedBy);
 
 
             config.NewConfig<BinTypeRequest, BinType>()
@@ -487,6 +506,7 @@ namespace EcoMonitor.App.Mapper
                 .Map(dest => dest.Page, src => src.Page)
                 .Map(dest => dest.PageSize, src => src.PageSize)
                 .Map(dest => dest.SortBy, src => src.SortBy)
+                .Map(dest => dest.District, src => src.District)
                 .Map(dest => dest.OnlyOutsideBin, src => src.OnlyOutsideBin)
                 .Map(dest => dest.MinFillLevel, src => src.MinFillLevel)
                 .Map(dest => dest.MaxFillLevel, src => src.MaxFillLevel)

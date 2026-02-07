@@ -7,6 +7,24 @@ public class TokenStore : ITokenStore
 {
     public string? AccessToken { get; set; }
     public string? RefreshToken { get; set; }
+    
+    public event Action? OnTokensLoaded;
+
+    public void RaiseTokensLoaded()
+    {
+        OnTokensLoaded?.Invoke();
+    }
+
+    public async Task LoadFromLocalStorageAsync(IJSRuntime js)
+    {
+        Console.WriteLine("TokenStore: loading tokens from localStorage..."); 
+        AccessToken = await js.InvokeAsync<string>("localStorage.getItem", "accessToken"); 
+        RefreshToken = await js.InvokeAsync<string>("localStorage.getItem", "refreshToken"); 
+        
+        Console.WriteLine("TokenStore loaded:"); Console.WriteLine("AccessToken: " + AccessToken); 
+        Console.WriteLine("RefreshToken: " + RefreshToken); 
+        OnTokensLoaded?.Invoke();
+    }
 
     public bool HasAccessToken() => !string.IsNullOrWhiteSpace(AccessToken);
 
@@ -16,12 +34,14 @@ public class TokenStore : ITokenStore
     {
         AccessToken = accessToken;
         RefreshToken = refreshToken;
+        OnTokensLoaded?.Invoke();
     }
 
     public void ClearTokens()
     {
         AccessToken = null;
         RefreshToken = null;
+        OnTokensLoaded?.Invoke();
     }
 
     public bool IsAccessTokenExpired()

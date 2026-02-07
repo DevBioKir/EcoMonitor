@@ -7,9 +7,10 @@ namespace EcoMonitor.Contracts.Contracts.BinPhoto
 {
     public record UpdatePhotoRequest(
         IFormFile? Photo,
+        int? District,
         //DateTime? UploadedAt,
         List<Guid>? BinTypeId, 
-        double? FillLevel,
+        string? FillLevel,
         bool? IsOutsideBin,
         string? Comment,
         int? TotalBins);

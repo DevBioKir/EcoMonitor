@@ -89,18 +89,25 @@ public partial class UserManage : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         Logger.LogInformation("UserManager.OnInitializedAsync START");
-        if (_initialized) return; // защита от повторного вызова
-        _initialized = true;
-        
-        Console.WriteLine("[UserManage] Waiting for tokens from Index...");
-        bool tokensOk = await App.TokensLoaded.Task;
 
-        if (!tokensOk || !TokenStore.HasAccessToken())
+        if (!TokenStore.HasAccessToken())
         {
-            Console.WriteLine("[UserManage] Tokens invalid or missing, redirecting to login");
-            Navigation.NavigateTo("/auth/login", true);
+            Navigation.NavigateTo("/auth/login", true); 
             return;
         }
+        
+        // if (_initialized) return; // защита от повторного вызова
+        // _initialized = true;
+        
+        // Console.WriteLine("[UserManage] Waiting for tokens from Index...");
+        // bool tokensOk = await App.TokensLoaded.Task;
+        //
+        // if (!tokensOk || !TokenStore.HasAccessToken())
+        // {
+        //     Console.WriteLine("[UserManage] Tokens invalid or missing, redirecting to login");
+        //     Navigation.NavigateTo("/auth/login", true);
+        //     return;
+        // }
 
         Console.WriteLine("[UserManage] Tokens received successfully!");
         Console.WriteLine($"[UserManage] AccessToken: {TokenStore.AccessToken}");

@@ -12,6 +12,7 @@ namespace EcoMonitor.Core.Models
         //public Point Location { get; private set; } = null!;
         public double Latitude { get; private set; }
         public double Longitude { get; private set; }
+        public District District { get; private set; }
         public DateTime UploadedAt { get; private set; }
         public double FillLevel { get; private set; }
         public bool IsOutsideBin { get; private set; }
@@ -28,6 +29,7 @@ namespace EcoMonitor.Core.Models
             string urlFile,
             double latitude,
             double longitude,
+            District district,
             IEnumerable<Guid> BinTypeId,
             double fillLevel,
             bool isOutsideBin,
@@ -53,6 +55,7 @@ namespace EcoMonitor.Core.Models
             UrlFile = urlFile;
             Latitude = latitude;
             Longitude = longitude;
+            District = district;
             UploadedAt = DateTime.UtcNow;
             FillLevel = fillLevel;
             IsOutsideBin = isOutsideBin;
@@ -68,6 +71,7 @@ namespace EcoMonitor.Core.Models
             string urlFile,
             double latitude,
             double longitude,
+            District district,
             DateTime uploadedAt,
             IEnumerable<Guid> BinTypeId,
             double fillLevel,
@@ -81,6 +85,7 @@ namespace EcoMonitor.Core.Models
             UrlFile = urlFile;
             Latitude = latitude;
             Longitude = longitude;
+            District = district;
             UploadedAt = uploadedAt;
             FillLevel = fillLevel;
             IsOutsideBin = isOutsideBin;
@@ -113,7 +118,6 @@ namespace EcoMonitor.Core.Models
                 throw new ArgumentNullException(nameof(longitude));
             if (latitude == null)
                 throw new ArgumentNullException(nameof(latitude));
-            
 
             if (latitude < -90 || latitude > 90)
                 throw new ArgumentOutOfRangeException(nameof(latitude), "Latitude must be between -90 and 90 degrees");
@@ -127,6 +131,7 @@ namespace EcoMonitor.Core.Models
             string urlFile,
             double latitude,
             double longitude,
+            District district,
             IEnumerable<Guid> BinTypeId,
             double fillLevel,
             bool isOutsideBin,
@@ -139,6 +144,7 @@ namespace EcoMonitor.Core.Models
                 urlFile, 
                 latitude, 
                 longitude, 
+                district,
                 BinTypeId, 
                 fillLevel, 
                 isOutsideBin, 
@@ -167,6 +173,7 @@ namespace EcoMonitor.Core.Models
             string urlFile,
             double latitude,
             double longitude,
+            District district,
             DateTime uploadedAt,
             IEnumerable<Guid> BinTypeId,
             double fillLevel,
@@ -181,6 +188,7 @@ namespace EcoMonitor.Core.Models
                 urlFile,
                 latitude,
                 longitude,
+                district,
                 uploadedAt,
                 BinTypeId,
                 fillLevel,
@@ -213,6 +221,16 @@ namespace EcoMonitor.Core.Models
             }
         }
 
+        public void ChangeDistrict(District district)
+        {
+            if (district == District.Unknown)
+            {
+                throw new Exception("Район должен быть указан");
+            }
+            
+            District = district;
+        }
+
         public void RemoveBinType(Guid binTypeId)
         {
             var link = BinPhotoBinTypes.FirstOrDefault(bbt => bbt.BinTypeId == binTypeId);
@@ -228,22 +246,45 @@ namespace EcoMonitor.Core.Models
         }
 
         public void UpdateMetadata(
+            District district,
             double fillLevel,
             bool isOutsideBin,
             string comment,
-            int totalBins,
-            IEnumerable<Guid> binTypeIds)
+            int totalBins)
         {
+            District = district;
             FillLevel = fillLevel;
             IsOutsideBin = isOutsideBin;
             Comment = comment;
             TotalBins = totalBins;
+        }
+
+        public void UpdateBinTypes(IEnumerable<Guid> newBinTypeIds)
+        {
+            if (newBinTypeIds == null)
+                throw new ArgumentNullException(nameof(newBinTypeIds));
             
-            BinPhotoBinTypes.Clear();
-            foreach (var id in binTypeIds)
+            var newIds = new HashSet<Guid>(newBinTypeIds);
+
+            if (!newIds.Any())
+                throw new Exception("At least one BinType is required");
+            
+            var toRemove = BinPhotoBinTypes
+                .Where(x => !newIds.Contains(x.BinTypeId))
+                .ToList();
+
+            foreach (var link in toRemove)
+                BinPhotoBinTypes.Remove(link);
+            
+            foreach (var id in newIds)
             {
-                AddBinType(id);
+                if (!BinPhotoBinTypes.Any(x => x.BinTypeId == id))
+                {
+                    BinPhotoBinTypes.Add(new BinPhotoBinType(Id, id));
+                }
             }
+
+            Validate();
         }
         
         public void UpdateFile(

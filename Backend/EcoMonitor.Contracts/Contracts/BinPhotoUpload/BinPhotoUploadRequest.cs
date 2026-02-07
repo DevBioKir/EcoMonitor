@@ -5,6 +5,7 @@ namespace EcoMonitor.Contracts.Contracts.BinPhotoUpload
 {
     public record BinPhotoUploadRequest(
         IFormFile Photo,
+        int District,
         List<string> BinTypeCode,
         double FillLevel,
         bool IsOutsideBin,

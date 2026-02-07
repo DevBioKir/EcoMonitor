@@ -95,6 +95,11 @@ namespace EcoMonitor.DataAccess.Repositories.Users
             return _mapper.Map<User>(entity);
         }
 
+        public async Task<int> GetCountUsersAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Users.CountAsync(cancellationToken);
+        }
+
         public async Task UpdateAsync(User user, CancellationToken cancellationToken = default)
         {
             try

@@ -10,8 +10,10 @@ public interface IUserService
     //Task AddAsync(UserRequest user, Guid? currentUser, CancellationToken cancellationToken = default);
     Task<UserWithPhotosResponse> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<UserWithPhotosResponse> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
+    Task<int> GetCountUsersAsync(CancellationToken cancellationToken = default);
     Task<UserResponse> UpdateAsync(
         Guid actorId, Guid userId, UpdateUserDTO request, CancellationToken cancellationToken = default);
+    
     // Task<UserResponse> UpdatePersonalInfoAsync(
     //     Guid actorId, Guid userId, UpdatePersonalInfoRequest request, CancellationToken cancellationToken = default);
     // Task<UserResponse> UpdateEmailAsync(

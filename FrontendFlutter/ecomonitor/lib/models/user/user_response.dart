@@ -29,6 +29,20 @@ factory UserResponse.fromJson(Map<String, dynamic> json) {
     );
   }
 
+// factory UserResponse.fromJson(Map<String, dynamic> json) {
+//     return UserResponse(
+//       id: json['id'] as String,
+//       firstname: json['firstname'] as String,
+//       surname: json['surname'] as String,
+//       email: json['email'] as String,
+//       binPhoto: json['binPhoto'] != null
+//           ? (json['binPhoto'] as List)
+//               .map((e) => BinPhotoResponse.fromJson(e as Map<String, dynamic>))
+//               .toList()
+//           : null,
+//     );
+//   }
+
   Map<String, dynamic> toJson() => {
     'id' : id,
     'firstname' : firstname,

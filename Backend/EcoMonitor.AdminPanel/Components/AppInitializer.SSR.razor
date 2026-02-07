@@ -1,0 +1,9 @@
+﻿@code {
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("[AppInitializer.SSR] SSR render complete");
+        }
+    }
+}

@@ -58,3 +58,92 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+
+
+
+.page-background {
+    background-color: #E8F5E9; 
+    min-height: 100vh; 
+    padding: 24px; 
+    box-sizing: border-box;
+}
+
+.top-row {
+    background-color: #60d1b5 !important;
+    color: white;
+}
+
+.nav-link { 
+    color: #1B5E20 !important; /* тёмно‑зелёный */ 
+    font-weight: 500; 
+} /* Hover */ 
+
+.nav-link:hover { 
+    background-color: #A5D6A7 !important; /* мягкий зелёный */ 
+    color: #1B5E20 !important; 
+} /* Активный пункт меню */ 
+
+.nav-link.active { 
+    background-color: #81C784 !important; /* насыщенный зелёный */ 
+    color: #1B5E20 !important; 
+    font-weight: 600; 
+} /* Иконки */ 
+
+.bi { 
+    color: #2E7D32 !important; 
+}
+
+.nav-scrollable { 
+    background-color: #C8E6C9 !important; /* светло‑зелёный */
+}
+
+.sidebar { 
+    background-color: #C8E6C9 !important; /* светло‑зелёный */ 
+}
+
+.nav-scrollable { 
+    background-color: #C8E6C9 !important; 
+}
+
+.sidebar, .page { 
+    background-color: transparent !important; 
+} /* Ссылки меню */ 
+
+.nav-link { 
+    color: #1B5E20 !important; 
+    font-weight: 500;
+} 
+
+.nav-link:hover { 
+    background-color: #A5D6A7 !important; 
+    color: #1B5E20 !important; 
+} 
+
+.nav-link.active {
+    background-color: #81C784 !important; 
+    color: #1B5E20 !important; 
+    font-weight: 600; 
+}
+
+
+/* Кнопки */
+.btn-primary { 
+    background-color: #4CAF50 !important; /* основной зелёный */ 
+    border-color: #2E7D32 !important; 
+    color: white !important; 
+} 
+
+.btn-primary:hover { 
+    background-color: #43A047 !important; /* hover */ 
+    border-color: #2E7D32 !important; 
+} 
+
+.btn-primary:active, 
+.btn-primary:focus, 
+.btn-primary:active:focus { 
+    background-color: #388E3C !important; /* нажатие */ 
+    border-color: #2E7D32 !important; 
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.4) !important; 
+}

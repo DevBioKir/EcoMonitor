@@ -1,5 +1,12 @@
-﻿@using EcoMonitor.AdminPanel.Infrastucture.TokenPersistence
+﻿@using EcoMonitor.AdminPanel.Infrastucture
+@using EcoMonitor.AdminPanel.Infrastucture.TokenPersistence
 @using EcoMonitor.AdminPanel.Infrastucture.TokenStorage
+@inject ITokenStore TokenStore
+@inject ITokenPersistenceService TokenPersistence
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject UISync Sync
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -37,6 +44,39 @@
     // private bool _initialized;
     
     public static TaskCompletionSource<bool> TokensLoaded { get; } = new();
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        // захватываем UI-синхронизацию
+        Sync.Context = SynchronizationContext.Current;
+        Console.WriteLine("[App] UISync context captured");
+
+        // грузим токены из localStorage/постоянного хранилища
+        await TokenPersistence.LoadTokensAsync();
+
+        Console.WriteLine($"[App] HasAccessToken: {TokenStore.HasAccessToken()}");
+
+        if (!TokenStore.HasAccessToken())
+        {
+            Navigation.NavigateTo("/auth/login", true);
+        }
+    }
+    
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         Sync.Context = SynchronizationContext.Current;
+    //
+    //         // Загружаем токены СРАЗУ
+    //         var access = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken");
+    //         var refresh = await JS.InvokeAsync<string>("localStorage.getItem", "refreshToken");
+    //
+    //         TokenStore.SetTokens(access, refresh);
+    //     }
+    // }
     
     // protected override async Task OnAfterRenderAsync(bool firstRender)
     // {

@@ -9,34 +9,42 @@
 </div>
 
 @code {
-    private bool _loaded;
-    public static TaskCompletionSource<bool> TokensLoaded { get; } = new();
-    
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnInitialized()
     {
-        if (!firstRender || _loaded) return;
-        _loaded = true;
-
-        var access = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken");
-        var refresh = await JS.InvokeAsync<string>("localStorage.getItem", "refreshToken");
-        
-        Console.WriteLine("[Index] Loaded tokens from localStorage:");
-        Console.WriteLine($"[Index] AccessToken: {access}");
-        Console.WriteLine($"[Index] RefreshToken: {refresh}");
-
-        if (!string.IsNullOrWhiteSpace(access) && !string.IsNullOrWhiteSpace(refresh))
-        {
-            TokenStore.SetTokens(access, refresh);
-            //TokensLoaded.TrySetResult(true);
-            App.TokensLoaded.TrySetResult(true);
-            Console.WriteLine("[Index] Tokens saved to TokenStore, redirecting to /admin/dashboard");
-            Navigation.NavigateTo("/admin/dashboard");
-        }
-        else
-        {
-            App.TokensLoaded.TrySetResult(false);
-            Console.WriteLine("[Index] Tokens not found, redirecting to /auth/login");
-            Navigation.NavigateTo("/auth/login", true);
-        }
+        // Просто редиректим на dashboard
+        Navigation.NavigateTo("/admin/dashboard", true);
     }
 }
+
+@* @code { *@
+@*     private bool _loaded; *@
+@*     public static TaskCompletionSource<bool> TokensLoaded { get; } = new(); *@
+@*      *@
+@*     protected override async Task OnAfterRenderAsync(bool firstRender) *@
+@*     { *@
+@*         if (!firstRender || _loaded) return; *@
+@*         _loaded = true; *@
+@* *@
+@*         var access = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken"); *@
+@*         var refresh = await JS.InvokeAsync<string>("localStorage.getItem", "refreshToken"); *@
+@*          *@
+@*         Console.WriteLine("[Index] Loaded tokens from localStorage:"); *@
+@*         Console.WriteLine($"[Index] AccessToken: {access}"); *@
+@*         Console.WriteLine($"[Index] RefreshToken: {refresh}"); *@
+@* *@
+@*         if (!string.IsNullOrWhiteSpace(access) && !string.IsNullOrWhiteSpace(refresh)) *@
+@*         { *@
+@*             TokenStore.SetTokens(access, refresh); *@
+@*             //TokensLoaded.TrySetResult(true); *@
+@*             App.TokensLoaded.TrySetResult(true); *@
+@*             Console.WriteLine("[Index] Tokens saved to TokenStore, redirecting to /admin/dashboard"); *@
+@*             Navigation.NavigateTo("/admin/dashboard"); *@
+@*         } *@
+@*         else *@
+@*         { *@
+@*             App.TokensLoaded.TrySetResult(false); *@
+@*             Console.WriteLine("[Index] Tokens not found, redirecting to /auth/login"); *@
+@*             Navigation.NavigateTo("/auth/login", true); *@
+@*         } *@
+@*     } *@
+@* } *@

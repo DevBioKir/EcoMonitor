@@ -16,6 +16,11 @@ namespace EcoMonitor.DataAccess.Repositories
             Guid userId,
             PhotoQuery query,
             CancellationToken cancellationToken = default);
+        Task<int> GetCountPhotosAsync(CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyList<BinPhoto>> GetLatestPhotosAsync(
+            int count = 5,
+            CancellationToken cancellationToken = default);
         Task<BinPhoto> AddBinPhotoAsync(BinPhoto binPhoto);
         Task UpdateBinPhotoAsync(BinPhoto binPhoto, CancellationToken cancellationToken = default);
         Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId);
@@ -24,5 +29,9 @@ namespace EcoMonitor.DataAccess.Repositories
             double south,
             double east,
             double west);
+        // Task<BinPhoto> GetByCoordinatesAsync(
+        //     double latitude, 
+        //     double longitude, 
+        //     CancellationToken cancellationToken = default);
     }
 }

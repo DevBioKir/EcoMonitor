@@ -1,4 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using EcoMonitor.AdminPanel.Components.Pages.currentUserUI
+@using EcoMonitor.AdminPanel.Infrastucture.Http
+@using EcoMonitor.AdminPanel.Infrastucture.TokenStorage
+@inherits LayoutComponentBase
+@inject AdminAuthHandler AuthHandler
+@inject CurrentUserService CurrentUser
 
 <MudThemeProvider/>
 <MudPopoverProvider/>
@@ -7,20 +12,31 @@
 
 <MudLayout>
     <MudMainContent>
-    <div class="page">
+        
+        <div class="page-background">
+        <div class="page">
             <div class="sidebar">
                 <NavMenu/>
             </div>
 
             <main>
-                <div class="top-row px-4">
-                    <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+                @* <div class="top-row px-4"> *@
+                @*     <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a> *@
+                @* </div> *@
+                
+                <div class="top-row px-4 d-flex justify-content-end align-items-center">
+                    @* Меню пользователя *@
+                    @* <MudMenu Icon="@Icons.Material.Filled.AccountCircle" Label="@UserLabel"> *@
+                    <MudMenu Label="@UserLabel">
+                        <MudMenuItem OnClick="@Logout">Выйти</MudMenuItem>
+                    </MudMenu>
                 </div>
 
                 <article class="content px-4">
                     @Body
                 </article>
             </main>
+        </div>
         </div>
 
         <div id="blazor-error-ui" data-nosnippet>
@@ -30,3 +46,25 @@
         </div>
     </MudMainContent>
 </MudLayout>
+
+@code {
+    private string UserLabel => string.IsNullOrWhiteSpace(CurrentUser?.UserName) ? "Гость" : CurrentUser.UserName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Подгружаем данные пользователя при старте Layout
+        CurrentUser.OnChange += StateHasChanged; 
+        //await CurrentUser.LoadUserAsync();
+        //StateHasChanged(); // чтобы имя пользователя обновилось
+    }
+
+    private void Logout()
+    {
+        _ = AuthHandler.LogoutAsync();
+    }
+
+    public void Dispose()
+    {
+        CurrentUser.OnChange -= StateHasChanged;
+    }
+}

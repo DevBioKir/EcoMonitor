@@ -7,6 +7,7 @@ public sealed record BinPhotoWithoutUser
     public string UrlFile { get; init; } = string.Empty;
     public double Latitude { get; init; }
     public double Longitude { get; init; }
+    public int District { get; init; }
     public DateTime UploadedAt { get; init; }
     public IEnumerable<Guid> BinTypeId { get; init; } = Enumerable.Empty<Guid>();
     public int FillLevel { get; init; }

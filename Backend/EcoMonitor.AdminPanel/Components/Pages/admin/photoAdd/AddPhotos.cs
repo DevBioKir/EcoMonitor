@@ -117,10 +117,19 @@ public partial class AddPhotos : ComponentBase
             
             using var fileStream = file.OpenReadStream(10 * 1024 * 1024);
             using var fileContent = new StreamContent(fileStream);
-            fileContent.Headers.ContentType = 
-                new System.Net.Http.Headers.MediaTypeHeaderValue(file.ContentType ?? "image/jpeg");
             
-            content.Add(fileContent, "Photo", file.Name);  // ✅ IFormFile ожидает "Photo"
+            var contentType = string.IsNullOrWhiteSpace(file.ContentType)
+                ? "application/octet-stream"
+                : file.ContentType;
+            
+            Console.WriteLine($"Uploading file: {file.Name}, ContentType='{file.ContentType}'");
+            
+            fileContent.Headers.ContentType = 
+                new System.Net.Http.Headers.MediaTypeHeaderValue(contentType);
+            
+            content.Add(fileContent, "Photo", file.Name); 
+            content.Add(new StringContent(Model.District.ToString()),
+                "District");
             content.Add(new StringContent(Model.FillLevel.ToString("F2", 
                 System.Globalization.CultureInfo.InvariantCulture)), "FillLevel");
             foreach (var binType in Model.BinTypeCode)
@@ -131,6 +140,8 @@ public partial class AddPhotos : ComponentBase
             content.Add(new StringContent(Model.TotalBins.ToString()), "TotalBins");
             content.Add(new StringContent(Model.Comment ?? ""), "Comment");
             content.Add(new StringContent(Model.IsOutsideBin.ToString()), "IsOutsideBin");
+            
+            
 
             var response = await AdminApi.PostAsync(
                 "/api/admin/v1/AdminBinPhoto/UploadWithMetadata", content);

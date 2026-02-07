@@ -1,25 +1,48 @@
 @page "/admin/dashboard"
 
-<MudText Typo="Typo.h4" Class="mb-2">
-    EcoMonitor — админский Dashboard (заглушка)
-</MudText>
-
-<MudText Typo="Typo.body1" Class="mb-4">
-    Здесь позже появятся метрики по пользователям, фотографиям баков и отчётам.
-</MudText>
+@* <MudText Typo="Typo.h4" Class="mb-2"> *@
+@*     EcoMonitor — админский Dashboard (заглушка) *@
+@* </MudText> *@
+@* *@
+@* <MudText Typo="Typo.body1" Class="mb-4"> *@
+@*     Здесь позже появятся метрики по пользователям, фотографиям баков и отчётам. *@
+@* </MudText> *@
 
 <MudGrid Class="mb-4">
+    <MudItem xs="12" md="12">
+        <MudPaper Class="pa-4" Elevation="1">
+            <MudText Typo="Typo.h4">Новые фото баков</MudText>
+            
+            <MudGrid>
+                @foreach (var photo in _latestPhotos)
+                {
+                    <MudItem xs="12" sm="4">
+                        <MudPaper Class="pa-2" Elevation="2">
+                            <MudImage Src="@($"https://localhost:7198/{photo.UrlFile.Replace("\\","/")}")"
+                                      Width="100"
+                                      Height="200"
+                                      Class="rounded mb-2" />
+
+                            <MudText Typo="Typo.subtitle2">Имя файла: @photo.FileName</MudText>
+                            <MudText Typo="Typo.subtitle2">Дата загрузки: @photo.UploadedAt</MudText>
+                            <MudText Typo="Typo.subtitle2">Район: @photo.District</MudText>
+                            <br/>
+                            
+                            <MudText Typo="Typo.subtitle1">Данные сотрудника, загрузившего фото: </MudText> 
+                            <MudText Typo="Typo.subtitle2">Имя: @photo.UploadedBy.Firstname</MudText> 
+                            <MudText Typo="Typo.subtitle2">Фамилия: @photo.UploadedBy.Surname</MudText> 
+                            <MudText Typo="Typo.subtitle2">Почта: @photo.UploadedBy.Email</MudText>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudPaper>
+    </MudItem>
+    
     <MudItem xs="12" md="4">
         <MudPaper Class="pa-4" Elevation="1">
             <MudText Typo="Typo.subtitle1">Всего пользователей</MudText>
-            <MudText Typo="Typo.h5" Color="Color.Primary">—</MudText>
-        </MudPaper>
-    </MudItem>
-
-    <MudItem xs="12" md="4">
-        <MudPaper Class="pa-4" Elevation="1">
-            <MudText Typo="Typo.subtitle1">Новые фото баков</MudText>
-            <MudText Typo="Typo.h5" Color="Color.Primary">—</MudText>
+            <MudText Typo="Typo.h5" Color="Color.Primary">@_countUsers</MudText>
         </MudPaper>
     </MudItem>
 

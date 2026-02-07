@@ -10,6 +10,7 @@ namespace EcoMonitor.DataAccess.Entities
         public string FileName { get; set; } = string.Empty;
         public string UrlFile { get; set; } = string.Empty;
         public Point Location { get; set; } = null!;
+        public District District { get; set; }
         public DateTime UploadedAt { get; set; }
         public double FillLevel { get; set; }
         public bool IsOutsideBin { get; set; } = false;

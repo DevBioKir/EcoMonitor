@@ -4,6 +4,10 @@
 
 <CascadingValue Value="_handler">
     <Http401Handler @ref="_handler">
+        <AppInitializer.SSR />
+
+        <AppInitializer.Interactive />
+        
         <Router AppAssembly="typeof(Program).Assembly">
             <Found Context="routeData">
                 <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>

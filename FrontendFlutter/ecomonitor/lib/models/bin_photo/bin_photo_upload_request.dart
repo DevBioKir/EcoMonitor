@@ -2,11 +2,13 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:ecomonitor/models/bin_type/bin_type_response.dart';
+import 'package:ecomonitor/models/constants/district.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 
 class BinPhotoUploadRequest {
   final XFile photo;
+  final District district;
   final List<String> binTypeCode;
   final double fillLevel;
   final bool isOutsideBin;
@@ -15,6 +17,7 @@ class BinPhotoUploadRequest {
 
   BinPhotoUploadRequest({
     required this.photo,
+    required this.district,
     required this.binTypeCode,
     required this.fillLevel,
     required this.isOutsideBin,
@@ -60,20 +63,26 @@ class BinPhotoUploadRequest {
     }
     
     FormData formData = FormData();
+
+    for (var code in binTypeCode) {
+    formData.fields.add(MapEntry('BinTypeCode', code));
+  }
+
     formData.files.add(MapEntry(
       'Photo',
       await MultipartFile.fromBytes(
         bytes,
         filename: path.basename(photo.path),
-        contentType: contentType,  // ✅ DioMediaType!
+        contentType: contentType,
       )
     ));
 
-    for (int i = 0; i < binTypeCode.length; i++) {
-    formData.fields.add(MapEntry('BinTypeCode[$i]', binTypeCode[i]));
-  }
+  //   for (int i = 0; i < binTypeCode.length; i++) {
+  //   formData.fields.add(MapEntry('BinTypeCode[$i]', binTypeCode[i]));
+  // }
   
     formData.fields.addAll([
+      MapEntry('District', district.index.toString()),
       MapEntry('FillLevel', fillLevel.toString()),
       MapEntry('IsOutsideBin', isOutsideBin.toString()),
       MapEntry('Comment', comment),

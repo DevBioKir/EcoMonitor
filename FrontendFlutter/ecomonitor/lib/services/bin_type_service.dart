@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:ecomonitor/abstractions/ibin_type_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/models/bin_type/bin_type_response.dart';
@@ -9,7 +10,8 @@ class BinTypeService implements IBinTypeService {
   BinTypeService(this._apiClient);
 
   Future<List<BinTypeResponse>> getAllType() async {
-    final response = await _apiClient.get('/api/public/v1/BinType/GetAllBinTypes');
+    final response = await _apiClient.get('/api/public/v1/BinType/GetAllBinTypes',
+    options: Options(extra: {'skipAuth': true}));
     print('Получение типов баков');
     return (response.data as List)
                   .map((item) => BinTypeResponse.fromJson(item)).toList();

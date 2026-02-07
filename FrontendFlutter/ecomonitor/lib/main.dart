@@ -1,8 +1,13 @@
+import 'package:ecomonitor/abstractions/ibin_photo_service.dart';
+import 'package:ecomonitor/abstractions/ibin_type_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
+import 'package:ecomonitor/core/network/api_config.dart';
 import 'package:ecomonitor/screens/map_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
 import 'package:ecomonitor/services/bin_photo_service.dart';
+import 'package:ecomonitor/services/bin_type_service.dart';
 import 'package:ecomonitor/services/user_service.dart';
+import 'package:ecomonitor/stores/bin_type_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -24,11 +29,16 @@ void showSnackBar(String message) {
   }
 }
 
+late ApiClient apiClient;
+late AuthService authService;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  late final String apiBaseUrl;
 
   print('Loading .env...');
   await dotenv.load(fileName: ".env.development");
+  print('⚡ .env BASE_URL_FOR_VD = ${dotenv.env['BASE_URL_FOR_VD']}');
 
   // Запрашиваем разрешение на геолокацию в рантайме
   final status = await Permission.location.request();
@@ -55,30 +65,96 @@ void main() async {
 
   
   //String apiUrl = dotenv.env['BASE_URL_FOR_VD'] ?? '';
-  String apiUrl = dotenv.env['BASE_URL_FOR_FD'] ?? '';
+  //String apiUrl = dotenv.env['BASE_URL_FOR_FD'] ?? '';
+  //String apiUrl = dotenv.env['BASE_URL'] ?? '';
+
+  //const apiUrl = String.fromEnvironment('BASE_URL');
+
+  // apiBaseUrl = dotenv.env['BASE_URL_FOR_VD'] ?? '';
+
+  // if (apiBaseUrl.isEmpty) {
+  //   throw Exception('BASE_URL is not defined');
+  // }
+
+  //apiBaseUrl = dotenv.env['BASE_URL_FOR_FD'] ?? '';
+  apiBaseUrl = await ApiConfig.getBaseUrl();
+
+  if (apiBaseUrl.isEmpty) {
+    throw Exception('BASE_URL is not defined');
+  }
   
   final storage = const FlutterSecureStorage();
-  final apiClient = ApiClient(
-    //"http://localhost:5198", () async => await storage.read(key: 'access_token') ?? '');
-    //"https://10.0.2.2:7198", () async => await storage.read(key: 'access_token') ?? '');
-    apiUrl, () async => await storage.read(key: 'access_token') ?? '');
 
-  final authService = AuthService(apiClient);
-  final userService = UserService(apiClient);
-  final binPhotoService = BinPhotoService(apiClient, authService);
+  authService = AuthService();
+
+  apiClient = ApiClient(
+    apiBaseUrl,
+    authService.getAccessToken,
+    (dio) => authService.refreshToken(dio),
+  );
+  //print('⚡ ApiClient final baseUrl: ${apiClient.baseUrl}');
+
+  authService.attachApiClient(apiClient);
+
+  // apiClient = ApiClient(
+  //   //"http://localhost:5198", () async => await storage.read(key: 'access_token') ?? '');
+  //   //"https://10.0.2.2:7198", () async => await storage.read(key: 'access_token') ?? '');
+  //   apiUrl,
+  //   () async => null,
+  //   () async => false,
+  //   //() async => await storage.read(key: 'access_token') ?? ''
+  //   );
+
+  //   authService.attachApiClient(apiClient);
+  
+  // apiClient = ApiClient(
+  //   //"http://localhost:5198", () async => await storage.read(key: 'access_token') ?? '');
+  //   //"https://10.0.2.2:7198", () async => await storage.read(key: 'access_token') ?? '');
+  //   apiUrl,
+  //   authService.getAccessToken,
+  //   () async {
+  //     try {
+  //       await authService.refreshToken();
+  //       return true;
+  //     } catch (_) {
+  //       return false;
+  //     }
+  //   },
+  // );
+
+    //authService.attachApiClient(apiClient);
+
+  // final authService = AuthService(apiClient);
+  // final userService = UserService(apiClient);
+  // final binPhotoService = BinPhotoService(apiClient, authService);
 
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider<AuthService>(
-          create: (_) => authService,
-        ),
+        Provider<ApiClient>.value(value: apiClient),
+        ChangeNotifierProvider<AuthService>.value(value: authService),
+
+        // Provider<AuthService>(
+        //   create: (_) => AuthService(apiClient),
+        // ),
+
         Provider<UserService>(
-          create: (_) => userService,
+          create: (_) => UserService(apiClient),
         ),
-        Provider<BinPhotoService>(
-          create: (_) => binPhotoService,
+
+        Provider<IBinTypeService>(
+          create: (_) => BinTypeService(apiClient),
         ),
+
+        Provider<IBinPhotoService>(
+          create: (ctx) => BinPhotoService(
+            apiClient,
+            //ctx.read<AuthService>(),
+          ),
+        ),
+        ChangeNotifierProvider<BinTypeStore>(
+        create: (ctx) => BinTypeStore(ctx.read<IBinTypeService>())..load(),
+      ),
       ],
       child: const MyApp(),
     ),
@@ -96,13 +172,13 @@ class MyApp extends StatelessWidget {
       home: Consumer<AuthService>(
         builder: (context, authService, _) {
           return MapScreen(
-            authService: authService,);
+            authService: authService);
         },
       ),
       routes: {
         '/map': (context) => Consumer<AuthService>(
           builder: (context, authService, _) => MapScreen(
-            authService: authService,),
+            authService: authService),
         ),
       },
     );

@@ -79,7 +79,7 @@ public class AdminUserController(
         {
             return BadRequest(new { error = "Invalid User ID format" });
         }
-        _logger.LogInformation("📥 Контроллер получил JSON: {@Request}", request);
+        _logger.LogInformation("Контроллер получил JSON: {@Request}", request);
         
         //_logger.LogInformation("🔥 userId = {UserId}, request = {@Request}", userId, request);
     

@@ -1,5 +1,6 @@
 @page "/admin/photo/add"
 @using EcoMonitor.AdminPanel.Components.Layout
+@using EcoMonitor.AdminPanel.Data.Models
 @using EcoMonitor.Contracts.Contracts.BinType
 @layout MainLayout
 
@@ -32,12 +33,12 @@
                         Выбрано: @_files.Count файл(ов)
                     </MudText>
                     <MudList T="string">
-                    @foreach (var file in _files)
-                    {
-                        <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@file">
-                            @file.Name <code>@file.Size bytes</code>
-                        </MudListItem>
-                    }
+                        @foreach (var file in _files)
+                        {
+                            <MudListItem Icon="@Icons.Material.Filled.AttachFile" @key="@file">
+                                @file.Name <code>@file.Size bytes</code>
+                            </MudListItem>
+                        }
                     </MudList>
                 }
                 
@@ -46,6 +47,21 @@
                     <MudImage Src="@PreviewImage" Width="200" Height="200" Class="mt-3 rounded" Elevation="2" />
                 }
             </MudItem>
+            
+            <MudItem xs="12" md="6">
+                <MudSelect T="int"
+                           Label="Район"
+                           @bind-Value="Model.District"
+                           Variant="Variant.Outlined"
+                           Required="true">
+                    @foreach (var d in Enum.GetValues<DistrictUi>())
+                    {
+                        <MudSelectItem Value="@((int)d)">
+                            @d.ToString()
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudItem>
 
             <!-- УРОВЕНЬ ЗАПОЛНЕНИЯ -->
             <MudItem xs="12" md="6">
@@ -53,7 +69,7 @@
                                  Label="Уровень заполнения (0.0-1.0)"
                                  Min="0" 
                                  Max="1" 
-                                 Step="0.100"
+                                 Step="0.1"
                                  Variant="Variant.Outlined" />
             </MudItem>
 

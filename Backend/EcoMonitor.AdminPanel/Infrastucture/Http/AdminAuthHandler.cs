@@ -80,7 +80,7 @@ public class AdminAuthHandler : DelegatingHandler
             if (!refreshed)
             {
                 _logger.LogWarning("Refresh token invalid, redirecting to login");
-                _tokens.ClearTokens();
+                //_tokens.ClearTokens();
                 return Unauthorized(request);
                 //_nav.NavigateTo("/auth/login", true);
 
@@ -101,18 +101,24 @@ public class AdminAuthHandler : DelegatingHandler
         //     return response;
         if (response.StatusCode == HttpStatusCode.Unauthorized)
         {
+            _logger.LogWarning("Request returned 401, trying refresh token...");
+            
             if (_tokens.HasRefreshToken() && await TryRefreshAsync())
             {
                 _logger.LogInformation("Retrying request after refresh token...");
-                request.Headers.Authorization =
+                var newRequest = await CloneHttpRequestMessageAsync(request);
+                newRequest.Headers.Authorization =
                     new AuthenticationHeaderValue("Bearer", _tokens.AccessToken);
                 _logger.LogInformation("Sending request with AccessToken: {Token}", _tokens.AccessToken[..10] + "...");
 
-                return await base.SendAsync(request, ct);
+                response = await base.SendAsync(newRequest, ct);
+
+                if (response.StatusCode != HttpStatusCode.Unauthorized)
+                    return response;
             }
 
             _logger.LogWarning("Refresh failed or missing, clearing tokens and redirecting to login");
-            _tokens.ClearTokens();
+            //_tokens.ClearTokens();
             return Unauthorized(request);
             
             // _tokens.ClearTokens();
@@ -120,17 +126,40 @@ public class AdminAuthHandler : DelegatingHandler
         }
         return response;
     }
+    
+    private async Task<HttpRequestMessage> CloneHttpRequestMessageAsync(HttpRequestMessage request)
+    {
+        var clone = new HttpRequestMessage(request.Method, request.RequestUri)
+        {
+            Version = request.Version,
+            Content = request.Content != null 
+                ? new StringContent(await request.Content.ReadAsStringAsync()) 
+                : null
+        };
+
+        foreach (var header in request.Headers)
+            clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+
+        foreach (var property in request.Options)
+            clone.Options.Set(new HttpRequestOptionsKey<object>(property.Key), property.Value);
+
+        return clone;
+    }
 
     private async Task<bool> TryRefreshAsync()
     {
         if (!_tokens.HasRefreshToken())
             return false;
-
+        
+        _logger.LogInformation("Using refresh token: {Token}", _tokens.RefreshToken);
+        
         var client = _factory.CreateClient("PublicApi");
 
         var response = await client.PostAsJsonAsync(
             "/api/public/v1/Authorization/refresh-token",
             new { refreshToken = _tokens.RefreshToken });
+        
+        _logger.LogInformation("Refresh response: {StatusCode}", response.StatusCode);
 
         if (!response.IsSuccessStatusCode)
             return false;
@@ -153,6 +182,23 @@ public class AdminAuthHandler : DelegatingHandler
         {
             RequestMessage = request
         };
+    }
+    
+    public async Task LogoutAsync()
+    {
+        _logger.LogInformation("Logging out user, clearing tokens...");
+
+        // Очищаем токены в памяти
+        _tokens.ClearTokens();
+
+        // Очищаем сохранённые токены в хранилище
+        //_persistenceService.ClearAsync().GetAwaiter().GetResult();
+        await _persistenceService.ClearAsync();
+
+        // Триггерим редирект на логин
+        //_accessor.Handler.TriggerRedirect();
+
+        _logger.LogInformation("User logged out successfully.");
     }
     
     // private string GetAccessToken() => 

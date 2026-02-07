@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:ecomonitor/abstractions/ibin_photo_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_response.dart';
+import 'package:ecomonitor/models/bin_photo/bin_photo_update_request.dart';
 import 'package:ecomonitor/models/bin_photo/bin_photo_upload_request.dart';
 import 'package:ecomonitor/models/markers/photo_markers_dto.dart';
 import 'package:ecomonitor/models/paged_result.dart';
@@ -14,11 +17,12 @@ import 'package:path/path.dart' as path;
 
 class BinPhotoService implements IBinPhotoService {
   final ApiClient _apiClient;
-  final AuthService _authService;
+  //final AuthService _authService;
 
   BinPhotoService(
     this._apiClient,
-    this._authService);
+    //this._authService
+    );
 
   Future<List<BinPhotoResponse>> getAllBinPhoto() async {
     final response = await _apiClient.get('/api/public/v1/BinPhoto/GetAllPhotos');
@@ -27,8 +31,14 @@ class BinPhotoService implements IBinPhotoService {
 
   Future<BinPhotoResponse> getBinPhotoById(String id) async {
     final response = await _apiClient.get('/api/public/v1/BinPhoto/GetBinPhotoById',
+    options: Options(extra: {'skipAuth': true}),
         queryParameters: {'id': id});
-    return BinPhotoResponse.fromJson(response.data);
+        
+    final photo = BinPhotoResponse.fromJson(response.data);
+
+    return photo.copyWith(
+      urlFile: '${_apiClient.baseUrl}/${photo.urlFile}',
+    );
   }
 
   Future<PagedResult<BinPhotoResponse>> getUserPhotos(PhotoFilter filter) async {
@@ -37,6 +47,9 @@ class BinPhotoService implements IBinPhotoService {
         'page' : filter.page.toString(),
         'pageSize' : filter.pageSize.toString(),
         'sortBy' : filter.sortBy,
+
+        if (filter.district != null)
+        'district' : filter.district.toString(),
 
         if (filter.onlyOutsideBin != null)
         'onlyOutsideBin' : filter.onlyOutsideBin.toString(),
@@ -48,7 +61,7 @@ class BinPhotoService implements IBinPhotoService {
         'maxFillLevel' : filter.maxFillLevel.toString(),
 
         if (filter.fromDate != null)
-        'fromData' : filter.fromDate!.toIso8601String(),
+        'fromDate' : filter.fromDate!.toIso8601String(),
 
         if (filter.toDate != null)
         'toDate' : filter.toDate!.toIso8601String(),
@@ -71,7 +84,10 @@ class BinPhotoService implements IBinPhotoService {
   }
 
   Future<List<PhotoMarkersDTO>> markers() async {
-    final response = await _apiClient.post('/api/public/v1/BinPhoto/Markers');
+    final response = await _apiClient.post('/api/public/v1/BinPhoto/Markers',
+    options: Options(extra: {'skipAuth': true}),
+      data: {}, 
+      );
     if (response.data != null){
       return (response.data as List)
       .map((dynamic item) => PhotoMarkersDTO.fromJson(item as Map<String, dynamic>)).toList();
@@ -93,43 +109,104 @@ class BinPhotoService implements IBinPhotoService {
   //   return BinPhotoResponse.fromJson(response.data);
   // }
 
-  Future<BinPhotoResponse> uploadWithMetadata(BinPhotoUploadRequest request) async {
-  final bytes = await request.photo.readAsBytes();
+  Future<String> uploadWithMetadata(BinPhotoUploadRequest request) async {
+    final formData = FormData.fromMap({
+      'Photo': await MultipartFile.fromFile(
+        request.photo.path,
+        filename: path.basename(request.photo.path),
+      ),
+      'district': request.district.index,
+      'FillLevel': request.fillLevel,
+      'IsOutsideBin': request.isOutsideBin,
+      'Comment': request.comment,
+      'TotalBins': request.totalBins,
+      for (int i = 0; i < request.binTypeCode.length; i++)
+        'BinTypeCode[$i]': request.binTypeCode[i],
+    });
+
+    final response = await _apiClient.post<Map<String, dynamic>>(
+      '/api/public/v1/BinPhoto/UploadWithMetadata',
+      data: formData,
+    );
+
+    return response.data!['id'] as String;
+  // final bytes = await request.photo.readAsBytes();
   
-  var httpRequest = http.MultipartRequest(
-    'POST', 
-    Uri.parse('http://localhost:5198/api/public/v1/BinPhoto/UploadWithMetadata')
-  );
+  // var httpRequest = http.MultipartRequest(
+  //   'POST', 
+  //   Uri.parse('http://100.69.144.77:5198/api/public/v1/BinPhoto/UploadWithMetadata')
+  //   //Uri.parse('http://localhost:5198/api/public/v1/BinPhoto/UploadWithMetadata')
+  // );
   
-  httpRequest.files.add(http.MultipartFile.fromBytes(
-    'Photo',
-    bytes,
-    filename: path.basename(request.photo.path),
-  ));
+  // httpRequest.files.add(http.MultipartFile.fromBytes(
+  //   'Photo',
+  //   bytes,
+  //   filename: path.basename(request.photo.path),
+  // ));
   
-  for (int i = 0; i < request.binTypeCode.length; i++) {
-    httpRequest.fields['BinTypeCode[$i]'] = request.binTypeCode[i];
-  }
+  // for (int i = 0; i < request.binTypeCode.length; i++) {
+  //   httpRequest.fields['BinTypeCode[$i]'] = request.binTypeCode[i];
+  // }
   
-  httpRequest.fields.addAll({
-    'FillLevel': request.fillLevel.toString(),
-    'IsOutsideBin': request.isOutsideBin.toString(),
-    'Comment': request.comment,
-    'TotalBins': request.totalBins.toString(),
-  });
+  // httpRequest.fields.addAll({
+  //   'district': request.district.index.toString(),
+  //   'FillLevel': request.fillLevel.toString(),
+  //   'IsOutsideBin': request.isOutsideBin.toString(),
+  //   'Comment': request.comment,
+  //   'TotalBins': request.totalBins.toString(),
+  // });
   
-  final token = await _authService.getAccessToken();
-  httpRequest.headers['Authorization'] = 'Bearer $token';
+  // final token = await _authService.getAccessToken();
+  // httpRequest.headers['Authorization'] = 'Bearer $token';
   
-  final response = await httpRequest.send();
-  final responseBody = await response.stream.bytesToString();
+  // final response = await httpRequest.send();
+  // final responseBody = await response.stream.bytesToString();
+
+  // print('🔍 TYPE: ${responseBody.runtimeType}');
+  // print('🔍 RAW: $responseBody');
+
+  // final jsonData = json.decode(responseBody);
+  // print('🔍 JSON TYPE: ${jsonData.runtimeType}');
+  // print('🔍 JSON KEYS: ${jsonData.keys.toList()}');
   
-  if (response.statusCode == 200) {
-    return BinPhotoResponse.fromJson(json.decode(responseBody));
-  } else {
-    throw Exception('Upload failed: ${response.statusCode} $responseBody');
-  }
+  // if (response.statusCode == 200) {
+  //   return jsonData['id'] as String;
+  // } else {
+  //   throw Exception('Upload failed: ${response.statusCode} $responseBody');
+  // }
 }
+
+  Future<void> updatePhoto(String photoId, BinPhotoUpdateRequest request) async {
+    final formData = FormData.fromMap({
+      if (request.photo != null)
+        'Photo': await MultipartFile.fromFile(
+          request.photo!.path,
+          filename: request.photo!.name,
+        ),
+
+        if (request.district != null)
+          'District': request.district,
+
+        if (request.binTypeId != null)
+          'BinTypeId': request.binTypeId,
+
+        if (request.fillLevel != null)
+          'FillLevel': request.fillLevel,
+
+        if (request.isOutsideBin != null)
+          'IsOutsideBin': request.isOutsideBin,
+
+        if (request.comment != null)
+          'Comment': request.comment,
+
+        if (request.totalBins != null)
+          'TotalBins': request.totalBins
+    });
+
+    await _apiClient.put(
+      '/api/public/v1/BinPhoto/$photoId',
+      data: formData);
+  }
 
   Future<String> deleteBinPhoto(String binPhotoId) async {
     final response = await _apiClient.delete(

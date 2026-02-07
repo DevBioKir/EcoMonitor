@@ -17,8 +17,13 @@ namespace EcoMonitor.App.Services
             Guid userId,
             PhotoQuery query,
             CancellationToken cancellationToken = default);
+        Task<int> GetCountPhotosAsync(CancellationToken cancellationToken = default);
+
+        Task<IReadOnlyList<BinPhotoResponse>> GetLatestPhotosAsync(
+            int count = 5,
+            CancellationToken cancellationToken = default);
         Task<BinPhotoResponse> AddBinPhotoAsync(AddPhotoRequest requestAddBinPhoto);
-        Task<Guid> DeleteBinPhotoAsync(Guid binPhotoId);
+        Task DeleteBinPhotoAsync(Guid binPhotoId);
         Task<BinPhotoResponse> UploadPhotoAsync(
             BinPhotoUploadRequest request,
             Guid userId,
@@ -34,5 +39,10 @@ namespace EcoMonitor.App.Services
             double south,
             double east,
             double west);
+
+        // Task<BinPhotoMapResponse> GetByCoordinatesAsync(
+        //     double latitude, 
+        //     double longitude, 
+        //     CancellationToken cancellationToken = default);
     }
 }

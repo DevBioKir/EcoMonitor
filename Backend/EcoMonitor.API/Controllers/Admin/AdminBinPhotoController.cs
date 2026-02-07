@@ -103,13 +103,14 @@ public class AdminBinPhotoController(
     }
     
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUserAsync(string id, [FromBody] UpdatePhotoRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> UpdatePhotoAsync(
+        string id, [FromForm] UpdatePhotoRequest request, CancellationToken cancellationToken)
     {
         if (!Guid.TryParse(id, out var photoId))
         {
             return BadRequest(new { error = "Invalid User ID format" });
         }
-        _logger.LogInformation("📥 Контроллер получил JSON: {@Request}", request);
+        _logger.LogInformation("Контроллер получил JSON: {@Request}", request);
         
         var currentUserId = GetCurrentUserId();
         
@@ -129,13 +130,13 @@ public class AdminBinPhotoController(
         return Ok(responseBinPhotos);
     }
     
-    [HttpDelete("Delete")]
+    [HttpDelete("{binPhotoId:guid}")]
     public async Task<ActionResult<Guid>> DeleteBinPhotoAsync(Guid binPhotoId)
     {
         try
         {
-            var photoId = await _binPhotoService.DeleteBinPhotoAsync(binPhotoId);
-            return photoId;
+            await _binPhotoService.DeleteBinPhotoAsync(binPhotoId);
+            return NoContent();
         }
         catch (Exception ex)
         {

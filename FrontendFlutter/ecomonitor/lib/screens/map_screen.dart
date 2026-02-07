@@ -1,9 +1,12 @@
 import 'package:ecomonitor/abstractions/ibin_photo_service.dart';
 import 'package:ecomonitor/abstractions/ibin_type_service.dart';
 import 'package:ecomonitor/core/network/api_client.dart';
+import 'package:ecomonitor/listeners/map_object_tap_listener.dart';
 import 'package:ecomonitor/main.dart';
+import 'package:ecomonitor/models/bin_photo/bin_photo_response.dart';
 import 'package:ecomonitor/screens/add_photo_screen.dart';
 import 'package:ecomonitor/screens/login_screen.dart';
+import 'package:ecomonitor/screens/photo_details_sheet.dart';
 import 'package:ecomonitor/screens/profile_screen.dart';
 import 'package:ecomonitor/screens/register_screen.dart';
 import 'package:ecomonitor/services/auth_service.dart';
@@ -11,10 +14,12 @@ import 'package:ecomonitor/services/bin_photo_service.dart';
 import 'package:ecomonitor/services/bin_type_service.dart';
 import 'package:ecomonitor/services/user_service.dart';
 import 'package:flutter/material.dart' hide TextStyle;
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_maps_mapkit/mapkit.dart' as ymapkit;
 import 'package:yandex_maps_mapkit/mapkit_factory.dart';
+import 'package:yandex_maps_mapkit/search.dart';
 import 'package:yandex_maps_mapkit/src/bindings/image/image_provider.dart' as ymapprovider;
 import 'package:yandex_maps_mapkit/yandex_map.dart' as ymap;
 import 'dart:math' as math;
@@ -29,29 +34,35 @@ Future<void> openYandexTerms() async {
   }
 }
 
-final class MapObjectTapListenerImpl implements ymapkit.MapObjectTapListener {
-  @override
-  bool onMapObjectTap(ymapkit.MapObject mapObject, ymapkit.Point point) {
-    showSnackBar("Tapped the placemark: Point(latitude: ${point.latitude}, longitude: ${point.longitude})");
-    return true;
-  }
-}
+// final class MapObjectTapListenerImpl implements ymapkit.MapObjectTapListener {
+//   @override
+//   bool onMapObjectTap(ymapkit.MapObject mapObject, ymapkit.Point point) {
+//     showSnackBar("Tapped the placemark: Point(latitude: ${point.latitude}, longitude: ${point.longitude})");
+//     return true;
+//   }
+// }
 
 class MapScreen extends StatefulWidget {
   final AuthService authService;
-  late final ApiClient apiClient;
+  
+  //late final ApiClient apiClient;
+
   //final AuthService authService;
 
   // MapScreen({Key? key})
   //     : apiClient = ApiClient("http://localhost:5198", () async => 'token'),
   //       super(key: key);
 
-  MapScreen({Key? key, required this.authService}) : super(key: key) {
-    apiClient = ApiClient(
-      "http://localhost:5198", 
-      () async => authService.getAccessToken() ?? 'token'
-    );
-  }
+  MapScreen({
+    Key? key, 
+    required this.authService}
+    ) : super(key: key); 
+  // {
+  //   apiClient = ApiClient(
+  //     "http://localhost:5198", 
+  //     () async => authService.getAccessToken() ?? 'token'
+  //   );
+  // }
   
 
   @override
@@ -61,8 +72,15 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   bool _isMapkitActive = false;
   late ymapkit.MapWindow _mapWindow;
+
   late IBinPhotoService _binPhotoService;
   late IBinTypeService _binTypeService;
+
+  final List<ymapkit.PlacemarkMapObject> _placemarks = [];
+
+  BinPhotoResponse? _selectedPhoto;
+  bool _sheetOpened = false;
+  //final Map<ymapkit.PlacemarkMapObject, String> _placemarksPhotoIds = {};
 
   // final List<ymapkit.Point> _points = [
   //   const ymapkit.Point(latitude: 56.838926, longitude: 60.605702),
@@ -70,18 +88,31 @@ class _MapScreenState extends State<MapScreen> {
   //   const ymapkit.Point(latitude: 56.839500, longitude: 60.607000),
   // ];
 
-  List<ymapkit.PlacemarkMapObject> _placemarks = [];
-
   //MapKit stores weak references to the Listener objects passed to it.
   //It is necessary to store references to them in memory.
   late final ymapkit.MapObjectTapListener _tapListener;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _binPhotoService = context.read<IBinPhotoService>();
+    _binTypeService  = context.read<IBinTypeService>();
+
+    _tapListener = MapObjectTapListenerImpl(
+      onTap: _onPlacemarkTapped,
+      // context: context,
+      // binPhotoService: _binPhotoService
+      //placemarkPhotoIds: _placemarksPhotoIds,
+    );
+  }
+
+  @override
   void initState() {
     super.initState();
-    _binPhotoService = BinPhotoService(widget.apiClient, widget.authService);
-    _binTypeService = BinTypeService(widget.apiClient);
-    _tapListener = MapObjectTapListenerImpl();
+    // _binPhotoService = BinPhotoService(widget.apiClient, widget.authService);
+    // _binTypeService = BinTypeService(widget.apiClient);
+    // _tapListener = MapObjectTapListenerImpl();
     _startMapkit();
   }
 
@@ -181,6 +212,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _setPlacemarks() async{
     _mapWindow.map.mapObjects.clear();
     _placemarks.clear();
+    //_placemarksPhotoIds.clear();
 
     //final center = const ymapkit.Point(latitude: 56.838926, longitude: 60.605702);
 
@@ -208,19 +240,25 @@ class _MapScreenState extends State<MapScreen> {
         iconStyle,
       );
 
-      placemark.setText("Special place");
-      placemark.setTextStyle(
-        const ymapkit.TextStyle(
-          size: 10.0,
-          color: Colors.black,
-          outlineColor: Colors.white,
-          placement: ymapkit.TextStylePlacement.Right,
-          offset: 5.0,
-        ),
-      );
+      // placemark.setText("Special place");
+      // placemark.setTextStyle(
+      //   const ymapkit.TextStyle(
+      //     size: 10.0,
+      //     color: Colors.black,
+      //     outlineColor: Colors.white,
+      //     placement: ymapkit.TextStylePlacement.Right,
+      //     offset: 5.0,
+      //   ),
+      // );
+
+        placemark.userData = marker.id;
+        print('Placemark created with userData = ${placemark.userData}');
+        _placemarks.add(placemark);
+        
+        //_placemarksPhotoIds[placemark] = marker.id;
 
         placemark.addTapListener(_tapListener);
-        _placemarks.add(placemark);
+        
       }
     } catch (e) {
       if (mounted) {
@@ -229,7 +267,11 @@ class _MapScreenState extends State<MapScreen> {
       );
       }
     }
-  } 
+  }
+
+
+
+
 
   void _onRegisterPressed() { ///////////////
   //final authService = Provider.of<AuthService>(context, listen: false);
@@ -279,44 +321,175 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _onAddPhotoPressed() async {
   final authService = Provider.of<AuthService>(context, listen: false);
+
   print('перед проверкой на валидацию токена');
-  final isTokenValid = await authService.ValidateToken();
+
+  final isTokenValid = await authService.validateToken();
 
   print('Проверка статуса логина: isLoggedIn = $isTokenValid');
 
   if (!mounted) return;
 
   if (isTokenValid) {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen(
-      binPhotoService: _binPhotoService,
-      binTypeService: _binTypeService,
-      apiClient: widget.apiClient,)));
-  } else {
-    final loginSuccess = await Navigator.push<bool>(
+    await Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (_) => AddPhotoScreen(
+          onPhotoUploaded: _refreshMarkers,
+        )),
+      // binPhotoService: _binPhotoService,
+      // binTypeService: _binTypeService,
+      // apiClient: widget.apiClient,)
+      //));
+    );
+    } else {
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => LoginScreen(
           authService: authService,
-          onRegister: _onRegisterPressed,////
-          onLoginSuccess: () { },
+          onRegister: _onRegisterPressed,
+          onLoginSuccess: () {},
         ),
       ),
     );
+  // } else {
+  //   final loginSuccess = await Navigator.push<bool>(
+  //     context,
+  //     MaterialPageRoute(
+  //       builder: (_) => LoginScreen(
+  //         authService: authService,
+  //         onRegister: _onRegisterPressed,////
+  //         onLoginSuccess: () { },
+  //       ),
+  //     ),
+  //   );
 
-    if (loginSuccess == true && mounted) {
-      print('Логин успешен, переходим к AddPhotoScreen');
-      Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen(
-        binPhotoService: _binPhotoService,
-        binTypeService: _binTypeService,
-        apiClient: widget.apiClient,)));
-    } else {
-      print('Логин неуспешен или context unmounted');
+    // if (loginSuccess == true && mounted) {
+    //   print('Логин успешен, переходим к AddPhotoScreen');
+    //   Navigator.push(context, MaterialPageRoute(builder: (_) => AddPhotoScreen(
+    //     binPhotoService: _binPhotoService,
+    //     binTypeService: _binTypeService,
+    //     apiClient: widget.apiClient,)));
+    // } else {
+    //   print('Логин неуспешен или context unmounted');
+    // }
+  }
+}
+
+Future<void> pickPhotoForEdit({
+  required BinPhotoResponse photo,
+  required void Function(String filePath) onPicked,
+}) async {
+  // важно: НИКАКИХ dialog / sheet в этот момент
+  final pickedFile = await ImagePicker().pickImage(
+    source: ImageSource.camera,
+    preferredCameraDevice: CameraDevice.rear,
+  );
+
+  if (pickedFile == null) return;
+  if (!mounted) return;
+
+  onPicked(pickedFile.path);
+}
+
+
+Future<void> _refreshMarkers() async {
+  try {
+    final markerResponse = await _binPhotoService.markers();
+
+    if (!mounted) return;
+
+    _mapWindow.map.mapObjects.clear(); // очищаем старые маркеры
+    _placemarks.clear();
+
+    final imageProvider = ymapprovider.ImageProvider.fromImageProvider(
+      const AssetImage('assets/ic_pin6.png'),
+    );
+    const iconStyle = ymapkit.IconStyle(
+      anchor: math.Point(0.5, 1.0),
+      scale: 2.0,
+    );
+
+    for (final marker in markerResponse) {
+      final point = ymapkit.Point(latitude: marker.latitude, longitude: marker.longitude);
+
+      final placemark = _mapWindow.map.mapObjects.addPlacemarkWithImageStyle(
+        point,
+        imageProvider,
+        iconStyle,
+      );
+
+      placemark.userData = marker.id;
+      _placemarks.add(placemark);
+      placemark.addTapListener(_tapListener);
     }
+
+    print("Маркеры обновлены: ${_placemarks.length}");
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Ошибка обновления маркеров: $e')),
+    );
+  }
+}
+
+Future<void> _onPlacemarkTapped(String photoId) async {
+  try {
+    final photo = await _binPhotoService.getBinPhotoById(photoId);
+
+    if (!mounted) return;
+
+    setState(() {
+      _selectedPhoto = photo;
+      _sheetOpened = false;
+    });
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Ошибка загрузки фото: $e')),
+    );
   }
 }
 
 @override
 Widget build(BuildContext context) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (_selectedPhoto != null && !_sheetOpened) {
+      _sheetOpened = true;
+
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true, 
+        backgroundColor: Colors.transparent,
+        builder: (_) => DraggableScrollableSheet(
+          initialChildSize: 0.4, // 👈 старт 40%
+          minChildSize: 0.25,
+          maxChildSize: 0.85,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: PhotoDetailsSheet(
+                photo: _selectedPhoto!,
+                scrollController: scrollController,
+              ),
+            );
+          },
+        ),
+      ).whenComplete(() {
+        if (!mounted) return;
+        setState(() {
+          _selectedPhoto = null;
+          _sheetOpened = false;
+        });
+});
+    }
+  });
+
+
   return Scaffold(
     body: Builder(
       builder: (scaffoldContext) {
